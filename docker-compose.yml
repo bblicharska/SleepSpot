@@ -1,0 +1,74 @@
+version: '3.4'
+networks: 
+  sleepspot:
+services:
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password@1235#
+    volumes:
+       - ./sqlserver/data:/var/opt/mssql/data
+    networks:
+      - sleepspot
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P 'Password@1235#' -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 180s
+    entrypoint: /bin/bash -c "apt-get update && apt-get install -y mssql-tools && /opt/mssql/bin/sqlservr"
+    user: root 
+    command: /opt/mssql/bin/sqlservr  
+    restart: always
+    
+  propertyapi:
+    container_name: property-api
+    image: ${DOCKER_REGISTRY-}propertyapi
+    build:
+      context: .
+      dockerfile: Services/Property/PropertyAPI/Dockerfile
+    ports:
+      - "5030:5030"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PropertyService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - sleepspot
+
+  identityapi:
+    container_name: identity-api
+    image: ${DOCKER_REGISTRY-}identityapi
+    build:
+      context: .
+      dockerfile: Services/Identity/IdentityAPI/Dockerfile
+    ports:
+      - "5031:5031"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=IdentityService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - sleepspot
+
+  apigateway:
+    container_name: api-gateway
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - propertyapi
+      - identityapi
+    networks:
+      - sleepspot
