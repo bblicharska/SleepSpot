@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace IdentityAPI.Controllers
 {
 
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace IdentityAPI.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{userId}")]
         [Authorize]
         public async Task<ActionResult> Delete(Guid id) // Zmieniamy metodę na asynchroniczną
         {

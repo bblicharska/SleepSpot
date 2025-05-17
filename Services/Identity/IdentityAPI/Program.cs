@@ -14,6 +14,13 @@ using IdentityService.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using NLog;
+using Microsoft.Data.SqlClient;
+using Polly;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthChecks.SqlServer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Text.Json;
+
 
 // Early init of NLog to allow startup and exception logging, before host is built
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -30,77 +37,43 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
+    // Register health checks
+    builder.Services.AddHealthChecks();
+
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Configuration.AddEnvironmentVariables();
+
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(options =>
-    {
-        options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
 
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "Please enter token"
-        });
-
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
-    });
+    builder.Services.AddSwaggerGen();
 
     // rejestracja automappera w kontenerze IoC
     builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 
-    var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    Console.WriteLine("Program: " + new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"])));
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-      .AddJwtBearer(options =>
-      {
-          options.TokenValidationParameters = new TokenValidationParameters
-          {
-              ValidateIssuer = true,
-              ValidIssuer = jwtSettings["Issuer"],
-              ValidateAudience = true,
-              ValidAudience = jwtSettings["Audience"],
-              ValidateLifetime = true,
-              ValidateIssuerSigningKey = true,
-              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
-          };
+    //var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+    //Console.WriteLine("Program: " + new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"])));
+    //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    // .AddJwtBearer(options =>
+    // {
+    //     options.TokenValidationParameters = new TokenValidationParameters
+    //     {
+    //         ValidateIssuer = true,
+    //         ValidIssuer = jwtSettings["Issuer"],
+    //         ValidateAudience = true,
+    //         ValidAudience = jwtSettings["Audience"],
+    //         ValidateLifetime = true,
+    //         ValidateIssuerSigningKey = true,
+    //         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+    //     };
+    // });
 
-          options.Events = new JwtBearerEvents
-          {
-              OnAuthenticationFailed = context =>
-              {
-                  Console.WriteLine("Authentication failed: " + context.Exception.Message);
-                  return Task.CompletedTask;
-              },
-              OnTokenValidated = context =>
-              {
-                  Console.WriteLine("Token validated successfully!");
-                  return Task.CompletedTask;
-              }
-          };
-      });
+    //builder.Services.AddAuthorization();
 
-    var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
     builder.Services.AddSingleton(sp =>
         sp.GetRequiredService<IOptions<JwtSettings>>().Value);
+    var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<UserDbContext>(options =>
         options.UseSqlServer(mssqlConnectionString, sqlOptions => 
             sqlOptions.MigrationsAssembly("IdentityService.Infrastructure")));
@@ -114,7 +87,6 @@ try
 
     builder.Services.AddScoped<DataSeeder>();
 
-
     builder.Services.AddScoped<ExceptionMiddleware>();
 
     builder.Services.AddCors(o => o.AddPolicy("SleepSpot", builder =>
@@ -124,21 +96,17 @@ try
 
 
     var app = builder.Build();
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-        var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-        dataSeeder.Seed();  // Seeding danych (jeœli potrzebujesz)
-    }
 
     app.UseStaticFiles();
     app.UseSwagger();
     app.UseSwaggerUI();
+    // Map the /health endpoint
+    app.MapHealthChecks("/health");
 
     app.UseMiddleware<ExceptionMiddleware>();
 
-    app.UseAuthentication();
-    app.UseAuthorization();
+    //app.UseAuthentication();
+    //app.UseAuthorization();
 
     app.MapControllers();
 
@@ -146,6 +114,42 @@ try
     app.UseCors("SleepSpot");
 
     // seeding data
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<UserDbContext>();
+        var seeder = services.GetRequiredService<DataSeeder>();
+
+        // Retry policy to wait if SQL Server isn't ready yet
+        var retryPolicy = Policy
+            .Handle<SqlException>()
+            .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5),
+                (exception, timeSpan, retryCount, context) =>
+                {
+                    Console.WriteLine($"[Startup Retry] Attempt {retryCount} failed. Waiting {timeSpan.TotalSeconds}s. Exception: {exception.Message}");
+                });
+
+        retryPolicy.Execute(() =>
+        {
+            // Ensure database exists (optional)
+            //context.Database.EnsureCreated(); // You may remove this if you rely solely on Migrations
+
+            // Apply pending migrations
+            var pendingMigrations = context.Database.GetPendingMigrations();
+            if (pendingMigrations.Any())
+            {
+                Console.WriteLine("Applying pending migrations...");
+                context.Database.Migrate();
+            }
+            else
+            {
+                Console.WriteLine("No pending migrations.");
+            }
+
+            // Seed initial data
+            seeder.Seed();
+        });
+    }
 
     app.Run();
 }

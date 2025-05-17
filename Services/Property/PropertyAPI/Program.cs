@@ -1,13 +1,18 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NLog;
 using NLog.Web;
+using Polly;
 using PropertyAPI.Middleware;
 using PropertyService.Application.Mappings;
 using PropertyService.Application.Services;
 using PropertyService.Domain.Contracts;
 using PropertyService.Infrastructure;
 using PropertyService.Infrastructure.Repositories;
+using System.Text;
 
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
@@ -21,9 +26,14 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
+    // Register health checks
+    builder.Services.AddHealthChecks();
+
     builder.Services.AddControllers();
 
     builder.Services.AddEndpointsApiExplorer();
+
+    builder.Configuration.AddEnvironmentVariables();
 
     //builder.Services.AddSwaggerGen(options =>
     //{
@@ -62,14 +72,17 @@ try
     //        options.TokenValidationParameters = new TokenValidationParameters
     //        {
     //            ValidateIssuer = true,
-    //            ValidIssuer = jwtSettings["Issuer"], // Issuer z IdentityService
+    //            ValidIssuer = jwtSettings["Issuer"],
     //            ValidateAudience = true,
-    //            ValidAudience = jwtSettings["Audience"], // Audience z IdentityService
-    //            ValidateLifetime = true, // Sprawdza czas wa¿noœci tokenu
-    //            ValidateIssuerSigningKey = true, // W³¹czenie weryfikacji klucza podpisuj¹cego
+    //            ValidAudience = jwtSettings["Audience"],
+    //            ValidateLifetime = true,
+    //            ValidateIssuerSigningKey = true,
     //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
     //        };
     //    });
+
+    //builder.Services.AddAuthorization();
+
 
     var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     //builder.Services.AddDbContext<PropertyDbContext>(options =>
@@ -103,10 +116,13 @@ try
         app.UseSwaggerUI();
     }
 
+    // Map the /health endpoint
+    app.MapHealthChecks("/health");
+
     app.UseMiddleware<ExceptionMiddleware>();
 
-    app.UseAuthentication();
-    app.UseAuthorization();
+    //app.UseAuthentication();
+    //app.UseAuthorization();
 
     app.MapControllers();
 
@@ -114,9 +130,39 @@ try
 
     using (var scope = app.Services.CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<PropertyDbContext>();
-        var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-        dataSeeder.Seed();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<PropertyDbContext>();
+        var seeder = services.GetRequiredService<DataSeeder>();
+
+        // Retry policy to wait if SQL Server isn't ready yet
+        var retryPolicy = Policy
+            .Handle<SqlException>()
+            .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5),
+                (exception, timeSpan, retryCount, context) =>
+                {
+                    Console.WriteLine($"[Startup Retry] Attempt {retryCount} failed. Waiting {timeSpan.TotalSeconds}s. Exception: {exception.Message}");
+                });
+
+        retryPolicy.Execute(() =>
+        {
+            // Ensure database exists (optional)
+            //context.Database.EnsureCreated(); // You may remove this if you rely solely on Migrations
+
+            // Apply pending migrations
+            var pendingMigrations = context.Database.GetPendingMigrations();
+            if (pendingMigrations.Any())
+            {
+                Console.WriteLine("Applying pending migrations...");
+                context.Database.Migrate();
+            }
+            else
+            {
+                Console.WriteLine("No pending migrations.");
+            }
+
+            // Seed initial data
+            seeder.Seed();
+        });
     }
 
     app.Run();

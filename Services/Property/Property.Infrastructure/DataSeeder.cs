@@ -19,7 +19,10 @@ namespace PropertyService.Infrastructure
 
         public void Seed()
         {
-            if (_context.Database.CanConnect())
+
+            try
+            {
+                if (_context.Database.CanConnect())
             {
 
                 if (!_context.Properties.Any())
@@ -79,7 +82,23 @@ namespace PropertyService.Infrastructure
                     // Dodanie przykładowych nieruchomości do bazy danych
                     _context.Properties.AddRange(properties);
                     _context.SaveChanges(); // Zapisanie danych w bazie
+                        Console.WriteLine("Seeding completed successfully.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Properties already exist. Skipping seeding.");
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("Cannot connect to the database. Skipping migrations and seeding.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred during seeding: {ex.Message}");
+                // Rzucanie wyjątku, jeśli konieczne
+                throw;
             }
         }
     }
