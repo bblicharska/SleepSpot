@@ -1,4 +1,5 @@
 ﻿using IdentityService.Application.Dto;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -3,30 +3,31 @@
 # Ten etap jest używany podczas uruchamiania z programu VS w trybie szybkim (domyślnie dla konfiguracji debugowania)
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
-EXPOSE 5031
+EXPOSE 5029
 
 
 # Ten etap służy do kompilowania projektu usługi
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Services/Identity/IdentityAPI/IdentityAPI.csproj", "Services/Identity/IdentityAPI/"]
-COPY ["Services/Identity/IdentityService.Application/IdentityService.Application.csproj", "Services/Identity/IdentityService.Application/"]
-COPY ["Services/Identity/IdentityService.Domain/IdentityService.Domain.csproj", "Services/Identity/IdentityService.Domain/"]
-COPY ["Services/Identity/IdentityService.Infrastructure/IdentityService.Infrastructure.csproj", "Services/Identity/IdentityService.Infrastructure/"]
+
+COPY ["Services/Review/ReviewAPI/ReviewAPI.csproj", "Services/Review/ReviewAPI/"]
+COPY ["Services/Review/ReviewService.Application/ReviewService.Application.csproj", "Services/Review/ReviewService.Application/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
-RUN dotnet restore "./Services/Identity/IdentityAPI/IdentityAPI.csproj"
+COPY ["Services/Review/ReviewService.Domain/ReviewService.Domain.csproj", "Services/Review/ReviewService.Domain/"]
+COPY ["Services/Review/ReviewService.Infrastructure/ReviewService.Infrastructure.csproj", "Services/Review/ReviewService.Infrastructure/"]
+RUN dotnet restore "./Services/Review/ReviewAPI/ReviewAPI.csproj"
 COPY . .
-WORKDIR "/src/Services/Identity/IdentityAPI"
-RUN dotnet build "./IdentityAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Services/Review/ReviewAPI"
+RUN dotnet build "./ReviewAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Ten etap służy do publikowania projektu usługi do skopiowania do etapu końcowego
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./IdentityAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./ReviewAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Ten etap jest używany w środowisku produkcyjnym lub w przypadku uruchamiania z programu VS w trybie regularnym (domyślnie, gdy nie jest używana konfiguracja debugowania)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "IdentityAPI.dll"]
+ENTRYPOINT ["dotnet", "ReviewAPI.dll"]

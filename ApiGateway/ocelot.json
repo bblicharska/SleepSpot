@@ -118,6 +118,114 @@
       "UpstreamPathTemplate": "/api/properties/{id}",
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ],
       "AuthenticationOptions": null
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/{id}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/user-reviewed/{reviewedId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/user-reviewed/{reviewedId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/user-reviewer/{reviewerId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/user-reviewer/{reviewerId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/property/{propertyId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/property/{propertyId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/landlord/{landlordId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/landlord/{landlordId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/tenant/{tenantId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/tenant/{tenantId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/average-rating/{userId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/average-rating/{userId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Review/exists",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/exists",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ]
 }

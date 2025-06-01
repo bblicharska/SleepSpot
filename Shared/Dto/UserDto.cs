@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IdentityService.Application.Dto
+namespace Shared.Dto
 {
     public class UserDto
     {

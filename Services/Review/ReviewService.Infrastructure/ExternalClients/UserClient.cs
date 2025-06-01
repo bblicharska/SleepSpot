@@ -1,0 +1,44 @@
+﻿using Microsoft.Extensions.Logging;
+using ReviewService.Application.Interfaces;
+using Shared.Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http.Json;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ReviewService.Infrastructure.ExternalClients
+{
+    public class UserClient : IUserClient
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<UserClient> _logger;
+
+        public UserClient(HttpClient httpClient, ILogger<UserClient> logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public async Task<UserDto?> GetUserByIdAsync(Guid userId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/User/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<UserDto>();
+                }
+
+                _logger.LogWarning("User not found: {UserId}, status: {StatusCode}", userId, response.StatusCode);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching user {UserId}", userId);
+                return null;
+            }
+        }
+    }
+}

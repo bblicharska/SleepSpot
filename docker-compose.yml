@@ -62,6 +62,22 @@ services:
       timeout: 5s
       retries: 10
 
+  reviewapi:
+    container_name: review-api
+    image: ${DOCKER_REGISTRY-}reviewapi
+    build:
+      context: .
+      dockerfile: Services/Review/ReviewAPI/Dockerfile
+    ports:
+      - "5029:5029"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ReviewService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+      - identityapi
+    networks:
+      - sleepspot
+
   apigateway:
     container_name: api-gateway
     image: ${DOCKER_REGISTRY-}apigateway

@@ -1,9 +1,9 @@
 ﻿using IdentityService.Application.Dto;
 using IdentityService.Application.Services;
 using IdentityService.Domain.Exceptions;
-using IdentityService.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Dto;
 using System.Security.Claims;
 
 namespace IdentityAPI.Controllers
@@ -28,7 +28,6 @@ namespace IdentityAPI.Controllers
         }
 
         [HttpDelete("{userId}")]
-        [Authorize]
         public async Task<ActionResult> Delete(Guid id) // Zmieniamy metodę na asynchroniczną
         {
             await _userService.DeleteAsync(id); // Czekamy na zakończenie operacji
@@ -78,7 +77,6 @@ namespace IdentityAPI.Controllers
 
         // Pobieranie danych użytkownika po ID
         [HttpGet("{userId}")]
-        [Authorize]
         public async Task<IActionResult> GetUserById(Guid userId) // Asynchroniczna metoda
         {
             try
@@ -94,7 +92,6 @@ namespace IdentityAPI.Controllers
 
         // Aktualizowanie danych użytkownika
         [HttpPut("{userId}")]
-        [Authorize]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserDto updateUserDto) // Asynchroniczna metoda
         {
             try
@@ -110,7 +107,6 @@ namespace IdentityAPI.Controllers
 
         // Zmiana hasła użytkownika
         [HttpPut("{userId}/change-password")]
-        [Authorize]
         public async Task<IActionResult> ChangePassword(Guid userId, [FromBody] ChangePasswordDto changePasswordDto) // Asynchroniczna metoda
         {
             try
@@ -130,7 +126,6 @@ namespace IdentityAPI.Controllers
 
         [Route("validate-token")]
         [HttpGet]
-        [Authorize]
         public IActionResult ValidateToken()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
