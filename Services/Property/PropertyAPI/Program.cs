@@ -96,6 +96,7 @@ try
     builder.Services.AddScoped<IPropertyUnitOfWork, PropertyUnitOfWork>();
     builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
     builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+    builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 
     builder.Services.AddScoped<DataSeeder>();
     builder.Services.AddScoped<IPropertyService, PropertyManager>();

@@ -11,8 +11,13 @@ namespace PropertyService.Application.Dto
         public string Name { get; set; }
         public string Description { get; set; }
         public string Address { get; set; }
-        public decimal PricePerNight { get; set; }
-        public List<string> Images { get; set; }  // List of image URLs or paths
-        public int Capacity { get; set; }
+
+        public decimal PricePerMonth { get; set; }
+        public decimal AreaInSquareMeters { get; set; }
+
+        public bool IsEntirePlaceRentable { get; set; }
+
+        public List<string> Images { get; set; } = new();
+        public List<UpdateRoomDto> Rooms { get; set; } = new();
     }
 }

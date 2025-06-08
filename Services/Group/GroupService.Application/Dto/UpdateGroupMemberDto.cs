@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PropertyService.Application.Dto
+namespace GroupService.Application.Dto
 {
-    public class DeletePropertyDto
+    public class UpdateGroupMemberDto
     {
         public Guid Id { get; set; }
+        public GroupRole Role { get; set; }
     }
+
 }

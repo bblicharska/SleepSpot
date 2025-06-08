@@ -62,6 +62,23 @@ services:
       timeout: 5s
       retries: 10
 
+  groupapi:
+    container_name: group-api
+    image: ${DOCKER_REGISTRY-}groupapi
+    build:
+      context: .
+      dockerfile: Services/Group/GroupAPI/Dockerfile
+    ports:
+      - "5032:5032"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GroupService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+      - identityapi
+      - propertyapi
+    networks:
+      - sleepspot
+
   reviewapi:
     container_name: review-api
     image: ${DOCKER_REGISTRY-}reviewapi
@@ -91,6 +108,7 @@ services:
     depends_on:
       - propertyapi
       - identityapi
+      - reviewapi
     networks:
       - sleepspot
     healthcheck:

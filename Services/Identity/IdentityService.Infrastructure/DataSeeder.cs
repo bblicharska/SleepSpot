@@ -26,7 +26,6 @@ namespace IdentityService.Infrastructure
 
                 if (_dbContext.Database.CanConnect())
                 {
-                    //_dbContext.Database.Migrate();
 
                     if (!_dbContext.Users.Any())
                     {

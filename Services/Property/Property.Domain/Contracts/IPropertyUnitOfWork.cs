@@ -10,7 +10,7 @@ namespace PropertyService.Domain.Contracts
     {
         IPropertyRepository PropertyRepository { get; }
         IPropertyImageRepository PropertyImageRepository { get; }
-
+        IRoomRepository RoomRepository { get; }
         void Commit();
         Task<int> CommitAsync();
     }

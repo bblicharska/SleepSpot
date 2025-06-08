@@ -13,6 +13,7 @@ namespace PropertyService.Infrastructure
     {
         public DbSet<Property> Properties { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
+        public DbSet<Room> Rooms { get; set; }
 
         public PropertyDbContext(DbContextOptions<PropertyDbContext> options)
             : base(options)
@@ -21,28 +22,60 @@ namespace PropertyService.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Define the primary key for Property
+            // ---------- Property ----------
             modelBuilder.Entity<Property>()
-                .HasKey(p => p.Id); // Explicitly set Id as the primary key
+                .HasKey(p => p.Id);
 
-            // Configure the properties for Property
             modelBuilder.Entity<Property>()
                 .Property(p => p.Name)
                 .IsRequired()
-                .HasMaxLength(255); // Ensure Name is required and has max length
+                .HasMaxLength(255);
 
             modelBuilder.Entity<Property>()
-                .Property(p => p.PricePerNight)
-                .HasPrecision(18, 2); // Set precision for decimal fields like PricePerNight
+                .Property(p => p.PricePerMonth)
+                .HasPrecision(18, 2); // ⬅️ aktualizacja: już nie PricePerNight
 
-            // Create a relationship between Property and PropertyImage
+            modelBuilder.Entity<Property>()
+                .Property(p => p.AreaInSquareMeters)
+                .HasPrecision(10, 2);
+
             modelBuilder.Entity<Property>()
                 .HasMany(p => p.Images)
                 .WithOne(i => i.Property)
                 .HasForeignKey(i => i.PropertyId);
 
             modelBuilder.Entity<Property>()
-                .HasIndex(p => p.OwnerId); // Optional: Index for OwnerId if you plan to search by it often
+                .HasMany(p => p.Rooms)
+                .WithOne(r => r.Property)
+                .HasForeignKey(r => r.PropertyId);
+
+            modelBuilder.Entity<Property>()
+                .HasIndex(p => p.OwnerId);
+
+            // ---------- Room ----------
+            modelBuilder.Entity<Room>()
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<Room>()
+                .Property(r => r.Name)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            modelBuilder.Entity<Room>()
+                .Property(r => r.PricePerMonth)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Room>()
+                .Property(r => r.AreaInSquareMeters)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Room>()
+                .Property(r => r.IsAvailable)
+                .HasDefaultValue(true);
+
+            // Opcjonalnie: indeksy
+            modelBuilder.Entity<Room>()
+                .HasIndex(r => r.PropertyId);
         }
     }
 

@@ -12,7 +12,7 @@ using ReviewService.Infrastructure;
 namespace ReviewService.Infrastructure.Migrations
 {
     [DbContext(typeof(ReviewDbContext))]
-    [Migration("20250530212051_InitialCreate")]
+    [Migration("20250601202902_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

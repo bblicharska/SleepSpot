@@ -14,13 +14,15 @@ namespace PropertyService.Infrastructure
 
         public IPropertyRepository PropertyRepository { get; }
         public IPropertyImageRepository PropertyImageRepository { get; }
+        public IRoomRepository RoomRepository { get; }
 
 
-        public PropertyUnitOfWork(PropertyDbContext context, IPropertyRepository propertyRepository, IPropertyImageRepository propertyImageRepository)
+        public PropertyUnitOfWork(PropertyDbContext context, IPropertyRepository propertyRepository, IPropertyImageRepository propertyImageRepository, IRoomRepository roomRepository)
         {
             _context = context;
             PropertyRepository = propertyRepository;
             PropertyImageRepository = propertyImageRepository;
+            RoomRepository = roomRepository;
         }
 
         public void Commit()

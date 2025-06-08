@@ -59,12 +59,14 @@ namespace PropertyService.Infrastructure.Repositories
                 query = query.Where(p => p.Address.Contains(location));
 
             if (minPrice.HasValue)
-                query = query.Where(p => p.PricePerNight >= minPrice.Value);
+                query = query.Where(p => p.PricePerMonth >= minPrice.Value);
 
             if (maxPrice.HasValue)
-                query = query.Where(p => p.PricePerNight <= maxPrice.Value);
+                query = query.Where(p => p.PricePerMonth <= maxPrice.Value);
 
-            return await query.Include(p => p.Images)  // Include images if needed
+            return await query
+                .Include(p => p.Images)
+                .Include(p => p.Rooms)
                 .ToListAsync();
         }
 
@@ -91,6 +93,38 @@ namespace PropertyService.Infrastructure.Repositories
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<Property> GetByIdWithRoomsAsync(Guid id)
+        {
+            return await _context.Properties
+                .Include(p => p.Rooms)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Property> GetByIdWithRoomsAndImagesAsync(Guid id)
+        {
+            return await _context.Properties
+                .Include(p => p.Rooms)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<IEnumerable<Property>> GetByOwnerIdWithRoomsAndImagesAsync(Guid ownerId)
+        {
+            return await _context.Properties
+                .Where(p => p.OwnerId == ownerId)
+                .Include(p => p.Rooms)
+                .Include(p => p.Images)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Property>> GetAllWithRoomsAndImagesAsync()
+        {
+            return await _context.Properties
+                .Include(p => p.Rooms)
+                .Include(p => p.Images)
+                .ToListAsync();
         }
     }
 }

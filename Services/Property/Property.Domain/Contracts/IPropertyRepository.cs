@@ -18,5 +18,10 @@ namespace PropertyService.Domain.Contracts
         void Update(Property property);
         void Delete(Property property);
         Task<int> SaveChangesAsync();
+        Task<Property?> GetByIdWithRoomsAndImagesAsync(Guid id);
+        Task<Property> GetByIdWithRoomsAsync(Guid id);
+
+        Task<IEnumerable<Property>> GetAllWithRoomsAndImagesAsync();
+        Task<IEnumerable<Property>> GetByOwnerIdWithRoomsAndImagesAsync(Guid ownerId);
     }
 }

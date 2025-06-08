@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PropertyService.Application.Dto;
 using PropertyService.Application.Services;
+using Shared.Dto;
 
 namespace PropertyAPI.Controllers
 {
@@ -92,6 +93,41 @@ namespace PropertyAPI.Controllers
 
                 await _propertyService.DeletePropertyAsync(id);
                 return NoContent(); // Zwraca 204, jeśli usunięcie przebiegło pomyślnie
+            }
+
+            [HttpGet("{propertyId}/rooms")]
+            public async Task<ActionResult<IEnumerable<RoomDto>>> GetRoomsForProperty(Guid propertyId)
+            {
+                var rooms = await _propertyService.GetRoomsForPropertyAsync(propertyId);
+                return Ok(rooms);
+            }
+
+
+            [HttpPost("{propertyId}/rooms")]
+            public async Task<ActionResult> AddRoomToProperty(Guid propertyId, [FromBody] CreateRoomDto createRoomDto)
+            {
+                await _propertyService.AddRoomToPropertyAsync(propertyId, createRoomDto);
+                return NoContent();
+            }
+
+
+            [HttpPost("rooms/{roomId}/rent")]
+            public async Task<ActionResult> RentRoom(Guid roomId)
+            {
+                try
+                {
+                    await _propertyService.RentRoomAsync(roomId);
+                    return Ok("Room rented successfully");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] {ex.Message}");
+                    return StatusCode(500, "An unexpected error occurred.");
+                }
             }
         }
     }

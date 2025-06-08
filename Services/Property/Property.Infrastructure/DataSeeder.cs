@@ -36,49 +36,83 @@ namespace PropertyService.Infrastructure
                             Name = "Villa in the Mountains",
                             Description = "A beautiful villa with a stunning view of the mountains.",
                             Address = "123 Mountain Road, Mountain City",
-                            PricePerNight = 200.50m,
+                            PricePerMonth = 2500.00m,
+                            AreaInSquareMeters = 180.5m,
+                            IsEntirePlaceRentable = true,
+                            OwnerId =  new Guid("d93a381b-3b00-44c4-2165-08dd6f90dd1f"),
                             Images = new List<PropertyImage>
                             {
                                 new PropertyImage { ImageUrl = "https://example.com/image1.jpg" },
                                 new PropertyImage { ImageUrl = "https://example.com/image2.jpg" }
                             },
-                            Capacity = 6,
-                            OwnerId = Guid.NewGuid() // Przykładowy właściciel
+                            Rooms = new List<Room>
+                            {
+                                new Room
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Master Bedroom",
+                                    Description = "Spacious room with private bathroom.",
+                                    PricePerMonth = 900.00m,
+                                    AreaInSquareMeters = 30.0m,
+                                    Capacity = 2
+                                },
+                                new Room
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Guest Room",
+                                    Description = "Comfortable guest room.",
+                                    PricePerMonth = 700.00m,
+                                    AreaInSquareMeters = 20.0m,
+                                    Capacity = 1
+                                }
+                            }
                         },
-
                         new Property
                         {
                             Id = Guid.NewGuid(),
                             Name = "Beachside Apartment",
                             Description = "A cozy apartment right next to the beach.",
                             Address = "456 Ocean Blvd, Beach Town",
-                            PricePerNight = 150.00m,
+                            PricePerMonth = 1800.00m,
+                            AreaInSquareMeters = 85.0m,
+                            IsEntirePlaceRentable = true,
+                            OwnerId = new Guid("ea679e1b-4f2c-4108-2166-08dd6f90dd1f"),
                             Images = new List<PropertyImage>
                             {
-                                new PropertyImage { ImageUrl = "https://example.com/image1.jpg" },
-                                new PropertyImage { ImageUrl = "https://example.com/image2.jpg" }
+                                new PropertyImage { ImageUrl = "https://example.com/image3.jpg" },
+                                new PropertyImage { ImageUrl = "https://example.com/image4.jpg" }
                             },
-                            Capacity = 4,
-                            OwnerId = Guid.NewGuid() // Przykładowy właściciel
+                            Rooms = new List<Room>()
                         },
-
                         new Property
                         {
                             Id = Guid.NewGuid(),
                             Name = "City Center Loft",
                             Description = "A modern loft located in the heart of the city.",
                             Address = "789 Downtown St, City Center",
-                            PricePerNight = 120.75m,
+                            PricePerMonth = 2200.00m,
+                            AreaInSquareMeters = 65.5m,
+                            IsEntirePlaceRentable = true,
+                            OwnerId = new Guid("d21c93e3-8245-442d-f898-08dd6f9adc78"),
                             Images = new List<PropertyImage>
                             {
-                                new PropertyImage { ImageUrl = "https://example.com/image1.jpg" },
-                                new PropertyImage { ImageUrl = "https://example.com/image2.jpg" }
+                                new PropertyImage { ImageUrl = "https://example.com/image5.jpg" },
+                                new PropertyImage { ImageUrl = "https://example.com/image6.jpg" }
                             },
-                            Capacity = 2,
-                            OwnerId = Guid.NewGuid() // Przykładowy właściciel
+                            Rooms = new List<Room>
+                            {
+                                new Room
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Loft Bedroom",
+                                    Description = "Open bedroom space in loft style.",
+                                    PricePerMonth = 1100.00m,
+                                    AreaInSquareMeters = 25.0m,
+                                    Capacity = 1
+                                }
+                            }
                         }
                     };
-
                     // Dodanie przykładowych nieruchomości do bazy danych
                     _context.Properties.AddRange(properties);
                     _context.SaveChanges(); // Zapisanie danych w bazie
