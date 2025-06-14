@@ -1,4 +1,4 @@
-﻿using ReviewService.Domain.Exceptions;
+﻿using Shared.Exceptions;
 
 namespace ReviewAPI.Middleware
 {

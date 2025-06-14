@@ -1,4 +1,4 @@
-﻿using IdentityService.Domain.Exceptions;
+﻿using Shared.Exceptions;
 
 namespace IdentityAPI.Middleware
 {

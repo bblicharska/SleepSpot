@@ -3,6 +3,7 @@ using GroupService.Application.Dto;
 using GroupService.Application.Interfaces;
 using GroupService.Domain.Contracts;
 using GroupService.Domain.Models;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;

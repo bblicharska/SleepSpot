@@ -1,4 +1,4 @@
-﻿using PropertyService.Domain.Exceptions;
+﻿using Shared.Exceptions;
 
 namespace PropertyAPI.Middleware
 {

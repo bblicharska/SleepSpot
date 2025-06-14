@@ -12,6 +12,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Services/Group/GroupAPI/GroupAPI.csproj", "Services/Group/GroupAPI/"]
 COPY ["Services/Group/GroupService.Application/GroupService.Application.csproj", "Services/Group/GroupService.Application/"]
+COPY ["Services/Group/GroupService.Infrastructure/GroupService.Infrastructure.csproj", "Services/Group/GroupService.Infrastructure/"]
 COPY ["Shared/Shared.csproj", "Shared/"]
 COPY ["Services/Group/GroupService.Domain/GroupService.Domain.csproj", "Services/Group/GroupService.Domain/"]
 RUN dotnet restore "./Services/Group/GroupAPI/GroupAPI.csproj"

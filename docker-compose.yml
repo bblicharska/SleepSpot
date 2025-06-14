@@ -78,6 +78,24 @@ services:
       - propertyapi
     networks:
       - sleepspot
+  
+  rentalapi:
+    container_name: rental-api
+    image: ${DOCKER_REGISTRY-}rentalapi
+    build:
+      context: .
+      dockerfile: Services/Rental/RentalAPI/Dockerfile
+    ports:
+      - "5033:5033"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=RentalService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+      - identityapi
+      - propertyapi
+      - groupapi
+    networks:
+      - sleepspot
 
   reviewapi:
     container_name: review-api

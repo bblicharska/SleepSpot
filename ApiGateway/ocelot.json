@@ -120,6 +120,30 @@
       "AuthenticationOptions": null
     },
     {
+      "DownstreamPathTemplate": "/api/Property/{id}/rooms",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/{id}/rooms",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/rooms/{roomId}/rent",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/rooms/{roomId}/rent",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Review",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -226,6 +250,186 @@
       ],
       "UpstreamPathTemplate": "/api/reviews/exists",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/{id}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/user/{userId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/user/{userId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/{groupId}/members",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/{groupId}/members",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/members",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/members",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/members/{memberId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/members/{memberId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/listings",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/listings",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/listings/{listingId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/listings/{listingId}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/{groupId}/listings",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/{groupId}/listings",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/applications/listing/{listingId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/applications/listing/{listingId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/applications/{applicationId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/applications/{applicationId}",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/applications",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/applications",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Group/applications/{applicationId}/status",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5028
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/applications/{applicationId}/status",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5026
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5026
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/{id}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
     }
   ]
 }

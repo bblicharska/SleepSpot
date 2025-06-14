@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IdentityService.Domain.Exceptions
+namespace Shared.Exceptions
 {
     public class NotFoundException : Exception
     {

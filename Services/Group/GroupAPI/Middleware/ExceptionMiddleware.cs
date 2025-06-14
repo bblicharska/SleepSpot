@@ -1,4 +1,4 @@
-﻿using GroupService.Domain.Exceptions;
+﻿using Shared.Exceptions;
 
 namespace GroupAPI.Middleware
 {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GroupService.Application.Dto
+namespace Shared.Dto
 {
     public class GroupMemberDto
     {

@@ -1,9 +1,9 @@
 ﻿using IdentityService.Application.Dto;
 using IdentityService.Application.Services;
-using IdentityService.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Dto;
+using Shared.Exceptions;
 using System.Security.Claims;
 
 namespace IdentityAPI.Controllers

@@ -1,6 +1,7 @@
 ﻿using GroupService.Application.Dto;
 using GroupService.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Dto;
 
 namespace GroupAPI.Controllers
 {

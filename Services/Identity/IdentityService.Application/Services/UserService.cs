@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using IdentityService.Application.Dto;
 using IdentityService.Domain.Contracts;
-using IdentityService.Domain.Exceptions;
 using IdentityService.Domain.Models;
 using Shared.Dto;
+using Shared.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
