@@ -1,4 +1,6 @@
-﻿using PropertyService.Application.Dto;
+﻿using Microsoft.AspNetCore.Http;
+using PropertyService.Application.Dto;
+using PropertyService.Domain.Models;
 using Shared.Dto;
 using System;
 using System.Collections.Generic;
@@ -20,5 +22,11 @@ namespace PropertyService.Application.Services
         Task<IEnumerable<RoomDto>> GetRoomsForPropertyAsync(Guid propertyId);
         Task AddRoomToPropertyAsync(Guid propertyId, CreateRoomDto dto);
         Task RentRoomAsync(Guid roomId);
+        Task<PropertyImage> AddImageAsync(Guid propertyId, IFormFile file);
+        Task<List<PropertyImage>> AddMultipleImagesAsync(Guid propertyId, List<IFormFile> files);
+        Task<List<PropertyImage>> GetPropertyImagesAsync(Guid propertyId);
+        Task<bool> DeleteImageAsync(Guid imageId);
+        Task<bool> SetPrimaryImageAsync(Guid imageId);
+
     }
 }

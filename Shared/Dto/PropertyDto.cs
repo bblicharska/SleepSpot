@@ -19,7 +19,7 @@ namespace Shared.Dto
 
         public bool IsEntirePlaceRentable { get; set; }
 
-        public List<string> Images { get; set; } = new(); // or use List<PropertyImageDto>
+        public List<PropertyImageDto> Images { get; set; } = new();
         public List<RoomDto> Rooms { get; set; } = new();
 
         public Guid OwnerId { get; set; }

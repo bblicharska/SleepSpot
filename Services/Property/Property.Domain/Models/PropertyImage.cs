@@ -11,7 +11,10 @@ namespace PropertyService.Domain.Models
         public Guid Id { get; set; }
         public Guid PropertyId { get; set; }
         public string ImageUrl { get; set; }
-
+        public string OriginalFileName { get; set; }
+        public bool IsPrimary { get; set; } = false;
+        public int DisplayOrder { get; set; }
+        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
         public Property Property { get; set; }
     }
 }

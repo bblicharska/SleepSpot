@@ -9,7 +9,7 @@ namespace IdentityService.Domain.Contracts
 {
     public interface IUserRepository
     {
-        Task<User> GetByUsernameOrEmailAsync(string usernameOrEmail);
+        Task<User> GetByEmailAsync(string email);
         Task<User> GetByIdAsync(Guid userId);
         Task<User> GetAsync(Guid id);
         Task InsertAsync(User user);

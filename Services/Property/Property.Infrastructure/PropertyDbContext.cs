@@ -33,21 +33,11 @@ namespace PropertyService.Infrastructure
 
             modelBuilder.Entity<Property>()
                 .Property(p => p.PricePerMonth)
-                .HasPrecision(18, 2); // ⬅️ aktualizacja: już nie PricePerNight
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<Property>()
                 .Property(p => p.AreaInSquareMeters)
                 .HasPrecision(10, 2);
-
-            modelBuilder.Entity<Property>()
-                .HasMany(p => p.Images)
-                .WithOne(i => i.Property)
-                .HasForeignKey(i => i.PropertyId);
-
-            modelBuilder.Entity<Property>()
-                .HasMany(p => p.Rooms)
-                .WithOne(r => r.Property)
-                .HasForeignKey(r => r.PropertyId);
 
             modelBuilder.Entity<Property>()
                 .HasIndex(p => p.OwnerId);
@@ -73,10 +63,28 @@ namespace PropertyService.Infrastructure
                 .Property(r => r.IsAvailable)
                 .HasDefaultValue(true);
 
-            // Opcjonalnie: indeksy
             modelBuilder.Entity<Room>()
                 .HasIndex(r => r.PropertyId);
+
+            // ---------- PropertyImage ----------
+            modelBuilder.Entity<PropertyImage>()
+                .HasKey(pi => pi.Id);
+
+            // ---------- Relationships (Configure ONCE) ----------
+
+            // Property -> Images (one-to-many)
+            modelBuilder.Entity<PropertyImage>()
+                .HasOne(i => i.Property)
+                .WithMany(p => p.Images)
+                .HasForeignKey(i => i.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Property -> Rooms (one-to-many)
+            modelBuilder.Entity<Room>()
+                .HasOne(r => r.Property)
+                .WithMany(p => p.Rooms)
+                .HasForeignKey(r => r.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
-
 }

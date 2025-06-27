@@ -49,4 +49,8 @@
     <ProjectReference Include="..\Property.Infrastructure\PropertyService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\properties\" />
+  </ItemGroup>
+
 </Project>

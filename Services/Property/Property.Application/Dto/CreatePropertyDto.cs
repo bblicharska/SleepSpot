@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shared.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace PropertyService.Application.Dto
 
         public bool IsEntirePlaceRentable { get; set; } = true;
 
-        public List<string> Images { get; set; } = new(); // image URLs
+        public List<PropertyImageDto> Images { get; set; } = new();
         public List<CreateRoomDto> Rooms { get; set; } = new();
 
         public Guid OwnerId { get; set; }

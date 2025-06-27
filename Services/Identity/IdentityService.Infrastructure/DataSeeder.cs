@@ -34,7 +34,8 @@ namespace IdentityService.Infrastructure
                     new User()
                     {
                         Id = new Guid(),
-                        Username = "Kasia Nowak",
+                        FirstName = "Kasia",
+                        LastName = "Nowak",
                         Email = "kasiaNowak@gmail.com",
                         Role = "User",
                         CreatedAt = DateTime.Now.AddDays(-1),
@@ -43,7 +44,8 @@ namespace IdentityService.Infrastructure
                     new User()
                     {
                         Id = new Guid(),
-                        Username = "Jan Kowalski",
+                        FirstName = "Jan",
+                        LastName = "Kowalski",
                         Email = "janKowalski@gmail.com",
                         Role = "User",
                         CreatedAt = DateTime.Now.AddDays(-2),

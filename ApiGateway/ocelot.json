@@ -144,6 +144,80 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Property/{id}/images",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/{id}/images",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/images/{imageId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/images/{imageId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/images/{imageId}/primary",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/images/{imageId}/primary",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/{id}/with-images",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/{id}/with-images",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/search",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/search",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": null
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/owner/{ownerId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/owner/{ownerId}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": null
+    },
+    {
       "DownstreamPathTemplate": "/api/Review",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -430,6 +504,18 @@
       ],
       "UpstreamPathTemplate": "/api/rentals/{id}",
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/uploads/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/uploads/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ]
 }

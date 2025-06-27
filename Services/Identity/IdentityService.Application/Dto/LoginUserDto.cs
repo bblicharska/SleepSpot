@@ -8,7 +8,7 @@ namespace IdentityService.Application.Dto
 {
     public class LoginUserDto
     {
-        public string UsernameOrEmail { get; set; } // Możliwość logowania przez nazwę użytkownika lub email
+        public string Email { get; set; } 
         public string Password { get; set; }
     }
 }

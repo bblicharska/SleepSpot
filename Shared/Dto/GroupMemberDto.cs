@@ -17,7 +17,5 @@ namespace Shared.Dto
 
         public UserDto? User { get; set; }  // <- pełne info o użytkowniku
 
-
     }
-
 }

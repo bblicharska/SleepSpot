@@ -49,10 +49,10 @@ namespace IdentityService.Infrastructure.Repositories
                 return await _context.Users.Where(predicate).ToListAsync();
             }
 
-            public async Task<User> GetByUsernameOrEmailAsync(string usernameOrEmail)
+            public async Task<User> GetByEmailAsync(string email)
             {
                 return await _context.Users
-                    .FirstOrDefaultAsync(user => user.Username == usernameOrEmail || user.Email == usernameOrEmail);
+                    .FirstOrDefaultAsync(user => user.Email == email);
             }
 
             public async Task<User> GetByIdAsync(Guid userId)

@@ -24,7 +24,11 @@ namespace IdentityService.Infrastructure
             {
                 entity.HasKey(u => u.Id);
 
-                entity.Property(u => u.Username)
+                entity.Property(u => u.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(u => u.LastName)
                     .IsRequired()
                     .HasMaxLength(50);
 
@@ -43,9 +47,6 @@ namespace IdentityService.Infrastructure
                     .IsRequired();
 
                 entity.HasIndex(u => u.Email)
-                    .IsUnique();
-
-                entity.HasIndex(u => u.Username)
                     .IsUnique();
             });
         }

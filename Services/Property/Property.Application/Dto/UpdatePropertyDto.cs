@@ -17,7 +17,7 @@ namespace PropertyService.Application.Dto
 
         public bool IsEntirePlaceRentable { get; set; }
 
-        public List<string> Images { get; set; } = new();
+        public List<ImageUpdateDto> Images { get; set; } = new();
         public List<UpdateRoomDto> Rooms { get; set; } = new();
     }
 }

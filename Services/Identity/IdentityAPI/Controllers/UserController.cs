@@ -55,7 +55,7 @@ namespace IdentityAPI.Controllers
         {
             try
             {
-                if (loginUserDto == null || string.IsNullOrWhiteSpace(loginUserDto.UsernameOrEmail) || string.IsNullOrWhiteSpace(loginUserDto.Password))
+                if (loginUserDto == null || string.IsNullOrWhiteSpace(loginUserDto.Email) || string.IsNullOrWhiteSpace(loginUserDto.Password))
                 {
                     return BadRequest("Invalid login data.");
                 }

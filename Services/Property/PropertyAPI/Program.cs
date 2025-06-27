@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
 using NLog.Web;
@@ -14,13 +15,17 @@ using PropertyService.Infrastructure;
 using PropertyService.Infrastructure.Repositories;
 using System.Text;
 
-
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
 
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
+    var options = new WebApplicationOptions
+    {
+        WebRootPath = "wwwroot"
+    };
+    var builder = WebApplication.CreateBuilder(options);
+
     builder.WebHost.UseUrls("http://0.0.0.0:5030");
 
     builder.Logging.ClearProviders();
@@ -29,69 +34,24 @@ try
     // Register health checks
     builder.Services.AddHealthChecks();
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Handle circular references
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
     builder.Services.AddEndpointsApiExplorer();
 
     builder.Configuration.AddEnvironmentVariables();
 
-    //builder.Services.AddSwaggerGen(options =>
-    //{
-    //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //    {
-    //        In = ParameterLocation.Header,
-    //        Name = "Authorization",
-    //        Type = SecuritySchemeType.ApiKey,
-    //        BearerFormat = "JWT",
-    //        Description = "Enter 'Bearer' followed by a space and your JWT token"
-    //    });
-
-    //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    //    {
-    //        {
-    //            new OpenApiSecurityScheme
-    //            {
-    //                Reference = new OpenApiReference
-    //                {
-    //                    Type = ReferenceType.SecurityScheme,
-    //                    Id = "Bearer"
-    //                }
-    //            },
-    //            new string[] {}
-    //        }
-    //    });
-    //});
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddAutoMapper(typeof(PropertyMappingProfile));
 
-    //var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    //    .AddJwtBearer(options =>
-    //    {
-    //        options.TokenValidationParameters = new TokenValidationParameters
-    //        {
-    //            ValidateIssuer = true,
-    //            ValidIssuer = jwtSettings["Issuer"],
-    //            ValidateAudience = true,
-    //            ValidAudience = jwtSettings["Audience"],
-    //            ValidateLifetime = true,
-    //            ValidateIssuerSigningKey = true,
-    //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
-    //        };
-    //    });
-
-    //builder.Services.AddAuthorization();
-
-
     var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    //builder.Services.AddDbContext<PropertyDbContext>(options =>
-    // options.UseSqlServer(mssqlConnectionString));
     builder.Services.AddDbContext<PropertyDbContext>(options =>
       options.UseSqlServer(mssqlConnectionString, sqlOptions => sqlOptions.MigrationsAssembly("PropertyService.Infrastructure")));
-
-
-    //builder.Services.AddHttpClient();
 
     builder.Services.AddScoped<IPropertyUnitOfWork, PropertyUnitOfWork>();
     builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
@@ -104,31 +64,87 @@ try
 
     builder.Services.AddCors(o => o.AddPolicy("SleepSpot", builder =>
     {
-        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        builder.WithOrigins("http://localhost:3000") // Only allow your React app
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials(); // Optional: Needed if using cookies/auth
     }));
 
-
+    builder.Logging.AddConsole();
     var app = builder.Build();
 
-    app.UseStaticFiles();
-    if (app.Environment.IsDevelopment())
+    // Ensure the uploads directory exists
+    var uploadsPath = Path.Combine(app.Environment.WebRootPath, "uploads", "properties");
+    if (!Directory.Exists(uploadsPath))
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
+        Directory.CreateDirectory(uploadsPath);
+        Console.WriteLine($"Created uploads directory at: {uploadsPath}");
     }
+    Console.WriteLine($"Static File Path: {uploadsPath}");
+
+    // Add logging middleware to debug requests (before static files)
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/uploads"))
+        {
+            Console.WriteLine($"Static file request: {context.Request.Method} {context.Request.Path}");
+            Console.WriteLine($"Physical path would be: {Path.Combine(app.Environment.WebRootPath, context.Request.Path.Value.TrimStart('/'))}");
+        }
+        await next();
+    });
+
+    // Configure CORS before static files
+    app.UseCors("SleepSpot");
+
+    // Default static files middleware
+    app.UseStaticFiles();
+
+    // Configure static files for uploads with enhanced logging and CORS
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(app.Environment.WebRootPath, "uploads")),
+        RequestPath = "/uploads",
+        OnPrepareResponse = ctx =>
+        {
+            // Add CORS headers for images
+            ctx.Context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+            ctx.Context.Response.Headers.Add("Access-Control-Allow-Methods", "GET");
+            ctx.Context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+            ctx.Context.Response.Headers.Add("Cache-Control", "public,max-age=3600");
+
+            Console.WriteLine($"Serving static file: {ctx.File.Name} from {ctx.File.PhysicalPath}");
+        }
+    });
+
+    // Global exception handling
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (Exception ex)
+        {
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Unhandled exception");
+            throw;
+        }
+    });
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     // Map the /health endpoint
     app.MapHealthChecks("/health");
 
     app.UseMiddleware<ExceptionMiddleware>();
 
-    //app.UseAuthentication();
-    //app.UseAuthorization();
+    app.UseRouting();
 
     app.MapControllers();
 
-    app.UseCors("SleepSpot");
-
+    // Database initialization
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
@@ -146,9 +162,6 @@ try
 
         retryPolicy.Execute(() =>
         {
-            // Ensure database exists (optional)
-            //context.Database.EnsureCreated(); // You may remove this if you rely solely on Migrations
-
             // Apply pending migrations
             var pendingMigrations = context.Database.GetPendingMigrations();
             if (pendingMigrations.Any())
@@ -166,6 +179,13 @@ try
         });
     }
 
+    Console.WriteLine("PropertyAPI is ready and listening on http://0.0.0.0:5030");
+    Console.WriteLine($"Static files will be served from: {uploadsPath}");
+    Console.WriteLine("Available endpoints:");
+    Console.WriteLine("  - /health (health check)");
+    Console.WriteLine("  - /uploads/* (static files)");
+    Console.WriteLine("  - /swagger (API documentation)");
+
     app.Run();
 }
 catch (Exception exception)
@@ -179,4 +199,3 @@ finally
     // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     NLog.LogManager.Shutdown();
 }
-

@@ -8,7 +8,7 @@ namespace PropertyAPI.Middleware
 
         public ExceptionMiddleware(ILogger<ExceptionMiddleware> logger)
         {
-            this._logger = logger;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -20,23 +20,28 @@ namespace PropertyAPI.Middleware
             catch (NotFoundException ex)
             {
                 _logger.LogError(ex, ex.Message);
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
-                await context.Response.WriteAsync(ex.Message);
+                await HandleExceptionAsync(context, ex.Message, StatusCodes.Status404NotFound);
             }
             catch (BadRequestException ex)
             {
                 _logger.LogError(ex, ex.Message);
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync(ex.Message);
+                await HandleExceptionAsync(context, ex.Message, StatusCodes.Status400BadRequest);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsync("Something went wrong");
+                await HandleExceptionAsync(context, "Something went wrong", StatusCodes.Status500InternalServerError);
             }
+        }
 
+        private static async Task HandleExceptionAsync(HttpContext context, string message, int statusCode)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = statusCode;
 
+            var result = System.Text.Json.JsonSerializer.Serialize(new { message });
+            await context.Response.WriteAsync(result);
         }
     }
+
 }

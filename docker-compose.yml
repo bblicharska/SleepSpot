@@ -38,6 +38,8 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
+    volumes:
+      - ./Services/Property/PropertyAPI/wwwroot/uploads:/app/wwwroot/uploads
     networks:
       - sleepspot
 
@@ -127,6 +129,8 @@ services:
       - propertyapi
       - identityapi
       - reviewapi
+      - groupapi
+      - rentalapi
     networks:
       - sleepspot
     healthcheck:

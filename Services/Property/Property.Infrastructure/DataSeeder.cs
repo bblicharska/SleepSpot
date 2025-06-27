@@ -32,24 +32,40 @@ namespace PropertyService.Infrastructure
                     {
                         new Property
                         {
-                            Id = Guid.NewGuid(),
-                            Name = "Villa in the Mountains",
-                            Description = "A beautiful villa with a stunning view of the mountains.",
-                            Address = "123 Mountain Road, Mountain City",
+                            Id = new Guid("58d744b5-77e7-497a-8a92-24eee8dcfb8a"),
+                            Name = "Villa in the City Center",
+                            Description = "A beautiful villa with a stunning view.",
+                            Address = "Marszałkowska 84, Warsaw, Poland",
                             PricePerMonth = 2500.00m,
                             AreaInSquareMeters = 180.5m,
                             IsEntirePlaceRentable = true,
                             OwnerId =  new Guid("d93a381b-3b00-44c4-2165-08dd6f90dd1f"),
                             Images = new List<PropertyImage>
-                            {
-                                new PropertyImage { ImageUrl = "https://example.com/image1.jpg" },
-                                new PropertyImage { ImageUrl = "https://example.com/image2.jpg" }
-                            },
+{
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl = "/uploads/properties/property1.jpg",
+        OriginalFileName = "image1.jpg",
+        IsPrimary = true,
+        DisplayOrder = 1,
+        UploadedAt = DateTime.UtcNow
+    },
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl ="/uploads/properties/property2.jpg",
+        OriginalFileName = "image2.jpg",
+        IsPrimary = false,
+        DisplayOrder = 2,
+        UploadedAt = DateTime.UtcNow
+    }
+},
                             Rooms = new List<Room>
                             {
                                 new Room
                                 {
-                                    Id = Guid.NewGuid(),
+                                    Id = new Guid("3716234f-ea57-467b-91ed-78368106bd24"),
                                     Name = "Master Bedroom",
                                     Description = "Spacious room with private bathroom.",
                                     PricePerMonth = 900.00m,
@@ -58,7 +74,7 @@ namespace PropertyService.Infrastructure
                                 },
                                 new Room
                                 {
-                                    Id = Guid.NewGuid(),
+                                    Id = new Guid("663d12c7-dbf9-4c1a-bfc4-efca876610a9"),
                                     Name = "Guest Room",
                                     Description = "Comfortable guest room.",
                                     PricePerMonth = 700.00m,
@@ -69,41 +85,73 @@ namespace PropertyService.Infrastructure
                         },
                         new Property
                         {
-                            Id = Guid.NewGuid(),
+                            Id = new Guid("140c0d86-df4a-4c1c-8cb2-b563c2361307"),
                             Name = "Beachside Apartment",
                             Description = "A cozy apartment right next to the beach.",
-                            Address = "456 Ocean Blvd, Beach Town",
+                            Address = "Długi Targ 1, Gdansk, Poland",
                             PricePerMonth = 1800.00m,
                             AreaInSquareMeters = 85.0m,
                             IsEntirePlaceRentable = true,
                             OwnerId = new Guid("ea679e1b-4f2c-4108-2166-08dd6f90dd1f"),
                             Images = new List<PropertyImage>
-                            {
-                                new PropertyImage { ImageUrl = "https://example.com/image3.jpg" },
-                                new PropertyImage { ImageUrl = "https://example.com/image4.jpg" }
-                            },
+{
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl =  "/uploads/properties/property1.jpg",
+        OriginalFileName = "image1.jpg",
+        IsPrimary = true,
+        DisplayOrder = 1,
+        UploadedAt = DateTime.UtcNow
+    },
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl =  "/uploads/properties/property2.jpg",
+        OriginalFileName = "image2.jpg",
+        IsPrimary = false,
+        DisplayOrder = 2,
+        UploadedAt = DateTime.UtcNow
+    }
+},
                             Rooms = new List<Room>()
                         },
                         new Property
                         {
-                            Id = Guid.NewGuid(),
+                            Id = new Guid("5cb0bd81-7624-4c09-8be2-447a638f53e6"),
                             Name = "City Center Loft",
                             Description = "A modern loft located in the heart of the city.",
-                            Address = "789 Downtown St, City Center",
+                            Address = "Rynek Główny 5, Krakow, Poland",
                             PricePerMonth = 2200.00m,
                             AreaInSquareMeters = 65.5m,
                             IsEntirePlaceRentable = true,
                             OwnerId = new Guid("d21c93e3-8245-442d-f898-08dd6f9adc78"),
                             Images = new List<PropertyImage>
-                            {
-                                new PropertyImage { ImageUrl = "https://example.com/image5.jpg" },
-                                new PropertyImage { ImageUrl = "https://example.com/image6.jpg" }
-                            },
+{
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl =  "/uploads/properties/property1.jpg",
+        OriginalFileName = "image1.jpg",
+        IsPrimary = true,
+        DisplayOrder = 1,
+        UploadedAt = DateTime.UtcNow
+    },
+    new PropertyImage
+    {
+        Id = Guid.NewGuid(),
+        ImageUrl =  "/uploads/properties/property2.jpg",
+        OriginalFileName = "image2.jpg",
+        IsPrimary = false,
+        DisplayOrder = 2,
+        UploadedAt = DateTime.UtcNow
+    }
+},
                             Rooms = new List<Room>
                             {
                                 new Room
                                 {
-                                    Id = Guid.NewGuid(),
+                                    Id = new Guid("c53a92a3-1043-4e3b-873b-d8fa55cc90b2"),
                                     Name = "Loft Bedroom",
                                     Description = "Open bedroom space in loft style.",
                                     PricePerMonth = 1100.00m,

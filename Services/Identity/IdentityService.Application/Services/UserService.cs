@@ -50,7 +50,8 @@ namespace IdentityService.Application.Services
 
             var user = new User
             {
-                Username = registerUserDto.Username,
+                FirstName = registerUserDto.FirstName,
+                LastName = registerUserDto.LastName,
                 Email = registerUserDto.Email,
                 PasswordHash = _passwordHasher.HashPassword(registerUserDto.Password),
                 Role = "User",
@@ -71,13 +72,13 @@ namespace IdentityService.Application.Services
 
         public async Task<TokenDto> LoginAsync(LoginUserDto loginUserDto)
         {
-            if (loginUserDto == null || string.IsNullOrWhiteSpace(loginUserDto.UsernameOrEmail) || string.IsNullOrWhiteSpace(loginUserDto.Password))
+            if (loginUserDto == null || string.IsNullOrWhiteSpace(loginUserDto.Email) || string.IsNullOrWhiteSpace(loginUserDto.Password))
             {
                 throw new BadRequestException("Invalid login data.");
             }
 
-            var normalizedInput = loginUserDto.UsernameOrEmail.Trim().ToLower();
-            var user = await _uow.UserRepository.GetByUsernameOrEmailAsync(normalizedInput);
+            var normalizedInput = loginUserDto.Email.Trim().ToLower();
+            var user = await _uow.UserRepository.GetByEmailAsync(normalizedInput);
 
             if (user == null || !_passwordHasher.VerifyPassword(user.PasswordHash, loginUserDto.Password))
             {
@@ -134,7 +135,8 @@ namespace IdentityService.Application.Services
                 throw new NotFoundException("User not found.");
             }
 
-            user.Username = updateUserDto.Username;
+            user.FirstName = updateUserDto.FirstName;
+            user.LastName = updateUserDto.LastName;
             user.Email = updateUserDto.Email;
 
             _uow.UserRepository.Update(user);
