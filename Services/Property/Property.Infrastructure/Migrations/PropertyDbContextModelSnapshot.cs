@@ -33,8 +33,7 @@ namespace PropertyService.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("AreaInSquareMeters")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -43,24 +42,28 @@ namespace PropertyService.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DetailedDescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsEntirePlaceRentable")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("PricePerMonth")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+                    b.Property<bool>("isAvailable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
-                    b.HasIndex("OwnerId");
+                    b.HasKey("Id");
 
                     b.ToTable("Properties");
                 });
@@ -85,7 +88,10 @@ namespace PropertyService.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PropertyId")
+                    b.Property<Guid?>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UploadedAt")
@@ -94,6 +100,8 @@ namespace PropertyService.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PropertyId");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("PropertyImages");
                 });
@@ -105,8 +113,7 @@ namespace PropertyService.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("AreaInSquareMeters")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
@@ -118,18 +125,17 @@ namespace PropertyService.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DetailedDescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAvailable")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PricePerMonth")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("PropertyId")
@@ -147,10 +153,16 @@ namespace PropertyService.Infrastructure.Migrations
                     b.HasOne("PropertyService.Domain.Models.Property", "Property")
                         .WithMany("Images")
                         .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PropertyService.Domain.Models.Room", "Room")
+                        .WithMany("Images")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Property");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("PropertyService.Domain.Models.Room", b =>
@@ -169,6 +181,11 @@ namespace PropertyService.Infrastructure.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("PropertyService.Domain.Models.Room", b =>
+                {
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

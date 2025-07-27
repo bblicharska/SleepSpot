@@ -4,6 +4,32 @@
   },
   "Routes": [
     {
+      "UpstreamPathTemplate": "/gateway/property-details/{propertyId}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/gateway/property-details/{propertyId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "Priority": 100
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/room-details/{roomId}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/gateway/room-details/{roomId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "Priority": 100
+    },
+    {
       "DownstreamPathTemplate": "/api/User/register",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -117,7 +143,9 @@
       ],
       "UpstreamPathTemplate": "/api/properties/{id}",
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ],
-      "AuthenticationOptions": null
+      "AuthenticationOptions": null,
+      "RouteClaimsRequirement": {},
+      "Priority": 0
     },
     {
       "DownstreamPathTemplate": "/api/Property/{id}/rooms",
@@ -132,6 +160,18 @@
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Property/{id}/rooms/{roomId}/details",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/{id}/rooms/{roomId}/details",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Property/rooms/{roomId}/rent",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -142,6 +182,30 @@
       ],
       "UpstreamPathTemplate": "/api/properties/rooms/{roomId}/rent",
       "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/rooms/{roomId}/images",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/rooms/{roomId}/images",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/rooms/{roomId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/rooms/{roomId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/Property/{id}/images",
@@ -242,7 +306,7 @@
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Review/user-reviewed/{reviewedId}",
+      "DownstreamPathTemplate": "/api/Review/by-reviewer/{reviewerId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -250,19 +314,7 @@
           "Port": 5029
         }
       ],
-      "UpstreamPathTemplate": "/api/reviews/user-reviewed/{reviewedId}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/Review/user-reviewer/{reviewerId}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "review-api",
-          "Port": 5029
-        }
-      ],
-      "UpstreamPathTemplate": "/api/reviews/user-reviewer/{reviewerId}",
+      "UpstreamPathTemplate": "/api/reviews/by-reviewer/{reviewerId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
@@ -278,7 +330,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Review/landlord/{landlordId}",
+      "DownstreamPathTemplate": "/api/Review/room/{roomId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -286,11 +338,11 @@
           "Port": 5029
         }
       ],
-      "UpstreamPathTemplate": "/api/reviews/landlord/{landlordId}",
+      "UpstreamPathTemplate": "/api/reviews/room/{roomId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Review/tenant/{tenantId}",
+      "DownstreamPathTemplate": "/api/Review/average-rating/property/{propertyId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -298,11 +350,11 @@
           "Port": 5029
         }
       ],
-      "UpstreamPathTemplate": "/api/reviews/tenant/{tenantId}",
+      "UpstreamPathTemplate": "/api/reviews/average-rating/property/{propertyId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Review/average-rating/{userId}",
+      "DownstreamPathTemplate": "/api/Review/average-rating/room/{roomId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -310,19 +362,7 @@
           "Port": 5029
         }
       ],
-      "UpstreamPathTemplate": "/api/reviews/average-rating/{userId}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/Review/exists",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "review-api",
-          "Port": 5029
-        }
-      ],
-      "UpstreamPathTemplate": "/api/reviews/exists",
+      "UpstreamPathTemplate": "/api/reviews/average-rating/room/{roomId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {

@@ -19,5 +19,7 @@ namespace PropertyService.Domain.Contracts
         Task<int> GetMaxImageDisplayOrderAsync(Guid propertyId);
         Task ClearPrimaryImageFlagAsync(Guid propertyId);
         Task SetImageAsPrimaryAsync(Guid imageId);
+        Task UpdateImageAsync(PropertyImage image);
+
     }
 }

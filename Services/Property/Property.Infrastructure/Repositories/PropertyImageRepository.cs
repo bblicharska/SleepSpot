@@ -97,5 +97,11 @@ namespace PropertyService.Infrastructure.Repositories
             }
         }
 
+        public async Task UpdateImageAsync(PropertyImage image)
+        {
+            _context.PropertyImages.Update(image);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

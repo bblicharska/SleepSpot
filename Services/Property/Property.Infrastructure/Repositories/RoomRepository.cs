@@ -54,6 +54,23 @@ namespace PropertyService.Infrastructure.Repositories
         {
             _context.Rooms.RemoveRange(rooms);
         }
+        public async Task<Room> GetByIdWithPropertyAndImagesAsync(Guid id)
+        {
+            return await _context.Rooms
+                .Include(r => r.Property)
+                .Include(r => r.Images)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<Room?> GetRoomWithPropertyDetailsAsync(Guid roomId)
+        {
+            return await _context.Rooms
+                .Include(r => r.Property)
+                .Include(r => r.Images)
+                .Include(r => r.Property.Rooms)
+                    .ThenInclude(room => room.Images)
+                .FirstOrDefaultAsync(r => r.Id == roomId);
+        }
     }
 
 }

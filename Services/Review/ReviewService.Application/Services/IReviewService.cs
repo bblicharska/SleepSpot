@@ -1,5 +1,6 @@
 ﻿using ReviewService.Application.Dto;
 using ReviewService.Domain.Models;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,14 +18,18 @@ namespace ReviewService.Application.Services
         Task UpdateReviewAsync(ReviewUpdateDto dto);
         Task DeleteReviewAsync(Guid id);
 
-        Task<IEnumerable<ReviewDto>> GetReviewsForUserAsync(Guid reviewedId);
-        Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId);
+        // Opinie o property
         Task<IEnumerable<ReviewDto>> GetReviewsForPropertyAsync(Guid propertyId);
 
-        Task<IEnumerable<ReviewDto>> GetLandlordReviewsAsync(Guid landlordId);
-        Task<IEnumerable<ReviewDto>> GetTenantReviewsAsync(Guid tenantId);
+        // Opinie o pokoju (jeśli chcesz)
+        Task<IEnumerable<ReviewDto>> GetReviewsForRoomAsync(Guid roomId);
 
-        Task<double> GetUserAverageRatingAsync(Guid userId);
-        Task<bool> HasUserReviewedAsync(Guid reviewerId, Guid reviewedId, Guid? propertyId);
+        // Opinie napisane przez użytkownika (recenzenta)
+        Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId);
+
+        // Możesz też mieć średnią ocenę dla property i pokoju
+        Task<double> GetAverageRatingForPropertyAsync(Guid propertyId);
+        Task<double> GetAverageRatingForRoomAsync(Guid roomId);
     }
+
 }

@@ -12,8 +12,10 @@ namespace PropertyService.Domain.Models
 
         public string Name { get; set; }
         public string Description { get; set; }
+        public string? DetailedDescription { get; set; }
         public string Address { get; set; }
 
+        public bool isAvailable { get; set; } = true;
         public decimal PricePerMonth { get; set; } 
         public bool IsEntirePlaceRentable { get; set; } = true;
         public decimal AreaInSquareMeters { get; set; } 

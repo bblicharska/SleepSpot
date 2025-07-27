@@ -19,14 +19,17 @@ namespace PropertyService.Application.Services
         Task<PropertyDto> CreatePropertyAsync(CreatePropertyDto createPropertyDto);
         Task<PropertyDto> UpdatePropertyAsync(Guid id, UpdatePropertyDto updatePropertyDto);
         Task DeletePropertyAsync(Guid id);
+        Task DeleteRoomAsync(Guid roomId);
         Task<IEnumerable<RoomDto>> GetRoomsForPropertyAsync(Guid propertyId);
         Task AddRoomToPropertyAsync(Guid propertyId, CreateRoomDto dto);
+        Task<List<PropertyImage>> AddMultipleRoomImagesAsync(Guid roomId, List<IFormFile> files);
         Task RentRoomAsync(Guid roomId);
         Task<PropertyImage> AddImageAsync(Guid propertyId, IFormFile file);
         Task<List<PropertyImage>> AddMultipleImagesAsync(Guid propertyId, List<IFormFile> files);
         Task<List<PropertyImage>> GetPropertyImagesAsync(Guid propertyId);
         Task<bool> DeleteImageAsync(Guid imageId);
         Task<bool> SetPrimaryImageAsync(Guid imageId);
-
+        Task<RoomDto> GetRoomByIdAsync(Guid roomId);
+        Task<RoomWithPropertyDetailsDto?> GetRoomWithPropertyDetailsAsync(Guid roomId);
     }
 }

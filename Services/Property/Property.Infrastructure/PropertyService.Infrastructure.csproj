@@ -37,6 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Property.Application\PropertyService.Application.csproj" />
     <ProjectReference Include="..\Property.Domain\PropertyService.Domain.csproj" />
   </ItemGroup>
 

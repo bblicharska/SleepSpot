@@ -16,6 +16,8 @@ namespace PropertyService.Domain.Contracts
         void Update(Room room);
         void Remove(Room room);
         void RemoveRange(IEnumerable<Room> rooms);
+        Task<Room> GetByIdWithPropertyAndImagesAsync(Guid id);
+        Task<Room?> GetRoomWithPropertyDetailsAsync(Guid roomId);
     }
 
 }

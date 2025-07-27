@@ -24,12 +24,20 @@ namespace PropertyService.Application.Mappings
                 .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src =>
                     src.Rooms ?? new List<Room>()));
 
+            CreateMap<UploadPropertyImageDto, PropertyImage>()
+        .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+        .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()) // You'll set this after upload
+        .ForMember(dest => dest.OriginalFileName, opt => opt.MapFrom(src => src.File.FileName))
+        .ForMember(dest => dest.UploadedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+        .ForMember(dest => dest.PropertyId, opt => opt.Ignore()) // Set later manually
+        .ForMember(dest => dest.Property, opt => opt.Ignore());
+
+
             // CreatePropertyDto -> Property
             CreateMap<CreatePropertyDto, Property>()
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
-                    src.Images ?? new List<PropertyImageDto>()))
-                .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src =>
-                    src.Rooms ?? new List<CreateRoomDto>()));
+    .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+    .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src => src.Rooms));
+
 
             // Property -> PropertyDto
             CreateMap<Property, PropertyDto>()
@@ -47,15 +55,15 @@ namespace PropertyService.Application.Mappings
 
             // UpdatePropertyDto -> Property
             CreateMap<UpdatePropertyDto, Property>()
-                .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
-                    src.Images ?? new List<ImageUpdateDto>()))
-                .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src =>
-                    src.Rooms ?? new List<UpdateRoomDto>()));
+     .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
+         src.Images ?? new List<ImageUpdateDto>()));
 
             // === Room <-> DTOs ===
             CreateMap<Room, RoomDto>();
             CreateMap<CreateRoomDto, Room>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+    .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+    .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images));
+            CreateMap<UploadPropertyImageDto, PropertyImage>();
             CreateMap<UpdateRoomDto, Room>();
             CreateMap<Room, CreateRoomDto>();
             CreateMap<Room, UpdateRoomDto>();

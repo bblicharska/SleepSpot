@@ -192,6 +192,25 @@ namespace PropertyAPI.Controllers
                 }
             }
 
+            [HttpDelete("rooms/{roomId}")]
+            public async Task<IActionResult> DeleteRoom(Guid roomId)
+            {
+                try
+                {
+                    await _propertyService.DeleteRoomAsync(roomId);
+                    return NoContent();
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error deleting room with ID {RoomId}", roomId);
+                    return StatusCode(500, "An unexpected error occurred while deleting the room.");
+                }
+            }
+
             [HttpPost("rooms/{roomId}/rent")]
             public async Task<ActionResult> RentRoom(Guid roomId)
             {
@@ -371,6 +390,78 @@ namespace PropertyAPI.Controllers
                 {
                     _logger.LogError(ex, "Error retrieving properties for owner {OwnerId}", ownerId);
                     return StatusCode(500, "An unexpected error occurred while retrieving properties for owner.");
+                }
+            }
+
+            [HttpGet("rooms/{roomId}")]
+            public async Task<ActionResult<RoomDto>> GetRoomById(Guid roomId)
+            {
+                try
+                {
+                    var room = await _propertyService.GetRoomByIdAsync(roomId);
+                    return Ok(room);
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error retrieving room with ID {RoomId}", roomId);
+                    return StatusCode(500, "An unexpected error occurred while retrieving the room.");
+                }
+            }
+
+            [HttpPost("rooms/{roomId}/images")]
+            public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] List<IFormFile> files)
+            {
+                if (files == null || !files.Any())
+                    return BadRequest("No files provided");
+
+                try
+                {
+                    var uploadedImages = await _propertyService.AddMultipleRoomImagesAsync(roomId, files);
+
+                    var imageDtos = uploadedImages.Select(img => new PropertyImageDto
+                    {
+                        Id = img.Id,
+                        ImageUrl = img.ImageUrl,
+                        OriginalFileName = img.OriginalFileName,
+                        IsPrimary = img.IsPrimary,
+                        DisplayOrder = img.DisplayOrder
+                    }).ToList();
+
+                    return Ok(imageDtos);
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading images for room {RoomId}", roomId);
+                    return StatusCode(500, "An unexpected error occurred while uploading room images.");
+                }
+            }
+
+            [HttpGet("rooms/{roomId}/details")]
+            public async Task<IActionResult> GetRoomWithPropertyDetails(Guid roomId)
+            {
+                try
+                {
+                    var roomDetails = await _propertyService.GetRoomWithPropertyDetailsAsync(roomId);
+
+                    if (roomDetails == null)
+                    {
+                        return NotFound($"Room with ID {roomId} not found.");
+                    }
+
+                    return Ok(roomDetails);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while fetching room details for room ID: {RoomId}", roomId);
+                    return StatusCode(500, "An error occurred while processing your request.");
                 }
             }
         }

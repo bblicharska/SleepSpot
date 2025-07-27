@@ -18,39 +18,28 @@ namespace PropertyService.Infrastructure.Repositories
             _context = context;
         }
 
-        // Pobranie nieruchomości po ID
         public async Task<Property> GetByIdAsync(Guid id)
-        {
-            return await _context.Properties
-                .Include(p => p.Images)  // This line ensures images are included
-                .FirstOrDefaultAsync(p => p.Id == id);
-        }
-
-        public async Task<Property> GetByIdWithImagesAsync(Guid id)
         {
             return await _context.Properties
                 .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Pobranie wszystkich nieruchomości
         public async Task<IEnumerable<Property>> GetAllAsync()
         {
             return await _context.Properties
-              .Include(p => p.Images)  // Optionally include images here if needed
-              .ToListAsync();
+                .Include(p => p.Images)
+                .ToListAsync();
         }
 
-        // Pobranie nieruchomości według właściciela
         public async Task<IEnumerable<Property>> GetByOwnerIdAsync(Guid ownerId)
         {
             return await _context.Properties
-             .Where(p => p.OwnerId == ownerId)
-             .Include(p => p.Images)  // Optionally include images
-             .ToListAsync();
+                .Where(p => p.OwnerId == ownerId)
+                .Include(p => p.Images)
+                .ToListAsync();
         }
 
-        // Wyszukiwanie nieruchomości według lokalizacji i cen
         public async Task<IEnumerable<Property>> SearchAsync(string location, decimal? minPrice, decimal? maxPrice)
         {
             var query = _context.Properties.AsQueryable();
@@ -67,29 +56,26 @@ namespace PropertyService.Infrastructure.Repositories
             return await query
                 .Include(p => p.Images)
                 .Include(p => p.Rooms)
+                    .ThenInclude(r => r.Images) // ✅ Include Room Images
                 .ToListAsync();
         }
 
-        // Dodanie nowej nieruchomości
         public async Task AddAsync(Property property)
         {
             await _context.Properties.AddAsync(property);
         }
 
-        // Aktualizacja istniejącej nieruchomości
         public void Update(Property property)
         {
             _context.Properties.Attach(property);
             _context.Entry(property).State = EntityState.Modified;
         }
 
-        // Usunięcie nieruchomości
         public void Delete(Property property)
         {
             _context.Properties.Remove(property);
         }
 
-        // Zapisanie zmian w bazie danych
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
@@ -106,6 +92,7 @@ namespace PropertyService.Infrastructure.Repositories
         {
             return await _context.Properties
                 .Include(p => p.Rooms)
+                    .ThenInclude(r => r.Images) // ✅ Include Room Images
                 .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -115,6 +102,7 @@ namespace PropertyService.Infrastructure.Repositories
             return await _context.Properties
                 .Where(p => p.OwnerId == ownerId)
                 .Include(p => p.Rooms)
+                    .ThenInclude(r => r.Images) // ✅ Include Room Images
                 .Include(p => p.Images)
                 .ToListAsync();
         }
@@ -123,8 +111,10 @@ namespace PropertyService.Infrastructure.Repositories
         {
             return await _context.Properties
                 .Include(p => p.Rooms)
+                    .ThenInclude(r => r.Images) // ✅ Include Room Images
                 .Include(p => p.Images)
                 .ToListAsync();
         }
     }
+
 }

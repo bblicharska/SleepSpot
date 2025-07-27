@@ -30,6 +30,10 @@
     <PackageReference Include="Polly" Version="7.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
     
   <ItemGroup>
     <Content Update="ocelot.json">

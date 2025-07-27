@@ -12,11 +12,13 @@ namespace PropertyService.Application.Dto
 
         public string Name { get; set; }
         public string Description { get; set; }
+        public string? DetailedDescription { get; set; }
 
         public decimal PricePerMonth { get; set; }
         public decimal AreaInSquareMeters { get; set; }
 
         public int Capacity { get; set; }
         public bool IsAvailable { get; set; }
+        public List<ImageUpdateDto> Images { get; set; } = new();
     }
 }

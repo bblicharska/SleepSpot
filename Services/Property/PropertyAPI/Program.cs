@@ -179,13 +179,6 @@ try
         });
     }
 
-    Console.WriteLine("PropertyAPI is ready and listening on http://0.0.0.0:5030");
-    Console.WriteLine($"Static files will be served from: {uploadsPath}");
-    Console.WriteLine("Available endpoints:");
-    Console.WriteLine("  - /health (health check)");
-    Console.WriteLine("  - /uploads/* (static files)");
-    Console.WriteLine("  - /swagger (API documentation)");
-
     app.Run();
 }
 catch (Exception exception)

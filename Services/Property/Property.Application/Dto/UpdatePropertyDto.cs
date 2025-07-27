@@ -10,6 +10,9 @@ namespace PropertyService.Application.Dto
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public string? DetailedDescription { get; set; }
+        public bool isAvailable { get; set; }
+
         public string Address { get; set; }
 
         public decimal PricePerMonth { get; set; }

@@ -22,22 +22,16 @@ namespace ReviewService.Infrastructure
         {
             modelBuilder.Entity<Review>(entity =>
             {
-                // Klucz główny
                 entity.HasKey(r => r.Id);
 
                 entity.Property(r => r.ReviewerId)
                     .IsRequired();
 
-                entity.Property(r => r.ReviewedId)
-                    .IsRequired();
-
-                entity.Property(r => r.ReviewedRole)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasConversion<string>(); // Dla enum: .HasConversion<EnumToStringConverter<Role>>();
-
                 entity.Property(r => r.PropertyId)
-                    .IsRequired();
+                    .IsRequired(false);
+
+                entity.Property(r => r.RoomId)
+                    .IsRequired(false);
 
                 entity.Property(r => r.Rating)
                     .IsRequired();
@@ -47,7 +41,14 @@ namespace ReviewService.Infrastructure
 
                 entity.Property(r => r.CreatedAt)
                     .IsRequired();
+
+                // Indeksy
+                entity.HasIndex(r => r.PropertyId);
+                entity.HasIndex(r => r.RoomId);
+                entity.HasIndex(r => r.ReviewerId);
+
             });
         }
     }
+
 }

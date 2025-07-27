@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,12 +16,14 @@ namespace PropertyService.Domain.Models
 
         public string Name { get; set; }
         public string Description { get; set; }
+        public string? DetailedDescription { get; set; }
 
         public decimal PricePerMonth { get; set; }
         public decimal AreaInSquareMeters { get; set; } // Dodane
 
         public int Capacity { get; set; } = 1;
         public bool IsAvailable { get; set; } = true;
+        public ICollection<PropertyImage> Images { get; set; } = new List<PropertyImage>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

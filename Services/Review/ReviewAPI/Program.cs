@@ -6,12 +6,10 @@ using NLog;
 using NLog.Web;
 using Polly;
 using ReviewAPI.Middleware;
-using ReviewService.Application.Interfaces;
 using ReviewService.Application.Mappings;
 using ReviewService.Application.Services;
 using ReviewService.Domain.Contracts;
 using ReviewService.Infrastructure;
-using ReviewService.Infrastructure.ExternalClients;
 using ReviewService.Infrastructure.Repositories;
 using System.Text;
 using ReviewService.Application.Services;
@@ -101,11 +99,6 @@ try
     builder.Services.AddScoped<IReviewService, ReviewService.Application.Services.ReviewService>();
     builder.Services.AddScoped<ExceptionMiddleware>();
 
-    builder.Services.AddHttpClient<IUserClient, UserClient>(client =>
-    {
-        client.BaseAddress = new Uri("http://identity-api:5031");
-    });
-
     builder.Services.AddCors(o => o.AddPolicy("SleepSpot", builder =>
     {
         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
@@ -155,7 +148,7 @@ try
             if (pendingMigrations.Any())
             {
                 Console.WriteLine("Applying pending migrations...");
-                //context.Database.Migrate();
+                context.Database.Migrate();
             }
             else
             {

@@ -133,8 +133,3 @@ services:
       - rentalapi
     networks:
       - sleepspot
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5030/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10

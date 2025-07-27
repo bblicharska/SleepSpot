@@ -17,11 +17,13 @@ namespace ReviewService.Domain.Contracts
         Task DeleteAsync(Guid id);
 
         // Zapytania specyficzne dla domeny
-        Task<IEnumerable<Review>> GetByReviewedIdAsync(Guid reviewedId);
-        Task<IEnumerable<Review>> GetByReviewerIdAsync(Guid reviewerId);
         Task<IEnumerable<Review>> GetByPropertyIdAsync(Guid propertyId);
-        Task<IEnumerable<Review>> GetByReviewedRoleAsync(string role);
-        Task<double> GetAverageRatingByReviewedIdAsync(Guid reviewedId);
-        Task<bool> ExistsAsync(Guid reviewerId, Guid reviewedId, Guid? propertyId);
+        Task<IEnumerable<Review>> GetByRoomIdAsync(Guid roomId);        // nowa metoda
+        Task<IEnumerable<Review>> GetByReviewerIdAsync(Guid reviewerId);
+
+        Task<double> GetAverageRatingByPropertyIdAsync(Guid propertyId);
+        Task<double> GetAverageRatingByRoomIdAsync(Guid roomId);
+
+        Task<bool> ExistsAsync(Guid reviewerId, Guid? propertyId, Guid? roomId);
     }
 }

@@ -59,7 +59,7 @@ namespace ReviewService.Infrastructure.Repositories
                 await _context.Reviews.AddAsync(review);
                 await _context.SaveChangesAsync();
 
-                _context.Entry(review).State = EntityState.Detached; // Clear tracking
+                _context.Entry(review).State = EntityState.Detached;
             }
             catch (Exception ex)
             {
@@ -102,19 +102,36 @@ namespace ReviewService.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Review>> GetByReviewedIdAsync(Guid reviewedId)
+        public async Task<IEnumerable<Review>> GetByPropertyIdAsync(Guid propertyId)
         {
             try
             {
                 return await _context.Reviews
                     .AsNoTracking()
-                    .Where(r => r.ReviewedId == reviewedId)
+                    .Where(r => r.PropertyId == propertyId)
                     .OrderByDescending(r => r.CreatedAt)
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving reviews for user ID {ReviewedId}", reviewedId);
+                _logger.LogError(ex, "Error retrieving reviews for property ID {PropertyId}", propertyId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Review>> GetByRoomIdAsync(Guid roomId)
+        {
+            try
+            {
+                return await _context.Reviews
+                    .AsNoTracking()
+                    .Where(r => r.RoomId == roomId)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving reviews for room ID {RoomId}", roomId);
                 throw;
             }
         }
@@ -136,63 +153,44 @@ namespace ReviewService.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Review>> GetByPropertyIdAsync(Guid propertyId)
+        public async Task<double> GetAverageRatingByPropertyIdAsync(Guid propertyId)
         {
             try
             {
                 return await _context.Reviews
-                    .AsNoTracking()
                     .Where(r => r.PropertyId == propertyId)
-                    .OrderByDescending(r => r.CreatedAt)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving reviews for property ID {PropertyId}", propertyId);
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<Review>> GetByReviewedRoleAsync(string role)
-        {
-            try
-            {
-                return await _context.Reviews
-                    .AsNoTracking()
-                    .Where(r => r.ReviewedRole == role)
-                    .OrderByDescending(r => r.CreatedAt)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving reviews for role {Role}", role);
-                throw;
-            }
-        }
-
-        public async Task<double> GetAverageRatingByReviewedIdAsync(Guid reviewedId)
-        {
-            try
-            {
-                return await _context.Reviews
-                    .Where(r => r.ReviewedId == reviewedId)
                     .AverageAsync(r => r.Rating);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calculating average rating for user ID {ReviewedId}", reviewedId);
+                _logger.LogError(ex, "Error calculating average rating for property ID {PropertyId}", propertyId);
                 throw;
             }
         }
 
-        public async Task<bool> ExistsAsync(Guid reviewerId, Guid reviewedId, Guid? propertyId)
+        public async Task<double> GetAverageRatingByRoomIdAsync(Guid roomId)
         {
             try
             {
                 return await _context.Reviews
-                    .AnyAsync(r => r.ReviewerId == reviewerId
-                                && r.ReviewedId == reviewedId
-                                && (propertyId == null || r.PropertyId == propertyId));
+                    .Where(r => r.RoomId == roomId)
+                    .AverageAsync(r => r.Rating);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating average rating for room ID {RoomId}", roomId);
+                throw;
+            }
+        }
+
+        public async Task<bool> ExistsAsync(Guid reviewerId, Guid? propertyId, Guid? roomId)
+        {
+            try
+            {
+                return await _context.Reviews.AnyAsync(r =>
+                    r.ReviewerId == reviewerId
+                    && ((propertyId != null && r.PropertyId == propertyId) || (roomId != null && r.RoomId == roomId))
+                );
             }
             catch (Exception ex)
             {
@@ -201,4 +199,5 @@ namespace ReviewService.Infrastructure.Repositories
             }
         }
     }
+
 }

@@ -9,9 +9,8 @@ namespace ReviewService.Application.Dto
     public class ReviewCreateDto
     {
         public Guid ReviewerId { get; set; }
-        public Guid ReviewedId { get; set; }
-        public string ReviewedRole { get; set; }
-        public Guid PropertyId { get; set; }
+        public Guid? PropertyId { get; set; }
+        public Guid? RoomId { get; set; }
         public int Rating { get; set; }
         public string Comment { get; set; }
     }

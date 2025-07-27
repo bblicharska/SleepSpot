@@ -10,7 +10,6 @@ namespace PropertyService.Domain.Contracts
     public interface IPropertyRepository
     {
         Task<Property> GetByIdAsync(Guid id);
-        Task<Property> GetByIdWithImagesAsync(Guid id);
         Task<IEnumerable<Property>> GetAllAsync();
         Task<IEnumerable<Property>> GetByOwnerIdAsync(Guid ownerId);
         Task<IEnumerable<Property>> SearchAsync(string location, decimal? minPrice, decimal? maxPrice);

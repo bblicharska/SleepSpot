@@ -2,7 +2,7 @@
 using ReviewService.Domain.Models;
 using ReviewService.Application.Dto;
 using AutoMapper;
-using ReviewService.Application.Interfaces;
+using Shared.Dto;
 
 namespace ReviewService.Application.Services
 {
@@ -10,16 +10,13 @@ namespace ReviewService.Application.Services
     {
         private readonly IReviewUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IUserClient _userClient;
 
         public ReviewService(
             IReviewUnitOfWork unitOfWork,
-            IMapper mapper,
-            IUserClient userClient)
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _userClient = userClient;
         }
 
         public async Task<ReviewDto> GetReviewByIdAsync(Guid id)
@@ -28,9 +25,6 @@ namespace ReviewService.Application.Services
                          ?? throw new KeyNotFoundException($"Review with ID {id} not found.");
             var reviewDto = _mapper.Map<ReviewDto>(review);
 
-            reviewDto.Reviewer = await _userClient.GetUserByIdAsync(reviewDto.ReviewerId);
-            reviewDto.Reviewed = await _userClient.GetUserByIdAsync(reviewDto.ReviewedId);
-
             return reviewDto;
         }
 
@@ -38,10 +32,8 @@ namespace ReviewService.Application.Services
         {
             var reviews = await _unitOfWork.ReviewRepository.GetAllAsync();
             var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
             return reviewDtos;
         }
-
 
         public async Task<Guid> CreateReviewAsync(ReviewCreateDto dto)
         {
@@ -69,65 +61,35 @@ namespace ReviewService.Application.Services
             await _unitOfWork.ReviewRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<ReviewDto>> GetReviewsForUserAsync(Guid reviewedId)
-        {
-            var reviews = await _unitOfWork.ReviewRepository.GetByReviewedIdAsync(reviewedId);
-            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
-            return reviewDtos;
-        }
-
-        public async Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId)
-        {
-            var reviews = await _unitOfWork.ReviewRepository.GetByReviewerIdAsync(reviewerId);
-            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
-            return reviewDtos;
-        }
-
         public async Task<IEnumerable<ReviewDto>> GetReviewsForPropertyAsync(Guid propertyId)
         {
             var reviews = await _unitOfWork.ReviewRepository.GetByPropertyIdAsync(propertyId);
             var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
             return reviewDtos;
         }
 
-        public async Task<IEnumerable<ReviewDto>> GetLandlordReviewsAsync(Guid landlordId)
+        public async Task<IEnumerable<ReviewDto>> GetReviewsForRoomAsync(Guid roomId)
         {
-            var reviews = await _unitOfWork.ReviewRepository.GetByReviewedIdAsync(landlordId);
-            var filteredReviews = reviews.Where(r => r.ReviewedRole == "Landlord");
-            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(filteredReviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
+            var reviews = await _unitOfWork.ReviewRepository.GetByRoomIdAsync(roomId);
+            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+            return reviewDtos;
+        }
+        
+        public async Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId)
+        {
+            var reviews = await _unitOfWork.ReviewRepository.GetByReviewerIdAsync(reviewerId);
+            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
             return reviewDtos;
         }
 
-        public async Task<IEnumerable<ReviewDto>> GetTenantReviewsAsync(Guid tenantId)
+        public async Task<double> GetAverageRatingForPropertyAsync(Guid propertyId)
         {
-            var reviews = await _unitOfWork.ReviewRepository.GetByReviewedIdAsync(tenantId);
-            var filteredReviews = reviews.Where(r => r.ReviewedRole == "Tenant");
-            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(filteredReviews);
-            await EnrichReviewsWithUsersAsync(reviewDtos);
-            return reviewDtos;
+            return await _unitOfWork.ReviewRepository.GetAverageRatingByPropertyIdAsync(propertyId);
         }
 
-        public async Task<double> GetUserAverageRatingAsync(Guid userId)
+        public async Task<double> GetAverageRatingForRoomAsync(Guid roomId)
         {
-            return await _unitOfWork.ReviewRepository.GetAverageRatingByReviewedIdAsync(userId);
-        }
-
-        public async Task<bool> HasUserReviewedAsync(Guid reviewerId, Guid reviewedId, Guid? propertyId)
-        {
-            return await _unitOfWork.ReviewRepository.ExistsAsync(reviewerId, reviewedId, propertyId);
-        }
-
-        private async Task EnrichReviewsWithUsersAsync(IEnumerable<ReviewDto> reviewDtos)
-        {
-            foreach (var reviewDto in reviewDtos)
-            {
-                reviewDto.Reviewer = await _userClient.GetUserByIdAsync(reviewDto.ReviewerId);
-                reviewDto.Reviewed = await _userClient.GetUserByIdAsync(reviewDto.ReviewedId);
-            }
+            return await _unitOfWork.ReviewRepository.GetAverageRatingByRoomIdAsync(roomId);
         }
     }
 

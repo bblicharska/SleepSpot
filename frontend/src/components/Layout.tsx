@@ -26,17 +26,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { useLocation, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import { useAuth } from "./AuthContext";
 
 const drawerWidth = 240;
 const collapsedWidth = 72;
-
-type JwtPayload = {
-  firstName: string;
-  lastName: string;
-  exp?: number;
-};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -95,6 +88,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {isLoggedIn ? (
             <>
               <Box
+                onClick={() => navigate("/property/create")}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  backgroundColor: "#f3e5f5", // light purple
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 0.5,
+                  gap: 1,
+                  userSelect: "none",
+                  boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
+                  transition: "background-color 0.3s ease",
+                  mr: 2,
+                  "&:hover": {
+                    backgroundColor: "#e1bee7", // darker on hover
+                  },
+                }}
+              >
+                <ApartmentIcon sx={{ color: "#6a1b9a", fontSize: 28 }} />
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    color: "#4a148c",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Create Property
+                </Typography>
+              </Box>
+
+              <Box
                 onClick={handleMenuOpen}
                 sx={{
                   display: "flex",
@@ -137,13 +163,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {userFullName}
                   </Typography>
 
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ fontStyle: "italic" }}
-                  >
-                    {user?.role || "User"}
-                  </Typography>
+                 
                 </Box>
               </Box>
               <Menu
