@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Polly;
 using PropertyService.Application.Dto;
 using PropertyService.Domain.Contracts;
+using PropertyService.Domain.Enums;
 using PropertyService.Domain.Models;
 using Shared.Dto;
 using System;
@@ -59,9 +60,9 @@ namespace PropertyService.Application.Services
             return propertyDto;
         }
 
-        public async Task<IEnumerable<PropertyDto>> GetAllPropertiesAsync()
+        public async Task<IEnumerable<PropertyDto>> GetAllPropertiesAsync(PropertySortBy sortBy = PropertySortBy.CreatedAt, SortDirection sortDirection = SortDirection.Descending)
         {
-            var properties = await _unitOfWork.PropertyRepository.GetAllWithRoomsAndImagesAsync();
+            var properties = await _unitOfWork.PropertyRepository.GetAllWithRoomsAndImagesAsync(sortBy, sortDirection);
 
             // Configure JSON serializer settings to handle circular references
             var options = new JsonSerializerSettings
@@ -77,16 +78,47 @@ namespace PropertyService.Application.Services
             return _mapper.Map<IEnumerable<PropertyDto>>(properties);
         }
 
-        public async Task<IEnumerable<PropertyDto>> GetPropertiesByOwnerIdAsync(Guid ownerId)
+        public async Task<IEnumerable<PropertyDto>> GetPropertiesByOwnerIdAsync(Guid ownerId, PropertySortBy sortBy = PropertySortBy.CreatedAt, SortDirection sortDirection = SortDirection.Descending)
         {
-            var properties = await _unitOfWork.PropertyRepository.GetByOwnerIdWithRoomsAndImagesAsync(ownerId);
+            var properties = await _unitOfWork.PropertyRepository.GetByOwnerIdWithRoomsAndImagesAsync(ownerId, sortBy, sortDirection);
             return _mapper.Map<IEnumerable<PropertyDto>>(properties);
         }
 
-        public async Task<IEnumerable<PropertyDto>> SearchPropertiesAsync(string location, decimal? minPrice, decimal? maxPrice)
+        public async Task<IEnumerable<PropertyDto>> SearchPropertiesAsync(PropertyFilterDto f)
         {
-            var properties = await _unitOfWork.PropertyRepository.SearchAsync(location, minPrice, maxPrice);
-            return _mapper.Map<IEnumerable<PropertyDto>>(properties);
+            var props = await _unitOfWork.PropertyRepository.SearchAsync(f);
+            return _mapper.Map<IEnumerable<PropertyDto>>(props);
+        }
+
+        public async Task<IEnumerable<RoomFilterDto>> SearchAllRoomsAsync(RoomSearchFilterDto f)
+        {
+            // Build the query over all rooms
+            var query = _unitOfWork.RoomRepository.BuildSearchQuery(f);
+
+            // Execute with property information included (Property should already be included in BuildSearchQuery)
+            var rooms = await query
+                .OrderBy(r => r.CreatedAt)
+                .ToListAsync();
+
+            // Map to RoomFilterDto with property information
+            return rooms.Select(r => new RoomFilterDto
+            {
+                // Map room properties
+                Id = r.Id,
+                Name = r.Name,
+                Description = r.Description,
+                PricePerMonth = r.PricePerMonth,
+                AreaInSquareMeters = r.AreaInSquareMeters,
+                Capacity = r.Capacity,
+                IsAvailable = r.IsAvailable,
+                Images = _mapper.Map<List<PropertyImageDto>>(r.Images),
+
+                // Add property information
+                PropertyId = r.Property.Id,
+                PropertyName = r.Property.Name,
+                PropertyAddress = r.Property.Address,
+                PropertyOwnerId = r.Property.OwnerId
+            });
         }
 
         public async Task<PropertyDto> CreatePropertyAsync(CreatePropertyDto createPropertyDto)
@@ -223,15 +255,14 @@ namespace PropertyService.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<IEnumerable<RoomDto>> GetRoomsForPropertyAsync(Guid propertyId)
+        public async Task<IEnumerable<RoomDto>> GetRoomsForPropertyAsync(Guid propertyId, RoomSortBy sortBy = RoomSortBy.CreatedAt, SortDirection sortDirection = SortDirection.Descending)
         {
-            var property = await _unitOfWork.PropertyRepository.GetByIdWithRoomsAsync(propertyId);
+            var property = await _unitOfWork.PropertyRepository.GetByIdAsync(propertyId);
             if (property == null)
                 throw new KeyNotFoundException($"Property with ID {propertyId} not found.");
 
-            var roomsDto = _mapper.Map<IEnumerable<RoomDto>>(property.Rooms);
-
-            return roomsDto;
+            var rooms = await _unitOfWork.RoomRepository.GetRoomsByPropertyIdAsync(propertyId, sortBy, sortDirection);
+            return _mapper.Map<IEnumerable<RoomDto>>(rooms);
         }
 
         public async Task DeleteRoomAsync(Guid roomId)

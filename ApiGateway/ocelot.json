@@ -196,6 +196,30 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Property/rooms/search",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/rooms/search",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Property/search",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "property-api",
+          "Port": 5030
+        }
+      ],
+      "UpstreamPathTemplate": "/api/properties/search",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Property/rooms/{roomId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -254,19 +278,6 @@
       ],
       "UpstreamPathTemplate": "/api/properties/{id}/with-images",
       "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/Property/search",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "property-api",
-          "Port": 5030
-        }
-      ],
-      "UpstreamPathTemplate": "/api/properties/search",
-      "UpstreamHttpMethod": [ "GET" ],
-      "AuthenticationOptions": null
     },
     {
       "DownstreamPathTemplate": "/api/Property/owner/{ownerId}",

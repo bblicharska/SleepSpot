@@ -1,4 +1,6 @@
-﻿using PropertyService.Domain.Models;
+﻿using PropertyService.Domain.Enums;
+using PropertyService.Domain.Models;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,8 @@ namespace PropertyService.Domain.Contracts
         void RemoveRange(IEnumerable<Room> rooms);
         Task<Room> GetByIdWithPropertyAndImagesAsync(Guid id);
         Task<Room?> GetRoomWithPropertyDetailsAsync(Guid roomId);
+        IQueryable<Room> BuildSearchQuery(RoomSearchFilterDto f);
+        Task<IEnumerable<Room>> GetRoomsByPropertyIdAsync(Guid propertyId, RoomSortBy sortBy, SortDirection sortDirection);
     }
 
 }

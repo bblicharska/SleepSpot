@@ -96,6 +96,41 @@ export interface PropertyFormData {
   rooms: RoomDto[];
 }
 
+export interface PropertyFilterDto {
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
+  isAvailable?: boolean;
+  isEntirePlaceRentable?: boolean;
+}
+
+export interface RoomSearchFilterDto {
+  location?: string;        // Add location filtering
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
+  minCapacity?: number;
+  isAvailable?: boolean;
+}
+
+export interface RoomFilterDto {
+  id: string;
+  name: string;
+  description: string;
+  pricePerMonth: number;
+  areaInSquareMeters: number;
+  capacity: number;
+  isAvailable: boolean;
+  images: any[];
+  propertyId: string;
+  propertyName: string;
+  propertyAddress: string;
+  propertyOwnerId?: string;
+}
+
 export const initialPropertyData: PropertyFormData = {
   name: "",
   description: "",

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PropertyService.Application.Dto;
 using PropertyService.Application.Services;
+using PropertyService.Domain.Enums;
 using Shared.Dto;
 
 namespace PropertyAPI.Controllers
@@ -22,11 +23,13 @@ namespace PropertyAPI.Controllers
 
             // GET api/property
             [HttpGet]
-            public async Task<ActionResult<IEnumerable<PropertyDto>>> GetAllProperties()
+            public async Task<ActionResult<IEnumerable<PropertyDto>>> GetAllProperties(
+     [FromQuery] PropertySortBy sortBy = PropertySortBy.CreatedAt,
+     [FromQuery] SortDirection sortDirection = SortDirection.Descending)
             {
                 try
                 {
-                    var properties = await _propertyService.GetAllPropertiesAsync();
+                    var properties = await _propertyService.GetAllPropertiesAsync(sortBy, sortDirection);
                     return Ok(properties);
                 }
                 catch (Exception ex)
@@ -141,11 +144,14 @@ namespace PropertyAPI.Controllers
             }
 
             [HttpGet("{propertyId}/rooms")]
-            public async Task<ActionResult<IEnumerable<RoomDto>>> GetRoomsForProperty(Guid propertyId)
+            public async Task<ActionResult<IEnumerable<RoomDto>>> GetRoomsForProperty(
+    Guid propertyId,
+    [FromQuery] RoomSortBy sortBy = RoomSortBy.CreatedAt,
+    [FromQuery] SortDirection sortDirection = SortDirection.Descending)
             {
                 try
                 {
-                    var rooms = await _propertyService.GetRoomsForPropertyAsync(propertyId);
+                    var rooms = await _propertyService.GetRoomsForPropertyAsync(propertyId, sortBy, sortDirection);
                     return Ok(rooms);
                 }
                 catch (KeyNotFoundException ex)
@@ -359,21 +365,32 @@ namespace PropertyAPI.Controllers
 
             // Add search endpoint that seems to be missing
             [HttpGet("search")]
-            public async Task<ActionResult<IEnumerable<PropertyDto>>> SearchProperties(
-                [FromQuery] string? location,
-                [FromQuery] decimal? minPrice,
-                [FromQuery] decimal? maxPrice)
+            public async Task<ActionResult<IEnumerable<PropertyDto>>> SearchProperties([FromQuery] PropertyFilterDto filters)
             {
                 try
                 {
-                    var properties = await _propertyService.SearchPropertiesAsync(location, minPrice, maxPrice);
-                    return Ok(properties);
+                    var result = await _propertyService.SearchPropertiesAsync(filters);
+                    return Ok(result);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error searching properties with location: {Location}, minPrice: {MinPrice}, maxPrice: {MaxPrice}",
-                        location, minPrice, maxPrice);
+                    _logger.LogError(ex, "Error searching properties");
                     return StatusCode(500, "An unexpected error occurred while searching properties.");
+                }
+            }
+
+            [HttpGet("rooms/search")]
+            public async Task<ActionResult<IEnumerable<RoomFilterDto>>> SearchAllRooms([FromQuery] RoomSearchFilterDto filters)
+            {
+                try
+                {
+                    var rooms = await _propertyService.SearchAllRoomsAsync(filters);
+                    return Ok(rooms);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error searching all rooms");
+                    return StatusCode(500, "An unexpected error occurred while searching rooms.");
                 }
             }
 

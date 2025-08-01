@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PropertyService.Application.Dto;
 using PropertyService.Domain.Contracts;
 using PropertyService.Domain.Models;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +58,7 @@ namespace PropertyService.Infrastructure.Repositories
             return await query
                 .Include(p => p.Images)
                 .Include(p => p.Rooms)
-                    .ThenInclude(r => r.Images) // ✅ Include Room Images
+                    .ThenInclude(r => r.Images) 
                 .ToListAsync();
         }
 
@@ -88,32 +90,92 @@ namespace PropertyService.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<Property> GetByIdWithRoomsAndImagesAsync(Guid id)
+        public async Task<Property?> GetByIdWithRoomsAndImagesAsync(Guid id)
         {
             return await _context.Properties
                 .Include(p => p.Rooms)
-                    .ThenInclude(r => r.Images) // ✅ Include Room Images
-                .Include(p => p.Images)
+                    .ThenInclude(r => r.Images)
+                .Include(p => p.Images.Where(i => i.RoomId == null)) // Only property images
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<IEnumerable<Property>> GetByOwnerIdWithRoomsAndImagesAsync(Guid ownerId)
+        public async Task<IEnumerable<Property>> GetByOwnerIdWithRoomsAndImagesAsync(Guid ownerId, PropertySortBy sortBy, SortDirection sortDirection)
         {
-            return await _context.Properties
+            var query = _context.Properties
                 .Where(p => p.OwnerId == ownerId)
                 .Include(p => p.Rooms)
-                    .ThenInclude(r => r.Images) // ✅ Include Room Images
-                .Include(p => p.Images)
-                .ToListAsync();
+                    .ThenInclude(r => r.Images)
+                .Include(p => p.Images.Where(i => i.RoomId == null)); // Only property images
+
+            var sortedQuery = ApplySorting(query, sortBy, sortDirection);
+
+            return await sortedQuery.ToListAsync();
         }
 
-        public async Task<IEnumerable<Property>> GetAllWithRoomsAndImagesAsync()
+        public async Task<IEnumerable<Property>> GetAllWithRoomsAndImagesAsync(PropertySortBy sortBy, SortDirection sortDirection)
         {
-            return await _context.Properties
+            var query = _context.Properties
                 .Include(p => p.Rooms)
-                    .ThenInclude(r => r.Images) // ✅ Include Room Images
-                .Include(p => p.Images)
-                .ToListAsync();
+                    .ThenInclude(r => r.Images)
+                .Include(p => p.Images.Where(i => i.RoomId == null)); // Only property images
+
+            var sortedQuery = ApplySorting(query, sortBy, sortDirection);
+
+            return await sortedQuery.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Property>> SearchAsync(PropertyFilterDto f)
+        {
+            var q = _context.Properties
+                            .Include(p => p.Rooms)
+                            .Include(p => p.Images)
+                            .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(f.Location))
+                q = q.Where(p => EF.Functions.Like(p.Address, $"%{f.Location}%"));
+
+            if (f.MinPrice.HasValue)
+                q = q.Where(p => p.PricePerMonth >= f.MinPrice.Value);
+
+            if (f.MaxPrice.HasValue)
+                q = q.Where(p => p.PricePerMonth <= f.MaxPrice.Value);
+
+            if (f.MinArea.HasValue)
+                q = q.Where(p => p.AreaInSquareMeters >= f.MinArea.Value);
+
+            if (f.MaxArea.HasValue)
+                q = q.Where(p => p.AreaInSquareMeters <= f.MaxArea.Value);
+
+            if (f.IsAvailable.HasValue)
+                q = q.Where(p => p.isAvailable == f.IsAvailable.Value);
+
+            if (f.IsEntirePlaceRentable.HasValue)
+                q = q.Where(p => p.IsEntirePlaceRentable == f.IsEntirePlaceRentable.Value);
+
+            return await q.ToListAsync();
+        }
+
+        private IQueryable<Property> ApplySorting(IQueryable<Property> query, PropertySortBy sortBy, SortDirection direction)
+        {
+            return sortBy switch
+            {
+                PropertySortBy.Name => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.Name)
+                    : query.OrderByDescending(p => p.Name),
+                PropertySortBy.Price => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.PricePerMonth)
+                    : query.OrderByDescending(p => p.PricePerMonth),
+                PropertySortBy.Area => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.AreaInSquareMeters)
+                    : query.OrderByDescending(p => p.AreaInSquareMeters),
+                PropertySortBy.Address => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.Address)
+                    : query.OrderByDescending(p => p.Address),
+                PropertySortBy.CreatedAt => direction == SortDirection.Ascending
+                    ? query.OrderBy(p => p.CreatedAt)
+                    : query.OrderByDescending(p => p.CreatedAt),
+                _ => query.OrderByDescending(p => p.CreatedAt)
+            };
         }
     }
 
