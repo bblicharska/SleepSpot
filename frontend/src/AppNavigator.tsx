@@ -5,11 +5,13 @@ import { PropertyDetailsPage } from "./components/PropertyDetailsPage";
 import { PropertiesAndRoomsPage } from "./components/PropertiesAndRoomsPage";
 import { RoomDetailsPage } from "./components/RoomDetailsPage";
 import { PropertyCreationPage } from "./components/CreateProperty/PropertyCreationPage";
+import { ChangePasswordPage } from "./components/ChangePasswordPage";
 
 export const AppNavigator: React.FC = () => {
   return (
     <Routes>
       <Route path="/main" element={<LandingPage />} />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route path="/login" element={<AuthForm />} />
       <Route path="/properties" element={<PropertiesAndRoomsPage />} />
       <Route path="/rooms" element={<PropertiesAndRoomsPage />} />

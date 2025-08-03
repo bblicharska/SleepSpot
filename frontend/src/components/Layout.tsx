@@ -162,8 +162,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   >
                     {userFullName}
                   </Typography>
-
-                 
                 </Box>
               </Box>
               <Menu
@@ -182,6 +180,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   },
                 }}
               >
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
+                    navigate("/change-password");
+                  }}
+                  sx={{
+                    color: "#4a148c",
+                    "&:hover": {
+                      backgroundColor: "#fce4ec",
+                    },
+                  }}
+                >
+                  Change Password
+                </MenuItem>
                 <MenuItem
                   onClick={handleLogout}
                   sx={{
