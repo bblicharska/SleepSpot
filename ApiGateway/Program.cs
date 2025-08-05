@@ -68,6 +68,12 @@ builder.Services.AddHttpClient("UserClient", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddHttpClient("GroupClient", client =>
+{
+    client.BaseAddress = new Uri("http://group-api:5032");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 // Add CORS
 builder.Services.AddCors(options => options.AddPolicy("SleepSpot", policy =>
 {

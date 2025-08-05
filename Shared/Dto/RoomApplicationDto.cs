@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GroupService.Application.Dto
+namespace Shared.Dto
 {
     public class RoomApplicationDto
     {
@@ -13,6 +13,7 @@ namespace GroupService.Application.Dto
         public Guid ApplicantUserId { get; set; }
         public string Message { get; set; }
         public string Status { get; set; } // lub ApplicationStatus enum
+        public UserDto? Applicant { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 

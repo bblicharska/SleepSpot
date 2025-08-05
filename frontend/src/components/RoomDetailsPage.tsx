@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import { fetchRoomDetails } from "../queries/fetchRoomDetails";
-import { useAuth } from "./AuthContext";
 import { LoadingComponent } from "./LoadingComponent";
 import { ImageGallery } from "./ImageGallery";
 import { DetailedDescription } from "./DetailedDescription";
@@ -73,7 +72,6 @@ const getInitials = (firstName: string, lastName: string): string => {
 };
 
 export const RoomDetailsPage = () => {
-  const { user } = useAuth();
   const { id } = useParams();
   const [roomDetails, setRoomDetails] =
     useState<RoomWithPropertyDetailsDto | null>(null);

@@ -131,6 +131,79 @@ export interface RoomFilterDto {
   propertyOwnerId?: string;
 }
 
+export interface GroupListingDto {
+  id: string;
+  groupId: string;
+  group?: GroupDto;
+  title: string;
+  description: string;
+  desiredRoommatesCount: number;
+  status: "Active" | "Closed";
+  propertyId?: string;
+  property?: Property;
+  preferredCity: string;
+  maxBudgetPerPerson?: number;
+  createdAt: string;
+  applications?: RoomApplicationDto[];
+  propertyAlreadyRented?: boolean;
+  roomId?: string;
+  room?: RoomDetailsResponseDto;
+}
+
+export interface GroupDto {
+  id: string;
+  name: string;
+  description: string;
+  createdByUserId: string;
+  createdAt: string;
+  members: GroupMemberDto[];
+}
+
+export interface GroupMemberDto {
+  id: string;
+  groupId: string;
+  userId: string;
+  role: "Member" | "Admin";
+  joinedAt: string;
+  user?: UserDto;
+}
+
+export interface RoomApplicationDto {
+  id: string;
+  listingId: string;
+  applicantUserId: string;
+  message: string;
+  status: string;
+  createdAt: string;
+  applicant?: UserDto;
+}
+
+export interface GroupListingFilters {
+  page: number;
+  pageSize: number;
+  preferredCity?: string;
+  minBudget?: number;
+  maxBudget?: number;
+  minRoommates?: number;
+  maxRoommates?: number;
+  hasProperty?: boolean;
+  hasRoom?: boolean;
+  noPropertyYet?: boolean;
+  searchTerm?: string;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export const initialPropertyData: PropertyFormData = {
   name: "",
   description: "",

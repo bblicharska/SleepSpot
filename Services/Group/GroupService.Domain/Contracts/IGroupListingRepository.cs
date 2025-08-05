@@ -1,4 +1,5 @@
 ﻿using GroupService.Domain.Models;
+using Shared.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,8 @@ namespace GroupService.Domain.Contracts
     {
         Task<GroupListing?> GetByIdAsync(Guid listingId);
         Task<IEnumerable<GroupListing>> GetByGroupIdAsync(Guid groupId);
-        Task<IEnumerable<GroupListing>> GetActiveListingsAsync();
+        Task<IQueryable<GroupListing>> GetFilteredListingsQueryAsync(GroupListingQueryParams queryParams);
+
         Task AddAsync(GroupListing listing);
         Task UpdateAsync(GroupListing listing);
         Task DeleteAsync(GroupListing listing);

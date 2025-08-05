@@ -23,6 +23,7 @@ import ApartmentIcon from "@mui/icons-material/Apartment";
 import PersonIcon from "@mui/icons-material/Person";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MenuIcon from "@mui/icons-material/Menu";
+import GroupsIcon from "@mui/icons-material/Groups";
 import ListItemButton from "@mui/material/ListItemButton";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -61,15 +62,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const handleLogout = () => {
-    logout(); // from AuthContext
+    logout();
     handleMenuClose();
   };
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-
-      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -88,12 +87,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {isLoggedIn ? (
             <>
               <Box
-                onClick={() => navigate("/property/create")}
+                onClick={() => navigate("/group-listing/create")}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   cursor: "pointer",
-                  backgroundColor: "#f3e5f5", // light purple
+                  backgroundColor: "#f3e5f5",
                   borderRadius: 2,
                   px: 1.5,
                   py: 0.5,
@@ -103,19 +102,37 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   transition: "background-color 0.3s ease",
                   mr: 2,
                   "&:hover": {
-                    backgroundColor: "#e1bee7", // darker on hover
+                    backgroundColor: "#e1bee7",
                   },
                 }}
               >
-                <ApartmentIcon sx={{ color: "#6a1b9a", fontSize: 28 }} />
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 600,
-                    color: "#4a148c",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <GroupsIcon sx={iconStyle} />
+                <Typography variant="subtitle1" sx={labelStyle}>
+                  Create Group Listing
+                </Typography>
+              </Box>
+              <Box
+                onClick={() => navigate("/property/create")}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  backgroundColor: "#f3e5f5",
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 0.5,
+                  gap: 1,
+                  userSelect: "none",
+                  boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
+                  transition: "background-color 0.3s ease",
+                  mr: 2,
+                  "&:hover": {
+                    backgroundColor: "#e1bee7",
+                  },
+                }}
+              >
+                <ApartmentIcon sx={iconStyle} />
+                <Typography variant="subtitle1" sx={labelStyle}>
                   Create Property
                 </Typography>
               </Box>
@@ -126,7 +143,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   display: "flex",
                   alignItems: "center",
                   cursor: "pointer",
-                  backgroundColor: "#f3e5f5", // very light purple background
+                  backgroundColor: "#f3e5f5",
                   borderRadius: 2,
                   px: 1.5,
                   py: 0.5,
@@ -136,11 +153,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
                   transition: "background-color 0.3s ease",
                   "&:hover": {
-                    backgroundColor: "#e1bee7", // slightly darker purple on hover
+                    backgroundColor: "#e1bee7",
                   },
                 }}
               >
-                <PersonIcon sx={{ color: "#6a1b9a", fontSize: 28 }} />
+                <PersonIcon sx={iconStyle} />
 
                 <Box
                   sx={{
@@ -152,9 +169,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <Typography
                     variant="subtitle1"
                     sx={{
-                      fontWeight: 600,
-                      color: "#4a148c",
-                      whiteSpace: "nowrap",
+                      ...labelStyle,
                       textOverflow: "ellipsis",
                       overflow: "hidden",
                       maxWidth: 130,
@@ -173,7 +188,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 PaperProps={{
                   sx: {
                     width: 180,
-                    bgcolor: "#f3e5f5", // Light lilac
+                    bgcolor: "#f3e5f5",
                     borderRadius: 2,
                     boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
                     mt: 1,
@@ -199,7 +214,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   sx={{
                     color: "#4a148c",
                     "&:hover": {
-                      backgroundColor: "#fce4ec", // Soft light pink/lilac
+                      backgroundColor: "#fce4ec",
                     },
                     "&.Mui-focusVisible": {
                       backgroundColor: "#fce4ec",
@@ -217,7 +232,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 display: "flex",
                 alignItems: "center",
                 cursor: "pointer",
-                backgroundColor: "#f3e5f5", // same light purple
+                backgroundColor: "#f3e5f5",
                 borderRadius: 2,
                 px: 1.5,
                 py: 0.5,
@@ -226,27 +241,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
                 transition: "background-color 0.3s ease",
                 "&:hover": {
-                  backgroundColor: "#e1bee7", // slightly darker on hover
+                  backgroundColor: "#e1bee7",
                 },
               }}
             >
-              <PersonIcon sx={{ color: "#6a1b9a", fontSize: 28 }} />
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                  color: "#4a148c",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <PersonIcon sx={iconStyle} />
+              <Typography variant="subtitle1" sx={labelStyle}>
                 SIGN IN / SIGN UP
               </Typography>
             </Box>
           )}
         </Toolbar>
       </AppBar>
-
-      {/* Drawer - Sidebar */}
       {!isLoginPage && (
         <Drawer
           variant="permanent"
@@ -296,10 +302,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {!collapsed && <ListItemText primary="Apartments" />}
                 </ListItemButton>
               </ListItem>
+              <ListItem
+                disablePadding
+                onClick={() => navigate("/group-listings")}
+              >
+                <ListItemButton>
+                  <Tooltip
+                    title="Group Listings"
+                    placement="right"
+                    disableHoverListener={!collapsed}
+                  >
+                    <ListItemIcon>
+                      <GroupsIcon />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {!collapsed && <ListItemText primary="Group Listings" />}
+                </ListItemButton>
+              </ListItem>
             </List>
           </div>
-
-          {/* Collapse/Expand toggle at bottom */}
           <Box sx={{ textAlign: "center", py: 1 }}>
             <Divider />
             <IconButton onClick={toggleDrawer}>
@@ -308,8 +329,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Box>
         </Drawer>
       )}
-
-      {/* Main content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, overflowX: "hidden" }}>
         <Toolbar />
         {children}
@@ -350,3 +369,31 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 ) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
+
+const commonBoxStyle = {
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
+  backgroundColor: "#f3e5f5",
+  borderRadius: 2,
+  px: 1.5,
+  py: 0.5,
+  gap: 1,
+  userSelect: "none",
+  boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
+  transition: "background-color 0.3s ease",
+  "&:hover": {
+    backgroundColor: "#e1bee7",
+  },
+};
+
+const iconStyle = {
+  color: "#6a1b9a",
+  fontSize: 28,
+};
+
+const labelStyle = {
+  fontWeight: 600,
+  color: "#4a148c",
+  whiteSpace: "nowrap",
+};

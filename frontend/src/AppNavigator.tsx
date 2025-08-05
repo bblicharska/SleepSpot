@@ -6,6 +6,8 @@ import { PropertiesAndRoomsPage } from "./components/PropertiesAndRoomsPage";
 import { RoomDetailsPage } from "./components/RoomDetailsPage";
 import { PropertyCreationPage } from "./components/CreateProperty/PropertyCreationPage";
 import { ChangePasswordPage } from "./components/ChangePasswordPage";
+import { GroupListingsPage } from "./components/GroupListingsPage";
+import { GroupListingDetailsPage } from "./components/GroupListingDetailsPage";
 
 export const AppNavigator: React.FC = () => {
   return (
@@ -18,6 +20,8 @@ export const AppNavigator: React.FC = () => {
       <Route path="/property/:id" element={<PropertyDetailsPage />} />
       <Route path="/room/:id" element={<RoomDetailsPage />} />
       <Route path="/property/create" element={<PropertyCreationPage />} />
+      <Route path="/group-listings" element={<GroupListingsPage />} />
+      <Route path="/group-listings/:id" element={<GroupListingDetailsPage />} />
     </Routes>
   );
 };

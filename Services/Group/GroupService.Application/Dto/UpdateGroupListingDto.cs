@@ -13,8 +13,10 @@ namespace GroupService.Application.Dto
         public string Description { get; set; }
         public int DesiredRoommatesCount { get; set; }
         public string PreferredCity { get; set; }
+        public bool PropertyAlreadyRented { get; set; }
         public decimal? MaxBudgetPerPerson { get; set; }
         public Guid? PropertyId { get; set; }
+        public Guid? RoomId { get; set; }
         public ListingStatus Status { get; set; }
     }
 

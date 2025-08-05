@@ -37,6 +37,8 @@ namespace GroupService.Infrastructure.Migrations
                     DesiredRoommatesCount = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropertyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PropertyAlreadyRented = table.Column<bool>(type: "bit", nullable: false),
                     PreferredCity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MaxBudgetPerPerson = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)

@@ -161,7 +161,7 @@ try
             if (pendingMigrations.Any())
             {
                 Console.WriteLine("Applying pending migrations...");
-                //context.Database.Migrate();
+                context.Database.Migrate();
             }
             else
             {

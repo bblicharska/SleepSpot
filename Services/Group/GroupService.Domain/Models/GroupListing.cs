@@ -20,6 +20,9 @@ namespace GroupService.Domain.Models
         public ListingStatus Status { get; set; } = ListingStatus.Active; 
 
         public Guid? PropertyId { get; set; } // Optional – jeśli grupa ma przypisane mieszkanie
+        public Guid? RoomId { get; set; } // Optional – jeśli grupa ma przypisany pokój
+
+        public bool PropertyAlreadyRented { get; set; } = false;
 
         public string PreferredCity { get; set; }
         public decimal? MaxBudgetPerPerson { get; set; }

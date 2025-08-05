@@ -76,7 +76,13 @@ namespace GroupService.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("PropertyAlreadyRented")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")

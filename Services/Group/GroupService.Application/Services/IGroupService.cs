@@ -25,7 +25,7 @@ namespace GroupService.Application.Services
         Task RemoveMemberAsync(Guid memberId);
 
         // Group Listings
-        Task<IEnumerable<GroupListingDto>> GetAllListingsAsync();
+        Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams);
         Task<GroupListingDto?> GetListingByIdAsync(Guid listingId);
         Task<IEnumerable<GroupListingDto>> GetListingsByGroupIdAsync(Guid groupId);
         Task<Guid> CreateListingAsync(CreateGroupListingDto dto);

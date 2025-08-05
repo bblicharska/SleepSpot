@@ -30,6 +30,19 @@
       "Priority": 100
     },
     {
+      "UpstreamPathTemplate": "/gateway/group-listing-details/{listingId}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/gateway/group-listing-details/{listingId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "Priority": 100
+    },
+    {
       "DownstreamPathTemplate": "/api/User/register",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -382,7 +395,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups",
@@ -394,7 +407,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/{id}",
@@ -406,7 +419,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/user/{userId}",
@@ -418,7 +431,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/{groupId}/members",
@@ -430,7 +443,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/members",
@@ -442,7 +455,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/members/{memberId}",
@@ -454,7 +467,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/listings",
@@ -466,7 +479,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/listings/{listingId}",
@@ -478,7 +491,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/{groupId}/listings",
@@ -490,7 +503,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/applications/listing/{listingId}",
@@ -502,7 +515,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/applications/{applicationId}",
@@ -514,7 +527,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/applications",
@@ -526,7 +539,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "group-api",
-          "Port": 5028
+          "Port": 5032
         }
       ],
       "UpstreamPathTemplate": "/api/groups/applications/{applicationId}/status",
@@ -538,7 +551,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "rental-api",
-          "Port": 5026
+          "Port": 5033
         }
       ],
       "UpstreamPathTemplate": "/api/rentals",
@@ -550,7 +563,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "rental-api",
-          "Port": 5026
+          "Port": 5033
         }
       ],
       "UpstreamPathTemplate": "/api/rentals/{id}",

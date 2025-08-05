@@ -9,8 +9,8 @@ interface EntitySummaryCardProps {
   name: string;
   pricePerMonth: number;
   areaInSquareMeters: number;
-  averageRating: number;
-  reviewsCount: number;
+  averageRating?: number;
+  reviewsCount?: number;
   createdAt?: string;
   // Property specific props
   isEntirePlaceRentable?: boolean;
@@ -18,6 +18,10 @@ interface EntitySummaryCardProps {
   capacity?: number;
   isAvailable?: boolean;
   onBookRoom?: () => void;
+  // Display control props
+  showReviews?: boolean;
+  showAvailability?: boolean;
+  showCreatedDate?: boolean;
 }
 
 export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
@@ -25,13 +29,16 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
   name,
   pricePerMonth,
   areaInSquareMeters,
-  averageRating,
-  reviewsCount,
+  averageRating = 0,
+  reviewsCount = 0,
   createdAt,
   isEntirePlaceRentable,
   capacity,
   isAvailable,
   onBookRoom,
+  showReviews = true,
+  showAvailability = true,
+  showCreatedDate = true,
 }) => {
   const isRoom = entityType === "room";
   const isProperty = entityType === "property";
@@ -161,8 +168,8 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Room specific: Availability */}
-      {isAvailable !== undefined && (
+      {/* Room specific: Availability - only show if showAvailability is true */}
+      {showAvailability && isAvailable !== undefined && (
         <Box
           sx={{
             display: "flex",
@@ -189,35 +196,37 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Reviews */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Reviews:
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography
-            variant="body2"
-            sx={{
-              ml: 1,
-              color: "#8E44AD",
-              fontWeight: 600,
-            }}
-          >
-            {averageRating > 0 ? averageRating.toFixed(1) : "No reviews"} (
-            {reviewsCount})
+      {/* Reviews - only show if showReviews is true */}
+      {showReviews && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Reviews:
           </Typography>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                ml: 1,
+                color: "#8E44AD",
+                fontWeight: 600,
+              }}
+            >
+              {averageRating > 0 ? averageRating.toFixed(1) : "No reviews"} (
+              {reviewsCount})
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      )}
 
-      {/* Created Date (for rooms) */}
-      {createdAt && (
+      {/* Created Date - only show if showCreatedDate is true */}
+      {showCreatedDate && createdAt && (
         <Box
           sx={{
             display: "flex",

@@ -139,7 +139,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
                     onChange={handleInputChange("minPrice")}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
+                        <InputAdornment position="start">PLN</InputAdornment>
                       ),
                     }}
                   />
@@ -150,7 +150,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
                     onChange={handleInputChange("maxPrice")}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
+                        <InputAdornment position="start">PLN</InputAdornment>
                       ),
                     }}
                   />

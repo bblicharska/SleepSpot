@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace GroupService.Application.Services
 {
@@ -165,10 +166,26 @@ namespace GroupService.Application.Services
         }
 
         // LISTINGS
-        public async Task<IEnumerable<GroupListingDto>> GetAllListingsAsync()
+        public async Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams)
         {
-            var listings = await _unitOfWork.GroupListingRepository.GetActiveListingsAsync();
-            return await MapListingsWithApplicationsAsync(listings);
+            var query = await _unitOfWork.GroupListingRepository.GetFilteredListingsQueryAsync(queryParams);
+
+            var totalCount = await query.CountAsync();
+
+            var listings = await query
+                .Skip((queryParams.Page - 1) * queryParams.PageSize)
+                .Take(queryParams.PageSize)
+                .ToListAsync();
+
+            var mappedListings = await MapListingsWithApplicationsAsync(listings);
+
+            return new PagedResult<GroupListingDto>
+            {
+                Items = mappedListings,
+                TotalCount = totalCount,
+                Page = queryParams.Page,
+                PageSize = queryParams.PageSize
+            };
         }
 
         public async Task<GroupListingDto?> GetListingByIdAsync(Guid listingId)
@@ -215,6 +232,7 @@ namespace GroupService.Application.Services
             listing.DesiredRoommatesCount = dto.DesiredRoommatesCount;
             listing.PropertyId = dto.PropertyId;
             listing.PreferredCity = dto.PreferredCity;
+            listing.PropertyAlreadyRented = dto.PropertyAlreadyRented;
             listing.MaxBudgetPerPerson = dto.MaxBudgetPerPerson;
 
             await _unitOfWork.GroupListingRepository.UpdateAsync(listing);

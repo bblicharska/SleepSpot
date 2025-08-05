@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GroupService.Infrastructure.Migrations
 {
     [DbContext(typeof(GroupDbContext))]
-    [Migration("20250608120439_InitialCreate")]
+    [Migration("20250803131222_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -79,7 +79,13 @@ namespace GroupService.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("PropertyAlreadyRented")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("PropertyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Status")

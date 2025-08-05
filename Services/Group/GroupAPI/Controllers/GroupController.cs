@@ -87,10 +87,10 @@ namespace GroupAPI.Controllers
         // ===== LISTINGS =====
 
         [HttpGet("listings")]
-        public async Task<IActionResult> GetAllListings()
+        public async Task<IActionResult> GetAllListings([FromQuery] GroupListingQueryParams queryParams)
         {
-            var listings = await _groupService.GetAllListingsAsync();
-            return Ok(listings);
+            var result = await _groupService.GetPagedListingsAsync(queryParams);
+            return Ok(result);
         }
 
         [HttpGet("listings/{listingId:guid}")]

@@ -36,13 +36,13 @@ namespace GroupService.Infrastructure
                                 new GroupMember
                                 {
                                     Id = Guid.NewGuid(),
-                                    UserId = new Guid("ea679e1b-4f2c-4108-2166-08dd6f90dd1f"),
+                                    UserId = new Guid("49dbeb15-3962-4686-e0cc-08ddb10005d3"),
                                     Role = GroupRole.Admin
                                 },
                                 new GroupMember
                                 {
                                     Id = Guid.NewGuid(),
-                                    UserId = new Guid("d21c93e3-8245-442d-f898-08dd6f9adc78"),
+                                    UserId = new Guid("61ccb63e-98a1-44e9-e0cd-08ddb10005d3"),
                                     Role = GroupRole.Member
                                 },
                             }
@@ -60,13 +60,13 @@ namespace GroupService.Infrastructure
                                 new GroupMember
                                 {
                                     Id = Guid.NewGuid(),
-                                    UserId = new Guid("f162943b-a81c-4bd5-a9a1-08dd9d619286"),
+                                    UserId = new Guid("61ccb63e-98a1-44e9-e0cd-08ddb10005d3"),
                                     Role = GroupRole.Admin
                                 },
                                 new GroupMember
                                 {
                                     Id = Guid.NewGuid(),
-                                    UserId = new Guid("ea679e1b-4f2c-4108-2166-08dd6f90dd1f"),
+                                    UserId = new Guid("49dbeb15-3962-4686-e0cc-08ddb10005d3"),
                                     Role = GroupRole.Member
                                 },
                             }
@@ -91,19 +91,22 @@ namespace GroupService.Infrastructure
                                 PreferredCity = "Kraków",
                                 MaxBudgetPerPerson = 1500,
                                 CreatedAt = DateTime.UtcNow,
-                                PropertyId = new Guid("58d744b5-77e7-497a-8a92-24eee8dcfb8a")
+                                PropertyId = new Guid("58d744b5-77e7-497a-8a92-24eee8dcfb8a"),
+                                PropertyAlreadyRented = true
                             },
                             new GroupListing
                             {
                                 Id = Guid.NewGuid(),
                                 Group = group2,
-                                Title = "Pokój w centrum Krakowa",
-                                Description = "Duże mieszkanie z balkonem, szukamy jednej osoby",
+                                Title = "Współlokator do pokoju w akademiku",
+                                Description = "Duży pokój z balkonem, szukamy jednej osoby",
                                 DesiredRoommatesCount = 1,
                                 Status = ListingStatus.Active,
                                 PreferredCity = "Kraków",
                                 MaxBudgetPerPerson = 1500,
-                                CreatedAt = DateTime.UtcNow
+                                CreatedAt = DateTime.UtcNow,
+                                RoomId = new Guid("3716234f-ea57-467b-91ed-78368106bd27"),
+                                PropertyAlreadyRented = true
                             },
                         };
 
