@@ -2,6 +2,7 @@
 using GroupService.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Dto;
+using Shared.Exceptions;
 
 namespace GroupAPI.Controllers
 {
@@ -15,8 +16,6 @@ namespace GroupAPI.Controllers
         {
             _groupService = groupService;
         }
-
-        // ===== GROUPS =====
 
         [HttpGet]
         public async Task<IActionResult> GetAllGroups()
@@ -61,8 +60,6 @@ namespace GroupAPI.Controllers
             return Ok(groups);
         }
 
-        // ===== MEMBERS =====
-
         [HttpGet("{groupId:guid}/members")]
         public async Task<IActionResult> GetMembersByGroupId(Guid groupId)
         {
@@ -83,8 +80,6 @@ namespace GroupAPI.Controllers
             await _groupService.RemoveMemberAsync(memberId);
             return NoContent();
         }
-
-        // ===== LISTINGS =====
 
         [HttpGet("listings")]
         public async Task<IActionResult> GetAllListings([FromQuery] GroupListingQueryParams queryParams)
@@ -128,8 +123,6 @@ namespace GroupAPI.Controllers
             await _groupService.DeleteListingAsync(listingId);
             return NoContent();
         }
-
-        // ===== APPLICATIONS =====
 
         [HttpGet("applications/listing/{listingId:guid}")]
         public async Task<IActionResult> GetApplicationsByListingId(Guid listingId)

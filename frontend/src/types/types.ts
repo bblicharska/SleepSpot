@@ -107,7 +107,7 @@ export interface PropertyFilterDto {
 }
 
 export interface RoomSearchFilterDto {
-  location?: string;        // Add location filtering
+  location?: string;       
   minPrice?: number;
   maxPrice?: number;
   minArea?: number;
@@ -166,6 +166,25 @@ export interface GroupMemberDto {
   role: "Member" | "Admin";
   joinedAt: string;
   user?: UserDto;
+}
+
+export interface CreateGroupListingDto {
+  groupId: string;
+  title: string;
+  description: string;
+  desiredRoommatesCount: number;
+  propertyId?: string;
+  roomId?: string;
+  propertyAlreadyRented: boolean;
+  preferredCity: string;
+  maxBudgetPerPerson?: number;
+}
+
+export interface CreateGroupDto {
+  name: string;
+  description: string;
+  createdByUserId?: string;
+  memberEmails: string[];
 }
 
 export interface RoomApplicationDto {

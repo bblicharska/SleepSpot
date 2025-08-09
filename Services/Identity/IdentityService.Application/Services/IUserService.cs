@@ -13,6 +13,7 @@ namespace IdentityService.Application.Services
         Task<TokenDto> RegisterAsync(RegisterUserDto registerUserDto);
         Task<TokenDto> LoginAsync(LoginUserDto loginUserDto);
         Task<UserDto> GetUserByIdAsync(Guid userId);
+        Task<UserDto> GetUserByEmailAsync(string email);
         Task<List<UserDto>> GetAllAsync();
         Task DeleteAsync(Guid id);
         Task UpdateUserAsync(Guid userId, UpdateUserDto updateUserDto);

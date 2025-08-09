@@ -8,6 +8,7 @@ import { PropertyCreationPage } from "./components/CreateProperty/PropertyCreati
 import { ChangePasswordPage } from "./components/ChangePasswordPage";
 import { GroupListingsPage } from "./components/GroupListingsPage";
 import { GroupListingDetailsPage } from "./components/GroupListingDetailsPage";
+import { GroupListingCreationPage } from "./components/CreateListing/CreateGroupListingPage";
 
 export const AppNavigator: React.FC = () => {
   return (
@@ -22,6 +23,10 @@ export const AppNavigator: React.FC = () => {
       <Route path="/property/create" element={<PropertyCreationPage />} />
       <Route path="/group-listings" element={<GroupListingsPage />} />
       <Route path="/group-listings/:id" element={<GroupListingDetailsPage />} />
+      <Route
+        path="/group-listing/create"
+        element={<GroupListingCreationPage />}
+      />
     </Routes>
   );
 };

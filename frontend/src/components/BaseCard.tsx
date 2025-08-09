@@ -19,24 +19,17 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import { PropertyImageDto } from "../types/types";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-interface Image {
-  id: string;
-  imageUrl: string;
-  originalFileName: string;
-  isPrimary: boolean;
-  displayOrder: number;
-}
+import { getImageUrl } from "../queries/getImageUrl";
 
 interface BaseCardProps {
   title: string;
   description: string;
-  image?: string; // Primary image URL
-  images?: PropertyImageDto[]; // All images for carousel
+  image?: string;
+  images?: PropertyImageDto[];
   address: string;
   price: number;
   area: number;
-  capacity?: number; // Optional for property cards
+  capacity?: number;
   cardType: "property" | "room";
   onViewDetails: () => void;
   canDelete?: boolean;
@@ -60,7 +53,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
 
-  // Sort images by display order for carousel
   const sortedImages = [...images].sort(
     (a, b) => a.displayOrder - b.displayOrder
   );
@@ -81,22 +73,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
     );
   };
 
-  // Helper function to construct proper image URL
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return "/placeholder-image.jpg";
-
-    // If it's already a full URL, return as is
-    if (imagePath.startsWith("http")) return imagePath;
-
-    // If it starts with /, construct full URL through API Gateway
-    if (imagePath.startsWith("/")) {
-      return `http://localhost:5000${imagePath}`;
-    }
-
-    // For relative paths, add the uploads prefix
-    return `http://localhost:5000/uploads/properties/${imagePath}`;
-  };
-
   const getCurrentImage = () => {
     if (sortedImages.length === 0) {
       return image ? getImageUrl(image) : "";
@@ -111,7 +87,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
     setImageError(true);
   };
 
-  // Generate chips based on card type
   const generateChips = () => {
     const chips = [
       <Chip
@@ -160,7 +135,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   return (
     <Card
       sx={{
-        position: "relative", // add relative position for delete icon
+        position: "relative",
         width: 400,
         height: "auto",
         display: "flex",
@@ -172,12 +147,11 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         },
       }}
     >
-      {/* Delete icon button */}
       {canDelete && (
         <IconButton
           aria-label="delete"
           onClick={(e) => {
-            e.stopPropagation(); // prevent card click
+            e.stopPropagation();
             if (onDelete) onDelete();
           }}
           sx={{
@@ -196,7 +170,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
           <DeleteIcon />
         </IconButton>
       )}
-      {/* Image section */}
       <Box
         sx={{
           position: "relative",
@@ -220,8 +193,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 borderTopRightRadius: 8,
               }}
             />
-
-            {/* Image count badge */}
             {hasMultipleImages && (
               <Box
                 sx={{
@@ -244,8 +215,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 {sortedImages.length}
               </Box>
             )}
-
-            {/* Navigation arrows */}
             {hasMultipleImages && (
               <>
                 <IconButton
@@ -267,7 +236,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 >
                   <ChevronLeftIcon fontSize="small" />
                 </IconButton>
-
                 <IconButton
                   onClick={handleNextImage}
                   sx={{
@@ -289,8 +257,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 </IconButton>
               </>
             )}
-
-            {/* Image dots indicator */}
             {hasMultipleImages && (
               <Box
                 sx={{
@@ -324,7 +290,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
             )}
           </>
         ) : (
-          // Placeholder when no image or error
           <Box
             sx={{
               height: 220,
@@ -343,7 +308,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
           </Box>
         )}
       </Box>
-
       <CardContent
         sx={{
           flexGrow: 1,
@@ -360,7 +324,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         >
           {title}
         </Typography>
-
         <Box
           sx={{ minHeight: "40px", display: "flex", alignItems: "flex-start" }}
         >
@@ -368,21 +331,18 @@ export const BaseCard: React.FC<BaseCardProps> = ({
             {description}
           </Typography>
         </Box>
-
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <LocationOnIcon sx={{ fontSize: 18, color: "text.secondary" }} />
           <Typography variant="caption" color="text.secondary">
             {address}
           </Typography>
         </Box>
-
         <Box
           sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignSelf: "end" }}
         >
           {generateChips()}
         </Box>
       </CardContent>
-
       <CardActions sx={{ padding: 2, paddingTop: 1, paddingBottom: 2 }}>
         <Button
           variant="contained"

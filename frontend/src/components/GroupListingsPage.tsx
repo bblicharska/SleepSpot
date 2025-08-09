@@ -13,6 +13,9 @@ import {
   MenuItem,
   Pagination,
   Stack,
+  IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   Sort as SortIcon,
@@ -25,16 +28,21 @@ import PeopleIcon from "@mui/icons-material/People";
 import EuroIcon from "@mui/icons-material/Euro";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { LoadingComponent } from "../components/LoadingComponent";
 import { ErrorComponent } from "../components/ErrorComponent";
+import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog";
 import { useAuth } from "../components/AuthContext";
 import {
   GroupListingDto,
   PagedResult,
   GroupListingFilters,
+  GroupMemberDto,
 } from "../types/types";
 import { fetchListings } from "../queries/fetchListings";
+import { deleteGroupListing } from "../queries/deleteListing";
+import { checkDeletePermissionsForListings } from "../utils/canUserDeleteListing";
 import { GroupListingFilter } from "../components/GroupListingFilter";
 
 export const GroupListingsPage: React.FC = () => {
@@ -51,8 +59,29 @@ export const GroupListingsPage: React.FC = () => {
   });
   const [pendingFilters, setPendingFilters] =
     useState<GroupListingFilters>(filters);
+  const [listingToDelete, setListingToDelete] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+  const [groupMembersCache, setGroupMembersCache] = useState<{
+    [groupId: string]: GroupMemberDto[];
+  }>({});
+  const [deletableListings, setDeletableListings] = useState<Set<string>>(
+    new Set()
+  );
 
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+
+  const updateMembersCache = (groupId: string, members: GroupMemberDto[]) => {
+    setGroupMembersCache((prev) => ({
+      ...prev,
+      [groupId]: members,
+    }));
+  };
 
   const loadListings = async () => {
     try {
@@ -61,6 +90,14 @@ export const GroupListingsPage: React.FC = () => {
       const { listings, pagedResult } = await fetchListings(filters);
       setListings(listings);
       setPagedResult(pagedResult);
+
+      const deletable = await checkDeletePermissionsForListings(
+        listings,
+        user?.userId,
+        groupMembersCache,
+        updateMembersCache
+      );
+      setDeletableListings(deletable);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
@@ -68,9 +105,67 @@ export const GroupListingsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteListing = async (listingId: string) => {
+    try {
+      setDeleteLoading(true);
+
+      await deleteGroupListing(listingId);
+
+      setListings((prev) => prev.filter((listing) => listing.id !== listingId));
+      setDeletableListings((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(listingId);
+        return newSet;
+      });
+
+      if (pagedResult) {
+        setPagedResult((prev) =>
+          prev
+            ? {
+                ...prev,
+                totalCount: prev.totalCount - 1,
+              }
+            : null
+        );
+      }
+
+      setSnackbar({
+        open: true,
+        message: "Listing deleted successfully",
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message:
+          err instanceof Error ? err.message : "Failed to delete listing",
+        severity: "error",
+      });
+    } finally {
+      setDeleteLoading(false);
+      setListingToDelete(null);
+    }
+  };
+
+  const handleDeleteClick = (listingId: string) => {
+    setListingToDelete(listingId);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (listingToDelete) {
+      handleDeleteListing(listingToDelete);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setListingToDelete(null);
+  };
+
   useEffect(() => {
-    loadListings();
-  }, [filters]);
+    if (!authLoading) {
+      loadListings();
+    }
+  }, [filters, authLoading]);
 
   const handlePendingChange = (key: keyof GroupListingFilters, value: any) => {
     setPendingFilters((p) => ({ ...p, [key]: value }));
@@ -206,6 +301,7 @@ export const GroupListingsPage: React.FC = () => {
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={listing.id}>
                 <Card
                   sx={{
+                    position: "relative",
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
@@ -213,6 +309,30 @@ export const GroupListingsPage: React.FC = () => {
                     "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
                   }}
                 >
+                  {deletableListings.has(listing.id) && (
+                    <IconButton
+                      aria-label="delete listing"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(listing.id);
+                      }}
+                      disabled={deleteLoading}
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        color: "rgba(255, 0, 0, 0.8)",
+                        backgroundColor: "rgba(255,255,255,0.8)",
+                        "&:hover": {
+                          backgroundColor: "rgba(255,0,0,0.15)",
+                          color: "red",
+                        },
+                        zIndex: 10,
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
                   <CardContent sx={{ flexGrow: 1, p: 2 }}>
                     <Box
                       display="flex"
@@ -324,6 +444,29 @@ export const GroupListingsPage: React.FC = () => {
           )}
         </>
       )}
+      <DeleteConfirmationDialog
+        open={!!listingToDelete}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Group Listing"
+        message="Are you sure you want to delete this group listing? This action cannot be undone."
+        loading={deleteLoading}
+        variant="standard"
+      />
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

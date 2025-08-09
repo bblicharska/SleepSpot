@@ -10,5 +10,6 @@ namespace GroupService.Application.Interfaces
     public interface IUserClient
     {
         Task<UserDto?> GetUserByIdAsync(Guid userId);
+        Task<UserDto?> GetUserByEmailAsync(string email);
     }
 }

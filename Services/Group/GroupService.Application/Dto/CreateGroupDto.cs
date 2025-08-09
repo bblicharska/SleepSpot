@@ -11,5 +11,6 @@ namespace GroupService.Application.Dto
         public string Name { get; set; }
         public string Description { get; set; }
         public Guid CreatedByUserId { get; set; }
+        public List<string>? MemberEmails { get; set; } = new List<string>();
     }
 }

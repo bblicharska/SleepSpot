@@ -19,6 +19,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  loading: boolean; // Add loading state
   login: (token: string) => void;
   logout: () => void;
   loggedOutDueToExpiry: boolean;
@@ -32,10 +33,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.getItem("authToken")
   );
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // Add loading state
   const [loggedOutDueToExpiry, setLoggedOutDueToExpiry] = useState(false);
 
   const fetchUserData = async (userId: string, token: string) => {
     try {
+      setLoading(true); // Set loading when starting fetch
       const response = await fetch(`/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,6 +56,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setToken(null);
       localStorage.removeItem("authToken");
+    } finally {
+      setLoading(false); // Always set loading to false when done
     }
   };
 
@@ -72,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(null);
           localStorage.removeItem("authToken");
           setLoggedOutDueToExpiry(true);
+          setLoading(false); // Set loading to false for expired token
           navigate("/login");
         } else {
           localStorage.setItem("authToken", token);
@@ -82,10 +88,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setToken(null);
         localStorage.removeItem("authToken");
+        setLoading(false); // Set loading to false for invalid token
       }
     } else {
       setUser(null);
       localStorage.removeItem("authToken");
+      setLoading(false); // Set loading to false when no token
     }
   }, [token]);
 
@@ -99,12 +107,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("authToken");
+    setLoading(false); // Ensure loading is false on logout
     navigate("/login");
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, loggedOutDueToExpiry }}
+      value={{ user, token, loading, login, logout, loggedOutDueToExpiry }}
     >
       {children}
     </AuthContext.Provider>

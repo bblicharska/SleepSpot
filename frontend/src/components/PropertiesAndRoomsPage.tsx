@@ -27,7 +27,6 @@ import {
   PropertyImageDto,
   RoomDto,
   PropertyFilterDto,
-  RoomFilterDto,
   RoomSearchFilterDto,
 } from "../types/types";
 import { LoadingComponent } from "../components/LoadingComponent";
@@ -35,6 +34,7 @@ import { ErrorComponent } from "../components/ErrorComponent";
 import { fetchProperties } from "../queries/fetchProperties";
 import { searchProperties, searchRooms } from "../queries/searchProperties";
 import { useAuth } from "../components/AuthContext";
+import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog";
 
 interface ExtendedRoom extends RoomDto {
   propertyId: string;
@@ -43,7 +43,6 @@ interface ExtendedRoom extends RoomDto {
   propertyOwnerId?: string;
 }
 
-// Sorting options
 type PropertySortBy =
   | "name"
   | "pricePerMonth"
@@ -89,7 +88,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     id: string;
   } | null>(null);
 
-  // Sorting states
   const [propertySortBy, setPropertySortBy] =
     useState<PropertySortBy>("createdAt");
   const [propertySortDirection, setPropertySortDirection] =
@@ -109,7 +107,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     setTabValue(getCurrentTab());
   }, [location.pathname]);
 
-  // Sorting functions
   const sortProperties = (
     props: Property[],
     sortBy: PropertySortBy,
@@ -197,7 +194,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
       const data = await fetchProperties();
       setProperties(data);
 
-      // Extract rooms with property info
       const allRooms: ExtendedRoom[] = data
         .filter((p) => !p.isEntirePlaceRentable)
         .flatMap((p) =>
@@ -242,7 +238,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
 
       const roomData = await searchRooms(filters);
 
-      // Convert RoomFilterDto to ExtendedRoom format
       const extendedRooms: ExtendedRoom[] = roomData
         .map((room) => ({
           id: room.id!,
@@ -361,7 +356,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     }
   };
 
-  // Inline sorting controls component
   const InlineSortControls = ({
     isRoom = false,
     resultCount,
@@ -454,6 +448,7 @@ export const PropertiesAndRoomsPage: React.FC = () => {
   );
 
   if (loading) return <LoadingComponent text="Loading…" />;
+
   if (error && !activeFilters.properties && !activeFilters.rooms) {
     return (
       <ErrorComponent
@@ -533,8 +528,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           </Grid>
         )}
       </Box>
-
-      {/* Rooms Tab */}
       <Box hidden={tabValue !== 1} role="tabpanel">
         <RoomFilter
           onFilter={handleRoomFilter}
@@ -586,93 +579,16 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           </Grid>
         )}
       </Box>
-
-      {/* Confirmation modal */}
-      <Dialog
+      <DeleteConfirmationDialog
         open={!!deleteTarget}
         onClose={cancelDelete}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            maxHeight: "80vh",
-          },
-        }}
-      >
-        <DialogContent sx={{ p: 0 }}>
-          {/* Sticky header with gradient */}
-          <Box
-            sx={{
-              p: 4,
-              background: "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
-              color: "white",
-              position: "sticky",
-              top: 0,
-              zIndex: 1,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="h5" fontWeight={600}>
-                Confirm Deletion
-              </Typography>
-              <IconButton
-                onClick={cancelDelete}
-                sx={{
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  color: "white",
-                  "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.3)" },
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-          </Box>
-
-          {/* Confirmation content */}
-          <Box sx={{ p: 4 }}>
-            <Typography variant="body1" sx={{ mb: 3 }}>
-              Are you sure you want to delete this{" "}
-              <strong>
-                {deleteTarget?.type === "property" ? "property" : "room"}
-              </strong>
-              ? This action cannot be undone.
-            </Typography>
-
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button
-                onClick={cancelDelete}
-                variant="outlined"
-                sx={{ borderRadius: 2 }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleDeleteConfirmed}
-                variant="contained"
-                color="error"
-                sx={{
-                  borderRadius: 2,
-                  background:
-                    "linear-gradient(45deg, #C0392B 30%, #E74C3C 90%)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(45deg, #A93226 30%, #C0392B 90%)",
-                  },
-                }}
-              >
-                Delete
-              </Button>
-            </Box>
-          </Box>
-        </DialogContent>
-      </Dialog>
+        onConfirm={handleDeleteConfirmed}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete this ${
+          deleteTarget?.type === "property" ? "property" : "room"
+        }? This action cannot be undone.`}
+        variant="gradient"
+      />
     </Box>
   );
 };

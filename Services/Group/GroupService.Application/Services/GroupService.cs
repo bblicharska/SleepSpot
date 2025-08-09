@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace GroupService.Application.Services
 {
@@ -83,23 +85,76 @@ namespace GroupService.Application.Services
 
         public async Task<Guid> CreateGroupAsync(CreateGroupDto dto)
         {
-            var group = _mapper.Map<Group>(dto);
-            group.Id = Guid.NewGuid();
-            group.CreatedAt = DateTime.UtcNow;
+            var invalidEmails = new List<string>();
+            var validEmails = new List<string>();
+
+            if (dto.MemberEmails != null && dto.MemberEmails.Any())
+            {
+                foreach (var email in dto.MemberEmails.Where(e => !string.IsNullOrWhiteSpace(e)))
+                {
+                    try
+                    {
+                        var user = await _userClient.GetUserByEmailAsync(email);
+                        if (user.Id != dto.CreatedByUserId) 
+                        {
+                            validEmails.Add(email);
+                        }
+                    }
+                    catch (NotFoundException)
+                    {
+                        invalidEmails.Add(email);
+                    }
+                }
+            }
+
+            if (invalidEmails.Any())
+            {
+                throw new Shared.Exceptions.ValidationException($"The following emails were not found: {string.Join(", ", invalidEmails)}");
+            }
+
+            var group = new Group
+            {
+                Id = Guid.NewGuid(),
+                Name = dto.Name,
+                Description = dto.Description,
+                CreatedByUserId = dto.CreatedByUserId,
+                CreatedAt = DateTime.UtcNow
+            };
 
             await _unitOfWork.GroupRepository.AddAsync(group);
 
-            var creator = new GroupMember
+            var creatorMember = new GroupMember
             {
                 Id = Guid.NewGuid(),
                 GroupId = group.Id,
                 UserId = dto.CreatedByUserId,
-                Role = GroupRole.Admin
+                Role = GroupRole.Admin,
+                JoinedAt = DateTime.UtcNow
             };
+            await _unitOfWork.GroupMemberRepository.AddAsync(creatorMember);
 
-            await _unitOfWork.GroupMemberRepository.AddAsync(creator);
+            foreach (var email in validEmails)
+            {
+                try
+                {
+                    var user = await _userClient.GetUserByEmailAsync(email);
+                    var member = new GroupMember
+                    {
+                        Id = Guid.NewGuid(),
+                        GroupId = group.Id,
+                        UserId = user.Id,
+                        Role = GroupRole.Member,
+                        JoinedAt = DateTime.UtcNow
+                    };
+                    await _unitOfWork.GroupMemberRepository.AddAsync(member);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unexpected error adding member {email}: {ex.Message}");
+                }
+            }
+
             await _unitOfWork.CommitAsync();
-
             return group.Id;
         }
 

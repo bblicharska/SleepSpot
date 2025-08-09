@@ -27,6 +27,10 @@ namespace GroupAPI.Middleware
                 _logger.LogError(ex, ex.Message);
                 await HandleExceptionAsync(context, ex.Message, StatusCodes.Status400BadRequest);
             }
+            catch (Shared.Exceptions.ValidationException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);

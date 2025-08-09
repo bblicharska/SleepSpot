@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import {  useRef } from 'react';
 import { PropertyImageDto } from '../../types/types';
 
 export const useImageUpload = () => {

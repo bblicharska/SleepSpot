@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Shared.Dto;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace ApiGateway.Controllers
 {
@@ -10,255 +12,287 @@ namespace ApiGateway.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<GatewayController> _logger;
+        private readonly IDistributedCache _cache;
 
-        public GatewayController(IHttpClientFactory httpClientFactory, ILogger<GatewayController> logger)
+        private readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
+
+        public GatewayController(
+            IHttpClientFactory httpClientFactory,
+            ILogger<GatewayController> logger,
+            IDistributedCache cache)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _cache = cache;
+        }
+
+        private async Task<T> SafeCall<T>(Func<Task<T>> call, string serviceName, T defaultValue)
+        {
+            try
+            {
+                return await call();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "{Service} unavailable. Returning default value.", serviceName);
+                return defaultValue;
+            }
+        }
+
+        private async Task<T?> GetOrSetCacheAsync<T>(string cacheKey, Func<Task<T>> fetchFunc, TimeSpan? absoluteExpirationRelativeToNow = null)
+        {
+            var cached = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrEmpty(cached))
+            {
+                try
+                {
+                    return JsonSerializer.Deserialize<T>(cached, _jsonOptions);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize cache key {CacheKey}", cacheKey);
+                }
+            }
+
+            var freshData = await fetchFunc();
+
+            try
+            {
+                var serialized = JsonSerializer.Serialize(freshData, _jsonOptions);
+                var options = new DistributedCacheEntryOptions();
+                if (absoluteExpirationRelativeToNow.HasValue)
+                {
+                    options.SetAbsoluteExpiration(absoluteExpirationRelativeToNow.Value);
+                }
+                await _cache.SetStringAsync(cacheKey, serialized, options);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to serialize/set cache for key {CacheKey}", cacheKey);
+            }
+
+            return freshData;
         }
 
         [HttpGet("property-details/{propertyId:guid}")]
         public async Task<IActionResult> GetPropertyDetails(Guid propertyId)
         {
+            var cacheKey = $"property-details-{propertyId}";
             var propertyClient = _httpClientFactory.CreateClient("PropertyClient");
             var reviewClient = _httpClientFactory.CreateClient("ReviewClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            try
+            var propertyDetails = await GetOrSetCacheAsync(cacheKey, async () =>
             {
-                // Fix: Use the correct property API endpoint
                 var propertyResponse = await propertyClient.GetAsync($"/api/Property/{propertyId}");
-                if (!propertyResponse.IsSuccessStatusCode)
-                    return NotFound($"Property {propertyId} not found.");
+                if (!propertyResponse.IsSuccessStatusCode) return null;
 
                 var property = await propertyResponse.Content.ReadFromJsonAsync<PropertyDto>();
-                if (property == null)
-                    return NotFound($"Property {propertyId} returned null.");
+                if (property == null) return null;
 
-                // Fetch property reviews
-                var reviewsResponse = await reviewClient.GetAsync($"/api/Review/property/{propertyId}");
-
-                if (reviewsResponse.IsSuccessStatusCode)
+                var reviews = await SafeCall(async () =>
                 {
-                    var reviews = await reviewsResponse.Content.ReadFromJsonAsync<List<ReviewDto>>();
-                    if (reviews?.Any() == true)
+                    var revResp = await reviewClient.GetAsync($"/api/Review/property/{propertyId}");
+                    if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
+                    var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
+                    return revs ?? new List<ReviewDto>();
+                }, "ReviewService", new List<ReviewDto>());
+
+                if (reviews.Any())
+                {
+                    var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
+                    var users = await Task.WhenAll(reviewerIds.Select(async id =>
                     {
-                        var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
-                        var userTasks = reviewerIds.Select(async id =>
+                        return await SafeCall(async () =>
                         {
-                            var userResponse = await userClient.GetAsync($"/api/User/{id}");
-                            return userResponse.IsSuccessStatusCode
-                                ? await userResponse.Content.ReadFromJsonAsync<UserDto>()
-                                : null;
-                        });
+                            var userResp = await userClient.GetAsync($"/api/User/{id}");
+                            if (!userResp.IsSuccessStatusCode) return null;
+                            return await userResp.Content.ReadFromJsonAsync<UserDto>();
+                        }, "UserService", null);
+                    }));
 
-                        var users = await Task.WhenAll(userTasks);
-                        foreach (var review in reviews)
-                        {
-                            review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
-                        }
-
-                        property.Reviews = reviews;
+                    foreach (var review in reviews)
+                    {
+                        review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
                     }
                 }
+                property.Reviews = reviews;
 
-                // Fetch owner
-                var ownerResponse = await userClient.GetAsync($"/api/User/{property.OwnerId}");
-                if (ownerResponse.IsSuccessStatusCode)
+                var owner = await SafeCall(async () =>
                 {
-                    var owner = await ownerResponse.Content.ReadFromJsonAsync<UserDto>();
-                    property.Owner = owner ?? new UserDto();
-                }
+                    var ownerResp = await userClient.GetAsync($"/api/User/{property.OwnerId}");
+                    if (!ownerResp.IsSuccessStatusCode) return new UserDto();
+                    return await ownerResp.Content.ReadFromJsonAsync<UserDto>() ?? new UserDto();
+                }, "UserService", new UserDto());
 
-                return Ok(property);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching property details for {PropertyId}", propertyId);
-                return StatusCode(500, "Internal server error");
-            }
+                property.Owner = owner;
+
+                return property;
+            }, TimeSpan.FromMinutes(10));
+
+            if (propertyDetails == null)
+                return NotFound($"Property {propertyId} not found.");
+
+            return Ok(propertyDetails);
         }
+
 
         [HttpGet("room-details/{roomId:guid}")]
         public async Task<IActionResult> GetRoomDetails(Guid roomId)
         {
+            var cacheKey = $"room-details-{roomId}";
             var propertyClient = _httpClientFactory.CreateClient("PropertyClient");
             var reviewClient = _httpClientFactory.CreateClient("ReviewClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            try
+            var roomDetails = await GetOrSetCacheAsync(cacheKey, async () =>
             {
-                // 1. Pobierz dane pokoju i property w jednym wywołaniu
                 var roomDetailsResponse = await propertyClient.GetAsync($"/api/Property/rooms/{roomId}/details");
-                if (!roomDetailsResponse.IsSuccessStatusCode)
-                    return NotFound($"Room {roomId} not found.");
+                if (!roomDetailsResponse.IsSuccessStatusCode) return null;
 
-                var roomDetails = await roomDetailsResponse.Content.ReadFromJsonAsync<RoomWithPropertyDetailsDto>();
-                if (roomDetails == null)
-                    return NotFound($"Room {roomId} returned null.");
+                var room = await roomDetailsResponse.Content.ReadFromJsonAsync<RoomWithPropertyDetailsDto>();
+                if (room == null) return null;
 
-                // 2. Pobierz dane właściciela (jeśli OwnerId istnieje)
-                if (roomDetails.OwnerId.HasValue)
+                if (room.OwnerId.HasValue)
                 {
-                    var ownerResponse = await userClient.GetAsync($"/api/User/{roomDetails.OwnerId.Value}");
-                    if (ownerResponse.IsSuccessStatusCode)
+                    var owner = await SafeCall(async () =>
                     {
-                        var owner = await ownerResponse.Content.ReadFromJsonAsync<UserDto>();
-                        if (owner != null)
+                        var ownerResp = await userClient.GetAsync($"/api/User/{room.OwnerId.Value}");
+                        if (!ownerResp.IsSuccessStatusCode) return null;
+                        return await ownerResp.Content.ReadFromJsonAsync<UserDto>();
+                    }, "UserService", null);
+
+                    if (owner != null)
+                    {
+                        room.Owner = new OwnerInfoDto
                         {
-                            roomDetails.Owner = new OwnerInfoDto
-                            {
-                                FirstName = owner.FirstName,
-                                LastName = owner.LastName,
-                                Email = owner.Email
-                            };
-                        }
+                            FirstName = owner.FirstName,
+                            LastName = owner.LastName,
+                            Email = owner.Email
+                        };
                     }
                 }
 
-                // 3. Pobierz opinie dla pokoju
-                var reviewsResponse = await reviewClient.GetAsync($"/api/Review/room/{roomId}");
-                if (reviewsResponse.IsSuccessStatusCode)
+                var reviews = await SafeCall(async () =>
                 {
-                    var reviews = await reviewsResponse.Content.ReadFromJsonAsync<List<ReviewDto>>();
-                    if (reviews?.Any() == true)
+                    var revResp = await reviewClient.GetAsync($"/api/Review/room/{roomId}");
+                    if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
+                    var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
+                    return revs ?? new List<ReviewDto>();
+                }, "ReviewService", new List<ReviewDto>());
+
+                if (reviews.Any())
+                {
+                    var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
+                    var users = await Task.WhenAll(reviewerIds.Select(async id =>
                     {
-                        // Pobierz dane recenzentów
-                        var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
-                        var userTasks = reviewerIds.Select(async id =>
+                        return await SafeCall(async () =>
                         {
-                            var userResponse = await userClient.GetAsync($"/api/User/{id}");
-                            return userResponse.IsSuccessStatusCode
-                                ? await userResponse.Content.ReadFromJsonAsync<UserDto>()
-                                : null;
-                        });
+                            var userResp = await userClient.GetAsync($"/api/User/{id}");
+                            if (!userResp.IsSuccessStatusCode) return null;
+                            return await userResp.Content.ReadFromJsonAsync<UserDto>();
+                        }, "UserService", null);
+                    }));
 
-                        var users = await Task.WhenAll(userTasks);
-                        foreach (var review in reviews)
-                        {
-                            review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
-                        }
-
-                        roomDetails.Reviews = reviews;
+                    foreach (var review in reviews)
+                    {
+                        review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
                     }
                 }
 
-                return Ok(roomDetails);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching room details for {RoomId}", roomId);
-                return StatusCode(500, "Internal server error");
-            }
+                room.Reviews = reviews;
+
+                return room;
+            }, TimeSpan.FromMinutes(10));
+
+            if (roomDetails == null)
+                return NotFound($"Room {roomId} not found.");
+
+            return Ok(roomDetails);
         }
+
 
         [HttpGet("group-listing-details/{listingId:guid}")]
         public async Task<IActionResult> GetGroupListingDetails(Guid listingId)
         {
+            var cacheKey = $"group-listing-details-{listingId}";
             var groupClient = _httpClientFactory.CreateClient("GroupClient");
             var propertyClient = _httpClientFactory.CreateClient("PropertyClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            try
+            var listing = await GetOrSetCacheAsync(cacheKey, async () =>
             {
                 _logger.LogInformation("Fetching group listing details for {ListingId}", listingId);
 
-                // 1. Fetch the group listing with applications
-                _logger.LogInformation("Fetching listing from: /api/Group/listings/{ListingId}", listingId);
                 var listingResponse = await groupClient.GetAsync($"/api/Group/listings/{listingId}");
+                if (!listingResponse.IsSuccessStatusCode) return null;
 
-                if (!listingResponse.IsSuccessStatusCode)
+                var listingDto = await listingResponse.Content.ReadFromJsonAsync<GroupListingDto>();
+                if (listingDto == null) return null;
+
+                if (listingDto.PropertyId.HasValue && listingDto.Property == null)
                 {
-                    _logger.LogWarning("Group listing {ListingId} not found. Status: {StatusCode}", listingId, listingResponse.StatusCode);
-                    return NotFound($"Group listing {listingId} not found. Status: {listingResponse.StatusCode}");
+                    var property = await SafeCall(async () =>
+                    {
+                        var resp = await propertyClient.GetAsync($"/api/Property/{listingDto.PropertyId.Value}");
+                        if (!resp.IsSuccessStatusCode) return null;
+                        return await resp.Content.ReadFromJsonAsync<PropertyDto>();
+                    }, "PropertyService", null);
+
+                    listingDto.Property = property;
                 }
 
-                var listing = await listingResponse.Content.ReadFromJsonAsync<GroupListingDto>();
-                if (listing == null)
+                if (listingDto.RoomId.HasValue && listingDto.Room == null)
                 {
-                    _logger.LogWarning("Group listing {ListingId} returned null", listingId);
-                    return NotFound($"Group listing {listingId} returned null.");
+                    var room = await SafeCall(async () =>
+                    {
+                        var resp = await propertyClient.GetAsync($"/api/Property/rooms/{listingDto.RoomId.Value}/details");
+                        if (!resp.IsSuccessStatusCode) return null;
+                        return await resp.Content.ReadFromJsonAsync<RoomWithPropertyDetailsDto>();
+                    }, "PropertyService", null);
+
+                    listingDto.Room = room;
                 }
 
-                _logger.LogInformation("Successfully fetched listing: {Title}", listing.Title);
-
-                if (listing.PropertyId.HasValue)
+                if (listingDto.GroupId != Guid.Empty && listingDto.Group == null)
                 {
-                    if (listing.Property != null)
+                    var group = await SafeCall(async () =>
                     {
-                        _logger.LogInformation("Property details already included in response for PropertyId: {PropertyId}", listing.PropertyId.Value);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Fetching property details for PropertyId: {PropertyId}", listing.PropertyId.Value);
-                        var propertyResponse = await propertyClient.GetAsync($"/api/Property/{listing.PropertyId.Value}");
-                        if (propertyResponse.IsSuccessStatusCode)
-                        {
-                            var property = await propertyResponse.Content.ReadFromJsonAsync<PropertyDto>();
-                            listing.Property = property;
-                            _logger.LogInformation("Successfully fetched property details");
-                        }
-                    }
-                }
+                        var resp = await groupClient.GetAsync($"/api/Group/{listingDto.GroupId}");
+                        if (!resp.IsSuccessStatusCode) return null;
+                        return await resp.Content.ReadFromJsonAsync<GroupDto>();
+                    }, "GroupService", null);
 
-                if (listing.RoomId.HasValue)
-                {
-                    _logger.LogInformation("Fetching room details for RoomId: {RoomId}", listing.RoomId.Value);
+                    listingDto.Group = group;
 
-                    var roomResponse = await propertyClient.GetAsync($"/api/Property/rooms/{listing.RoomId.Value}/details");
-                    if (roomResponse.IsSuccessStatusCode)
+                    if (group?.Members?.Any() == true)
                     {
-                        var room = await roomResponse.Content.ReadFromJsonAsync<RoomWithPropertyDetailsDto>();
-                        listing.Room = room;
-                        _logger.LogInformation("Successfully fetched room details");
+                        await EnrichGroupMembersWithUserDetails(group, userClient);
                     }
                 }
-
-                // 4. Fetch group details and members (only if group is not already included or is null)
-                if (listing.GroupId != Guid.Empty && listing.Group == null)
+                else if (listingDto.Group?.Members?.Any() == true)
                 {
-                    _logger.LogInformation("Group not included in response, fetching group details for GroupId: {GroupId}", listing.GroupId);
-                    var groupResponse = await groupClient.GetAsync($"/api/Group/{listing.GroupId}");
-                    if (groupResponse.IsSuccessStatusCode)
-                    {
-                        var group = await groupResponse.Content.ReadFromJsonAsync<GroupDto>();
-                        listing.Group = group;
-                        _logger.LogInformation("Successfully fetched group details: {GroupName}", group?.Name);
-
-                        // Fetch detailed user info for group members if needed
-                        if (group?.Members?.Any() == true)
-                        {
-                            await EnrichGroupMembersWithUserDetails(group, userClient);
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Failed to fetch group {GroupId}. Status: {StatusCode}", listing.GroupId, groupResponse.StatusCode);
-                    }
-                }
-                else if (listing.Group?.Members?.Any() == true)
-                {
-                    // Group is already included, just enrich members with user details
-                    _logger.LogInformation("Group already included, enriching member details");
-                    await EnrichGroupMembersWithUserDetails(listing.Group, userClient);
+                    await EnrichGroupMembersWithUserDetails(listingDto.Group, userClient);
                 }
 
-                // 5. Fetch applicant details for applications
-                if (listing.Applications?.Any() == true)
+                if (listingDto.Applications?.Any() == true)
                 {
-                    _logger.LogInformation("Fetching applicant details for {ApplicationCount} applications", listing.Applications.Count);
-                    await EnrichApplicationsWithUserDetails(listing.Applications, userClient);
+                    await EnrichApplicationsWithUserDetails(listingDto.Applications, userClient);
                 }
 
-                _logger.LogInformation("Successfully completed fetching all details for listing {ListingId}", listingId);
-                return Ok(listing);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching group listing details for {ListingId}", listingId);
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+                return listingDto;
+            }, TimeSpan.FromMinutes(5));
+
+            if (listing == null)
+                return NotFound($"Group listing {listingId} not found.");
+
+            return Ok(listing);
         }
+
 
         private async Task EnrichGroupMembersWithUserDetails(GroupDto group, HttpClient userClient)
         {

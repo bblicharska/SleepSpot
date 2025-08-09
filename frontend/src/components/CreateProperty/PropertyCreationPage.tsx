@@ -1,4 +1,3 @@
-// PropertyCreationPage.tsx - Fixed version
 import React, { useState } from "react";
 import {
   Box,
@@ -23,7 +22,7 @@ import { RoomsStep } from "./RoomsStep";
 import { PropertyImagesStep } from "./PropertyImagesStep";
 import { RoomDialog } from "./RoomDialog";
 
-export const PropertyCreationPage = () => {
+export const PropertyCreationPage: React.FC = () => {
   const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [propertyData, setPropertyData] =
@@ -36,12 +35,11 @@ export const PropertyCreationPage = () => {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-
+  console.log(user);
   const propertyImageUpload: ReturnType<typeof useImageUpload> =
     useImageUpload();
   const roomImageUpload: ReturnType<typeof useImageUpload> = useImageUpload();
 
-  // Property form handlers
   const handlePropertyChange = (field: keyof PropertyFormData, value: any) => {
     setPropertyData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -76,7 +74,6 @@ export const PropertyCreationPage = () => {
     }));
   };
 
-  // Room handlers
   const handleRoomChange = (field: keyof RoomDto, value: any) => {
     setCurrentRoom((prev) => ({ ...prev, [field]: value }));
   };
@@ -94,7 +91,7 @@ export const PropertyCreationPage = () => {
   };
 
   const handleSaveRoom = () => {
-    const updatedRoom = { ...currentRoom }; // clone latest state
+    const updatedRoom = { ...currentRoom };
 
     if (editingRoomIndex !== null) {
       setPropertyData((prev) => ({
@@ -149,19 +146,14 @@ export const PropertyCreationPage = () => {
     }));
   };
 
-  // Fixed step visibility logic
   const visibleSteps = React.useMemo(() => {
-    // When entire place is rentable, show: Property Details -> Images -> Rooms
-    // When not entire place rentable, show: Property Details -> Rooms (no Images step)
     if (propertyData.isEntirePlaceRentable) {
-      return steps; // Show all steps including Images
+      return steps;
     } else {
-      // Remove the Images step (assuming it's "Property Images")
       return steps.filter((step) => step !== "Property Images");
     }
   }, [propertyData.isEntirePlaceRentable]);
 
-  // Validation logic (kept in main component as it's business logic)
   const validateStep = (step: number): boolean => {
     const actualStep = visibleSteps[step];
     const newErrors: Record<string, string> = {};
@@ -205,12 +197,10 @@ export const PropertyCreationPage = () => {
     try {
       if (!user?.userId) throw new Error("User not authenticated");
 
-      // 1. Create the property (as JSON) - but store the original room IDs for mapping
-      const roomIdMapping = new Map<string, string>(); // temp ID -> server ID
+      const roomIdMapping = new Map<string, string>();
 
       const sanitizedRooms = propertyData.rooms.map(({ images, ...room }) => ({
         ...room,
-        // Remove the temporary ID so server generates a proper GUID
         id: undefined,
       }));
 
@@ -236,7 +226,6 @@ export const PropertyCreationPage = () => {
 
       const createdProperty = await response.json();
 
-      // 2. Create mapping between temporary room IDs and server-generated IDs
       if (createdProperty.rooms && createdProperty.rooms.length > 0) {
         propertyData.rooms.forEach((originalRoom, index) => {
           if (createdProperty.rooms[index]) {
@@ -245,7 +234,6 @@ export const PropertyCreationPage = () => {
         });
       }
 
-      // 3. Upload property images
       if (
         propertyData.isEntirePlaceRentable &&
         propertyData.images.length > 0
@@ -278,11 +266,9 @@ export const PropertyCreationPage = () => {
           throw new Error(await imageUploadResponse.text());
       }
 
-      // 4. Upload room images using the correct server-generated room IDs
       for (const room of propertyData.rooms) {
         if (!room.images || room.images.length === 0) continue;
 
-        // Get the server-generated room ID
         const serverRoomId = roomIdMapping.get(room.id);
         if (!serverRoomId) {
           console.error(`Could not find server ID for room ${room.id}`);
@@ -371,20 +357,11 @@ export const PropertyCreationPage = () => {
     }
   };
 
-  // Debug logging - remove this in production
-  console.log("Debug Info:", {
-    isEntirePlaceRentable: propertyData.isEntirePlaceRentable,
-    visibleSteps,
-    activeStep,
-    currentStepName: visibleSteps[activeStep],
-  });
-
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Create New Property
       </Typography>
-
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
         {visibleSteps.map((label) => (
           <Step key={label}>
@@ -392,32 +369,26 @@ export const PropertyCreationPage = () => {
           </Step>
         ))}
       </Stepper>
-
       <Paper sx={{ p: 3 }}>
         {renderStepContent()}
-
-        {/* Show submit status messages */}
         {submitStatus === "success" && (
           <Box sx={{ mt: 3 }}>
             <Typography color="success.main" variant="body1">
-              ✅ Property created successfully!
+              Property created successfully!
             </Typography>
           </Box>
         )}
-
         {submitStatus === "error" && (
           <Box sx={{ mt: 3 }}>
             <Typography color="error.main" variant="body1">
-              ❌ Failed to create property. Please try again.
+              Failed to create property. Please try again.
             </Typography>
           </Box>
         )}
-
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button onClick={handleBack} disabled={activeStep === 0}>
             Back
           </Button>
-
           <Box>
             {activeStep < visibleSteps.length - 1 ? (
               <Button variant="contained" onClick={handleNext} sx={{ ml: 1 }}>
@@ -436,8 +407,6 @@ export const PropertyCreationPage = () => {
           </Box>
         </Box>
       </Paper>
-
-      {/* Room Dialog */}
       <RoomDialog
         open={roomDialogOpen}
         room={currentRoom}

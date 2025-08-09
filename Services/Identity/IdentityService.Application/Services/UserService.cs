@@ -110,6 +110,15 @@ namespace IdentityService.Application.Services
             return _mapper.Map<UserDto>(user);
         }
 
+        public async Task<UserDto> GetUserByEmailAsync(string email)
+        {
+            var user = await _uow.UserRepository.GetByEmailAsync(email);
+            if (user == null)
+                throw new NotFoundException($"User with email {email} not found");
+
+            return _mapper.Map<UserDto>(user);
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             var user = await _uow.UserRepository.GetAsync(id);

@@ -90,6 +90,20 @@ namespace IdentityAPI.Controllers
             }
         }
 
+        [HttpGet("by-email/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            try
+            {
+                var userDto = await _userService.GetUserByEmailAsync(email);
+                return Ok(userDto);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
         // Aktualizowanie danych użytkownika
         [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserDto updateUserDto) // Asynchroniczna metoda

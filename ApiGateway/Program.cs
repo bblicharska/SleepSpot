@@ -2,22 +2,21 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using System.Text;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
-// Add Controllers - IMPORTANT: Add this for your custom controller
 builder.Services.AddControllers();
 
-// Add configuration for Ocelot
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
-// JWT authentication configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer("Bearer", options => // Explicit scheme name
+    .AddJwtBearer("Bearer", options => 
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -28,7 +27,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"])),
-            ClockSkew = TimeSpan.Zero // Reduce clock skew tolerance
+            ClockSkew = TimeSpan.Zero 
         };
         options.Events = new JwtBearerEvents
         {
@@ -45,11 +44,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add Ocelot services
 builder.Services.AddOcelot(builder.Configuration);
 
-// HTTP Clients for direct service communication (not through Ocelot)
-// Add timeout and retry policies for better resilience
+var redisConnection = builder.Configuration.GetValue<string>("Redis:Connection");
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnection;  
+    options.InstanceName = "ApiGatewayCache:";
+});
+
 builder.Services.AddHttpClient("PropertyClient", client =>
 {
     client.BaseAddress = new Uri("http://property-api:5030");
@@ -74,7 +78,6 @@ builder.Services.AddHttpClient("GroupClient", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// Add CORS
 builder.Services.AddCors(options => options.AddPolicy("SleepSpot", policy =>
 {
     policy.AllowAnyOrigin()
@@ -82,7 +85,6 @@ builder.Services.AddCors(options => options.AddPolicy("SleepSpot", policy =>
           .AllowAnyHeader();
 }));
 
-// Add Swagger for ApiGateway with JWT configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -114,7 +116,6 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Configure middleware pipeline - ORDER IS CRITICAL
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -123,20 +124,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("SleepSpot");
 
-// Add routing before authentication
 app.UseRouting();
 
-// Authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers for custom endpoints (like your GatewayController)
-// This must come BEFORE UseOcelot to ensure custom routes take precedence
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
-// Configure Ocelot middleware - This handles all remaining routes
+
 await app.UseOcelot();
 
 app.Run();

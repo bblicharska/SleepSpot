@@ -10,7 +10,6 @@ namespace GroupService.Application.Services
 {
     public interface IGroupService
     {
-        // Groups
         Task<IEnumerable<GroupDto>> GetAllGroupsAsync();
         Task<GroupDto?> GetGroupByIdAsync(Guid groupId);
         Task<Guid> CreateGroupAsync(CreateGroupDto dto);
@@ -18,13 +17,10 @@ namespace GroupService.Application.Services
         Task DeleteGroupAsync(Guid groupId);
         Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(Guid userId);
 
-
-        // Group Members
         Task<IEnumerable<GroupMemberDto>> GetMembersByGroupIdAsync(Guid groupId);
         Task AddMemberAsync(GroupMemberDto dto);
         Task RemoveMemberAsync(Guid memberId);
 
-        // Group Listings
         Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams);
         Task<GroupListingDto?> GetListingByIdAsync(Guid listingId);
         Task<IEnumerable<GroupListingDto>> GetListingsByGroupIdAsync(Guid groupId);
@@ -32,7 +28,6 @@ namespace GroupService.Application.Services
         Task UpdateListingAsync(Guid listingId, CreateGroupListingDto dto);
         Task DeleteListingAsync(Guid listingId);
 
-        // Room Applications
         Task<IEnumerable<RoomApplicationDto>> GetApplicationsByListingIdAsync(Guid listingId);
         Task<RoomApplicationDto?> GetApplicationByIdAsync(Guid applicationId);
         Task<Guid> CreateApplicationAsync(RoomApplicationDto dto);

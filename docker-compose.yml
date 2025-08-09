@@ -24,6 +24,14 @@ services:
     user: root 
     command: /opt/mssql/bin/sqlservr  
     restart: always
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - sleepspot    
     
   propertyapi:
     container_name: property-api
@@ -126,6 +134,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
+      - redis
       - propertyapi
       - identityapi
       - reviewapi
