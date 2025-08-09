@@ -15,6 +15,7 @@ namespace RentalService.Domain.Contracts
         Task<IEnumerable<RentalAgreement>> GetByGroupIdAsync(Guid groupId);
         Task<IEnumerable<RentalAgreement>> GetByPropertyIdAsync(Guid propertyId);
         Task<IEnumerable<RentalAgreement>> GetActiveAgreementsAsync();
+        Task<IEnumerable<RentalAgreement>> GetActiveByUserIdAsync(Guid userId);
 
         Task AddAsync(RentalAgreement agreement);
         void Update(RentalAgreement agreement);

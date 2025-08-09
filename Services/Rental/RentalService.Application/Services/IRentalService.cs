@@ -13,6 +13,7 @@ namespace RentalService.Application.Services
         Task<RentalAgreementDto> GetByIdAsync(Guid id);
         Task<RentalAgreementDto> CreateAsync(CreateRentalAgreementDto dto);
         Task<RentalAgreementDto> UpdateAsync(Guid id, UpdateRentalAgreementDto dto);
+        Task<IEnumerable<RentalAgreementDto>> GetActiveByUserIdAsync(Guid userId);
         Task<bool> DeleteAsync(Guid id);
     }
 }

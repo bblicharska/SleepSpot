@@ -48,9 +48,8 @@ export const GroupListingDetailsPage = () => {
   if (!listing) return <Typography variant="h6">Listing not found</Typography>;
 
   const { property, room } = listing;
-
-  const hasProperty = property && !room;
-  const hasRoom = room;
+  const hasProperty = !!property && !room;
+  const hasRoom = !!room;
 
   return (
     <Box sx={{ px: { xs: 2, md: 6 }, py: 4 }}>
@@ -138,32 +137,29 @@ export const GroupListingDetailsPage = () => {
             Room Information
           </Typography>
           <Typography>
-            <strong>Name:</strong> {room.room?.name}
+            <strong>Name:</strong> {room?.name}
           </Typography>
           <Typography>
-            <strong>Description:</strong> {room.room?.description}
+            <strong>Description:</strong> {room?.description}
           </Typography>
           <Typography>
-            <strong>Price:</strong> {room.room?.pricePerMonth} PLN/month
+            <strong>Price:</strong> {room?.pricePerMonth} PLN/month
           </Typography>
           <Typography>
-            <strong>Size:</strong> {room.room?.areaInSquareMeters} m²
+            <strong>Size:</strong> {room?.areaInSquareMeters} m²
           </Typography>
           <Typography>
-            <strong>Capacity:</strong> {room.room?.capacity}{" "}
-            {room.room?.capacity === 1 ? "person" : "people"}
+            <strong>Capacity:</strong> {room?.capacity}{" "}
+            {room?.capacity === 1 ? "person" : "people"}
           </Typography>
-          {room.room?.detailedDescription && (
+          {room?.detailedDescription && (
             <Typography sx={{ mt: 1 }}>
-              <strong>Details:</strong> {room.room?.detailedDescription}
+              <strong>Details:</strong> {room?.detailedDescription}
             </Typography>
           )}
-          {room.room?.images.length > 0 && (
+          {room?.images.length > 0 && (
             <Box mt={3}>
-              <ImageGallery
-                images={room.room?.images}
-                title={room.room?.name}
-              />
+              <ImageGallery images={room?.images} title={room?.name} />
             </Box>
           )}
 

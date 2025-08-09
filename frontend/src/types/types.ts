@@ -23,8 +23,7 @@ export interface RoomDto {
   reviews?: ReviewDto[];
 }
 
-export interface RoomDetailsResponseDto {
-  room: RoomDto;
+export interface RoomDetailsResponseDto extends RoomDto {
   propertyAddress: string;
   propertyName: string;
   otherRoomsInProperty: RoomSummaryDto[];
@@ -47,6 +46,7 @@ export interface UserDto {
   lastName: string;
   email: string;
   role: string;
+  reviews?: ReviewDto[];
 }
 
 export interface ReviewDto {
@@ -211,6 +211,14 @@ export interface GroupListingFilters {
   searchTerm?: string;
   sortBy: string;
   sortOrder: "asc" | "desc";
+}
+
+export interface RentalAgreementDto {
+  id: string;
+  propertyId: string;
+  roomId: string | null;
+  property?: Property;
+  room?:RoomDto;
 }
 
 export interface PagedResult<T> {

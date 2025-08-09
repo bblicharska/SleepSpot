@@ -21,57 +21,25 @@ import {
   Divider,
   InputAdornment,
   Paper,
-  IconButton,
   Stack,
 } from "@mui/material";
 import {
   Add as AddIcon,
   AttachMoney as MoneyIcon,
   Email as EmailIcon,
-  Close as CloseIcon,
+  Home as HomeIcon,
 } from "@mui/icons-material";
-import { API_BASE_URL } from "../../types/types";
 import { useAuth } from "../AuthContext";
 import { fetchUserGroups } from "../../queries/fetchUserGroups";
 import { createGroupListing } from "../../queries/createGroupListing";
+import { fetchUserActiveRentals } from "../../queries/fetchUserActiveRentals";
+import { createGroup } from "../../queries/createGroup";
 import {
   GroupDto,
   CreateGroupDto,
   CreateGroupListingDto,
+  RentalAgreementDto,
 } from "../../types/types";
-
-// Updated createGroup function with enhanced error handling
-const createGroup = async (groupData: CreateGroupDto) => {
-  const response = await fetch(`${API_BASE_URL}/api/groups`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(groupData),
-  });
-
-  if (!response.ok) {
-    // Try to extract the error message from the response
-    let errorMessage = "Failed to create group";
-
-    try {
-      const errorData = await response.json();
-      // Handle different error response formats
-      if (errorData.message) {
-        errorMessage = errorData.message;
-      } else if (errorData.title) {
-        errorMessage = errorData.title;
-      } else if (errorData.errors) {
-        // Handle validation errors from ASP.NET Core
-        errorMessage = Object.values(errorData.errors).flat().join(", ");
-      }
-    } catch {
-      // If parsing fails, use the default message
-    }
-
-    throw new Error(errorMessage);
-  }
-
-  return response.json();
-};
 
 export const GroupListingCreationPage: React.FC = () => {
   const { user } = useAuth();
@@ -88,8 +56,10 @@ export const GroupListingCreationPage: React.FC = () => {
     maxBudgetPerPerson: undefined,
   });
   const [groups, setGroups] = useState<GroupDto[]>([]);
+  const [userRentals, setUserRentals] = useState<RentalAgreementDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [groupsLoading, setGroupsLoading] = useState(true);
+  const [rentalsLoading, setRentalsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -104,6 +74,7 @@ export const GroupListingCreationPage: React.FC = () => {
 
   useEffect(() => {
     loadUserGroups();
+    loadUserRentals();
   }, []);
 
   const loadUserGroups = async () => {
@@ -120,6 +91,20 @@ export const GroupListingCreationPage: React.FC = () => {
     }
   };
 
+  const loadUserRentals = async () => {
+    if (!user?.userId) return;
+
+    try {
+      setRentalsLoading(true);
+      const rentals = await fetchUserActiveRentals(user.userId);
+      setUserRentals(rentals);
+    } catch (err) {
+      console.error("Error loading user rentals:", err);
+    } finally {
+      setRentalsLoading(false);
+    }
+  };
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleInputChange = (
@@ -131,6 +116,42 @@ export const GroupListingCreationPage: React.FC = () => {
       [field]: value,
     }));
     setError(null);
+  };
+
+  const handlePropertyRoomChange = (value: string) => {
+    if (!value) {
+      setFormData((prev) => ({
+        ...prev,
+        propertyId: undefined,
+        roomId: undefined,
+      }));
+      return;
+    }
+
+    if (value.startsWith("property-")) {
+      const propertyId = value.replace("property-", "");
+      setFormData((prev) => ({
+        ...prev,
+        propertyId: propertyId,
+        roomId: undefined,
+      }));
+    } else if (value.startsWith("room-")) {
+      const roomId = value.replace("room-", "");
+      setFormData((prev) => ({
+        ...prev,
+        propertyId: undefined,
+        roomId: roomId,
+      }));
+    }
+  };
+
+  const getSelectedValue = () => {
+    if (formData.roomId) {
+      return `room-${formData.roomId}`;
+    } else if (formData.propertyId) {
+      return `property-${formData.propertyId}`;
+    }
+    return "";
   };
 
   const handleAddMemberEmail = () => {
@@ -154,7 +175,6 @@ export const GroupListingCreationPage: React.FC = () => {
 
     setNewMemberEmail("");
     setError(null);
-    // Clear invalid email status when user adds a new email
     setInvalidEmails((prev) =>
       prev.filter((invalidEmail) => invalidEmail !== email)
     );
@@ -165,7 +185,6 @@ export const GroupListingCreationPage: React.FC = () => {
       ...prev,
       memberEmails: prev.memberEmails.filter((e) => e !== email),
     }));
-    // Clear invalid status when email is removed
     setInvalidEmails((prev) =>
       prev.filter((invalidEmail) => invalidEmail !== email)
     );
@@ -180,7 +199,7 @@ export const GroupListingCreationPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      setInvalidEmails([]); // Clear previous invalid emails
+      setInvalidEmails([]);
 
       const createdGroupId = await createGroup(newGroup);
 
@@ -204,7 +223,6 @@ export const GroupListingCreationPage: React.FC = () => {
         err.message || "Failed to create group. Please try again.";
       setError(errorMessage);
 
-      // Extract invalid emails from error message for visual feedback
       if (errorMessage.includes("were not found:")) {
         const emailPart = errorMessage.split("were not found:")[1];
         if (emailPart) {
@@ -238,7 +256,7 @@ export const GroupListingCreationPage: React.FC = () => {
 
       await createGroupListing(formData);
 
-      setSuccess("Listing created successfully! 🎉");
+      setSuccess("Listing created successfully!");
 
       setTimeout(() => {
         setSuccess(null);
@@ -441,6 +459,92 @@ export const GroupListingCreationPage: React.FC = () => {
               label="Property Already Rented"
             />
           </Grid>
+          {formData.propertyAlreadyRented && (
+            <>
+              <Grid size={{ xs: 12 }}>
+                <Divider sx={{ my: 2 }} />
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  <HomeIcon />
+                  Select Your Rented Property
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Select Property or Room</InputLabel>
+                  <Select
+                    value={getSelectedValue()}
+                    onChange={(e) => handlePropertyRoomChange(e.target.value)}
+                    disabled={rentalsLoading}
+                    label="Select Property or Room"
+                  >
+                    {userRentals.map((rental) => (
+                      <MenuItem
+                        key={rental.id}
+                        value={`${rental.property ? "property" : "room"}-${
+                          rental.property?.id || rental.room?.id
+                        }`}
+                      >
+                        <Box sx={{ width: "100%" }}>
+                          {rental.property ? (
+                            <>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "bold" }}
+                              >
+                                {rental.property.name} (Entire Property)
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {rental.property.address} • PLN{" "}
+                                {rental.property.pricePerMonth}/month
+                              </Typography>
+                            </>
+                          ) : rental.room ? (
+                            <>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "bold" }}
+                              >
+                                {rental.room.name} (Room)
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                PLN {rental.room.pricePerMonth}/month
+                              </Typography>
+                            </>
+                          ) : null}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {rentalsLoading && (
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", mt: 1 }}
+                    >
+                      <CircularProgress size={20} />
+                    </Box>
+                  )}
+                  {!rentalsLoading && userRentals.length === 0 && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 1 }}
+                    >
+                      No active rentals found
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
+            </>
+          )}
           <Grid size={{ xs: 12 }}>
             <Button
               variant="contained"
@@ -454,8 +558,6 @@ export const GroupListingCreationPage: React.FC = () => {
           </Grid>
         </Grid>
       </Paper>
-
-      {/* Create Group Dialog */}
       <Dialog
         open={createGroupOpen}
         onClose={handleCloseDialog}
@@ -513,7 +615,6 @@ export const GroupListingCreationPage: React.FC = () => {
               Add
             </Button>
           </Box>
-
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {newGroup.memberEmails.map((email) => (
               <Chip

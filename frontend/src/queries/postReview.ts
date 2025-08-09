@@ -1,11 +1,12 @@
 import { API_BASE_URL, ReviewDto } from "../types/types";
 
 interface SubmitReviewParams {
-reviewerId: string;
+  reviewerId: string;
   rating: number;
   comment: string;
-   roomId?: string; 
   propertyId?: string;
+  roomId?: string;
+  ownerId?: string;
 }
 
 export const postReview = async (
@@ -16,7 +17,7 @@ export const postReview = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`, // Add the authorization header
+      "Authorization": `Bearer ${token}`,
     },
     body: JSON.stringify(reviewData),
   });

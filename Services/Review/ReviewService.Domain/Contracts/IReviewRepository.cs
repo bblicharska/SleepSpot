@@ -9,16 +9,15 @@ namespace ReviewService.Domain.Contracts
 {
     public interface IReviewRepository
     {
-        // Podstawowe operacje CRUD
         Task<Review> GetByIdAsync(Guid id);
         Task<IEnumerable<Review>> GetAllAsync();
         Task AddAsync(Review review);
         Task UpdateAsync(Review review);
         Task DeleteAsync(Guid id);
 
-        // Zapytania specyficzne dla domeny
         Task<IEnumerable<Review>> GetByPropertyIdAsync(Guid propertyId);
-        Task<IEnumerable<Review>> GetByRoomIdAsync(Guid roomId);        // nowa metoda
+        Task<IEnumerable<Review>> GetByRoomIdAsync(Guid roomId);
+        Task<IEnumerable<Review>> GetByOwnerIdAsync(Guid ownerId);
         Task<IEnumerable<Review>> GetByReviewerIdAsync(Guid reviewerId);
 
         Task<double> GetAverageRatingByPropertyIdAsync(Guid propertyId);

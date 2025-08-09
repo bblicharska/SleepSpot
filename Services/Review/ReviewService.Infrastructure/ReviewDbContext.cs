@@ -30,6 +30,9 @@ namespace ReviewService.Infrastructure
                 entity.Property(r => r.PropertyId)
                     .IsRequired(false);
 
+                entity.Property(r => r.OwnerId)
+                    .IsRequired(false);
+
                 entity.Property(r => r.RoomId)
                     .IsRequired(false);
 

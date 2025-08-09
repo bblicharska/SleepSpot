@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Shared.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 
 namespace GroupService.Application.Services
 {
@@ -85,24 +87,28 @@ namespace GroupService.Application.Services
 
         public async Task<Guid> CreateGroupAsync(CreateGroupDto dto)
         {
+            // 1. Walidacja członków (z unikaniem duplikatów i 2x calli do API)
             var invalidEmails = new List<string>();
-            var validEmails = new List<string>();
+            var membersToAdd = new List<UserDto>();
 
-            if (dto.MemberEmails != null && dto.MemberEmails.Any())
+            if (dto.MemberEmails != null)
             {
-                foreach (var email in dto.MemberEmails.Where(e => !string.IsNullOrWhiteSpace(e)))
+                foreach (var email in dto.MemberEmails
+                                         .Where(e => !string.IsNullOrWhiteSpace(e))
+                                         .Distinct(StringComparer.OrdinalIgnoreCase))
                 {
-                    try
-                    {
-                        var user = await _userClient.GetUserByEmailAsync(email);
-                        if (user.Id != dto.CreatedByUserId) 
-                        {
-                            validEmails.Add(email);
-                        }
-                    }
-                    catch (NotFoundException)
+                    var user = await _userClient.GetUserByEmailAsync(email);
+
+                    if (user == null)
                     {
                         invalidEmails.Add(email);
+                        continue;
+                    }
+
+                    // Nie dodajemy twórcy jako zwykłego membera
+                    if (user.Id != dto.CreatedByUserId)
+                    {
+                        membersToAdd.Add(user);
                     }
                 }
             }
@@ -112,6 +118,7 @@ namespace GroupService.Application.Services
                 throw new Shared.Exceptions.ValidationException($"The following emails were not found: {string.Join(", ", invalidEmails)}");
             }
 
+            // 2. Utworzenie grupy + członków w jednej transakcji
             var group = new Group
             {
                 Id = Guid.NewGuid(),
@@ -123,40 +130,36 @@ namespace GroupService.Application.Services
 
             await _unitOfWork.GroupRepository.AddAsync(group);
 
+            // Twórca jako admin
             var creatorMember = new GroupMember
             {
                 Id = Guid.NewGuid(),
                 GroupId = group.Id,
-                UserId = dto.CreatedByUserId,
+                UserId = group.CreatedByUserId,
                 Role = GroupRole.Admin,
                 JoinedAt = DateTime.UtcNow
             };
             await _unitOfWork.GroupMemberRepository.AddAsync(creatorMember);
 
-            foreach (var email in validEmails)
+            // Pozostali członkowie
+            foreach (var user in membersToAdd)
             {
-                try
+                var member = new GroupMember
                 {
-                    var user = await _userClient.GetUserByEmailAsync(email);
-                    var member = new GroupMember
-                    {
-                        Id = Guid.NewGuid(),
-                        GroupId = group.Id,
-                        UserId = user.Id,
-                        Role = GroupRole.Member,
-                        JoinedAt = DateTime.UtcNow
-                    };
-                    await _unitOfWork.GroupMemberRepository.AddAsync(member);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Unexpected error adding member {email}: {ex.Message}");
-                }
+                    Id = Guid.NewGuid(),
+                    GroupId = group.Id,
+                    UserId = user.Id,
+                    Role = GroupRole.Member,
+                    JoinedAt = DateTime.UtcNow
+                };
+                await _unitOfWork.GroupMemberRepository.AddAsync(member);
             }
 
             await _unitOfWork.CommitAsync();
+
             return group.Id;
         }
+
 
         public async Task UpdateGroupAsync(Guid groupId, CreateGroupDto dto)
         {
@@ -267,6 +270,31 @@ namespace GroupService.Application.Services
 
         public async Task<Guid> CreateListingAsync(CreateGroupListingDto dto)
         {
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(dto.GroupId);
+            if (group == null)
+            {
+                throw new Shared.Exceptions.ValidationException($"Group with ID {dto.GroupId} does not exist.");
+            }
+
+            if (dto.PropertyId.HasValue)
+            {
+                var propertyGuid = dto.PropertyId.Value;
+                var property = await _propertyClient.GetPropertyByIdAsync(propertyGuid);
+                if (property == null)
+                {
+                    throw new Shared.Exceptions.ValidationException($"Property with ID {propertyGuid} does not exist.");
+                }
+            }
+
+            if (dto.RoomId.HasValue)
+            {
+                var roomGuid = dto.RoomId.Value;
+                var room = await _propertyClient.GetRoomByIdAsync(roomGuid);
+                if (room == null)
+                {
+                    throw new Shared.Exceptions.ValidationException($"Room with ID {roomGuid} does not exist.");
+                }
+            }
             var listing = _mapper.Map<GroupListing>(dto);
             listing.Id = Guid.NewGuid();
             listing.CreatedAt = DateTime.UtcNow;

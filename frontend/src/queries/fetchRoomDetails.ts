@@ -1,5 +1,5 @@
 import { RoomWithPropertyDetailsDto } from "../components/RoomDetailsPage";
-import { API_BASE_URL, RoomDetailsResponseDto } from "../types/types";
+import { API_BASE_URL } from "../types/types";
 
 export const fetchRoomDetails = async (roomId: string): Promise<RoomWithPropertyDetailsDto> => {
   const response = await fetch(`${API_BASE_URL}/gateway/room-details/${roomId}`);

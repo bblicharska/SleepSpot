@@ -12,7 +12,7 @@ using ReviewService.Infrastructure;
 namespace ReviewService.Infrastructure.Migrations
 {
     [DbContext(typeof(ReviewDbContext))]
-    [Migration("20250629145004_InitialCreate")]
+    [Migration("20250809062916_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -38,6 +38,9 @@ namespace ReviewService.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("PropertyId")
                         .HasColumnType("uniqueidentifier");

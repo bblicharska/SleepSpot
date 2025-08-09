@@ -77,6 +77,13 @@ namespace ReviewAPI.Controllers
                 return Ok(reviews);
             }
 
+            [HttpGet("owner/{ownerId:guid}")]
+            public async Task<ActionResult<IEnumerable<ReviewDto>>> GetForOwner(Guid ownerId)
+            {
+                var reviews = await _reviewService.GetReviewsForOwnerAsync(ownerId);
+                return Ok(reviews);
+            }
+
             [HttpGet("average-rating/property/{propertyId:guid}")]
             public async Task<ActionResult<double>> GetPropertyAverageRating(Guid propertyId)
             {

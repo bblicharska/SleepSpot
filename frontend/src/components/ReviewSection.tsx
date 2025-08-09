@@ -33,7 +33,7 @@ import { ReviewDto, ReviewFormData } from "../types/types";
 interface ReviewSectionProps {
   reviews: ReviewDto[];
   entityId: string;
-  entityType: "property" | "room";
+  entityType: "property" | "room" | "owner";
   onReviewsUpdate: () => void;
 }
 
@@ -56,7 +56,6 @@ export const ReviewSection = ({
   const [submittingReview, setSubmittingReview] = useState(false);
   const [updatingReview, setUpdatingReview] = useState(false);
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
-  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set()); // Track pending updates
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -70,33 +69,38 @@ export const ReviewSection = ({
     return total / localReviews.length;
   }, [localReviews]);
 
-  // Update local reviews when props change, but preserve optimistic updates
+  // Update local reviews when props change
   React.useEffect(() => {
-    setLocalReviews((prevLocalReviews) => {
-      const newReviews = reviews || [];
+    setLocalReviews(reviews || []);
+  }, [reviews]);
 
-      // If we have pending updates, merge carefully
-      if (pendingUpdates.size > 0) {
-        // Create a map of new reviews for easier lookup
-        const newReviewsMap = new Map(
-          newReviews.map((review) => [review.id, review])
-        );
+  // Get entity display name for UI
+  const getEntityDisplayName = () => {
+    switch (entityType) {
+      case "property":
+        return "property";
+      case "room":
+        return "room";
+      case "owner":
+        return "owner";
+      default:
+        return "entity";
+    }
+  };
 
-        return prevLocalReviews.map((localReview) => {
-          // If this review has a pending update, keep the local version
-          if (pendingUpdates.has(localReview.id)) {
-            return localReview;
-          }
-          // Otherwise, use the fresh data from props if available
-          const freshReview = newReviewsMap.get(localReview.id);
-          return freshReview || localReview;
-        });
-      }
-
-      // No pending updates, use fresh data completely
-      return newReviews;
-    });
-  }, [reviews, pendingUpdates]);
+  // Get review placeholder text
+  const getReviewPlaceholder = () => {
+    switch (entityType) {
+      case "property":
+        return "Share your experience with this property...";
+      case "room":
+        return "Share your experience with this room...";
+      case "owner":
+        return "Share your experience with this property owner...";
+      default:
+        return "Share your experience...";
+    }
+  };
 
   const handleSubmitReview = async () => {
     if (!user || !token) {
@@ -120,13 +124,27 @@ export const ReviewSection = ({
     setSubmittingReview(true);
 
     try {
-      const reviewData = {
+      // Map entityType to the correct field name for the API
+      const reviewData: any = {
         rating: reviewForm.rating,
         comment: reviewForm.comment.trim(),
-        entityId,
-        entityType,
         reviewerId: user.userId,
       };
+
+      // Add the correct ID field based on entityType
+      switch (entityType) {
+        case "property":
+          reviewData.propertyId = entityId;
+          break;
+        case "room":
+          reviewData.roomId = entityId;
+          break;
+        case "owner":
+          reviewData.ownerId = entityId;
+          break;
+        default:
+          throw new Error("Invalid entity type");
+      }
 
       const newReview = await postReview(reviewData, token);
 
@@ -418,7 +436,7 @@ export const ReviewSection = ({
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <RateReviewIcon sx={{ mr: 2 }} />
-            Write a Review
+            Write a Review for {getEntityDisplayName()}
           </Box>
         </DialogTitle>
         <DialogContent sx={{ p: 4 }}>
@@ -450,7 +468,7 @@ export const ReviewSection = ({
               multiline
               rows={4}
               fullWidth
-              placeholder={`Share your experience with this ${entityType}...`}
+              placeholder={getReviewPlaceholder()}
               variant="outlined"
               value={reviewForm.comment}
               onChange={(e) =>
@@ -567,7 +585,7 @@ export const ReviewSection = ({
               multiline
               rows={4}
               fullWidth
-              placeholder={`Share your experience with this ${entityType}...`}
+              placeholder={getReviewPlaceholder()}
               variant="outlined"
               value={reviewForm.comment}
               onChange={(e) =>
@@ -661,6 +679,8 @@ export const ReviewSection = ({
             >
               <Box>
                 <Typography variant="h5" fontWeight={600}>
+                  {getEntityDisplayName().charAt(0).toUpperCase() +
+                    getEntityDisplayName().slice(1)}{" "}
                   Reviews
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
@@ -859,7 +879,8 @@ export const ReviewSection = ({
                   color="text.secondary"
                   sx={{ mt: 1 }}
                 >
-                  Be the first to leave a review for this {entityType}!
+                  Be the first to leave a review for this{" "}
+                  {getEntityDisplayName()}!
                 </Typography>
               </Box>
             )}

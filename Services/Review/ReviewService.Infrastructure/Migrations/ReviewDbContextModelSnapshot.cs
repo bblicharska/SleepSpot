@@ -36,6 +36,9 @@ namespace ReviewService.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("PropertyId")
                         .HasColumnType("uniqueidentifier");
 

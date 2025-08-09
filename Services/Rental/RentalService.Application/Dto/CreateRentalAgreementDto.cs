@@ -9,18 +9,16 @@ namespace RentalService.Application.Dto
 {
     public class CreateRentalAgreementDto
     {
-        [Required]
-        public Guid PropertyId { get; set; }
+        public Guid? PropertyId { get; set; }
 
         public Guid? RoomId { get; set; }
 
         public Guid? GroupId { get; set; }
         public Guid? UserId { get; set; }
 
-        [Required]
         public DateTime StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         [Required]
         [Range(0, double.MaxValue)]

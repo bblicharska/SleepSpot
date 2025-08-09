@@ -45,7 +45,7 @@ namespace RentalService.Infrastructure.ExternalClients
         {
             try
             {
-                var response = await _httpClient.GetAsync($"/api/Room/{roomId}");
+                var response = await _httpClient.GetAsync($"/api/Property/rooms/{roomId}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<RoomDto>();

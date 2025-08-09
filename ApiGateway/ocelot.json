@@ -366,6 +366,18 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Review/owner/{ownerId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "review-api",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/api/reviews/owner/{ownerId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Review/average-rating/property/{propertyId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -568,6 +580,18 @@
       ],
       "UpstreamPathTemplate": "/api/rentals/{id}",
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/user/{userId}/active}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5033
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/user/{userId}/active",
+      "UpstreamHttpMethod": [ "GET"]
     },
     {
       "DownstreamPathTemplate": "/uploads/{everything}",

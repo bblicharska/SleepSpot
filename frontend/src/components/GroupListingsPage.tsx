@@ -344,21 +344,6 @@ export const GroupListingsPage: React.FC = () => {
                         {listing.title}
                       </Typography>
                     </Box>
-                    {listing.description && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          mb: 2,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {listing.description}
-                      </Typography>
-                    )}
                     <Stack spacing={1} mb={2}>
                       <Box display="flex" alignItems="center" gap={1}>
                         <Chip

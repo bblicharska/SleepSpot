@@ -82,6 +82,13 @@ namespace ReviewService.Application.Services
             return reviewDtos;
         }
 
+        public async Task<IEnumerable<ReviewDto>> GetReviewsForOwnerAsync(Guid ownerId)
+        {
+            var reviews = await _unitOfWork.ReviewRepository.GetByOwnerIdAsync(ownerId);
+            var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
+            return reviewDtos;
+        }
+
         public async Task<double> GetAverageRatingForPropertyAsync(Guid propertyId)
         {
             return await _unitOfWork.ReviewRepository.GetAverageRatingByPropertyIdAsync(propertyId);

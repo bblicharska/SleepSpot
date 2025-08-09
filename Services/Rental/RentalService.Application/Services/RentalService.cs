@@ -35,22 +35,18 @@ namespace RentalService.Application.Services
 
             var tasks = agreementDtos.Select(async dto =>
             {
-                // Property
-                dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId);
-
-                // Room (optional)
+                if (dto.RoomId.HasValue)
+                {
+                    dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId.Value);
+                }
                 if (dto.RoomId.HasValue)
                 {
                     dto.Room = await _propertyClient.GetRoomByIdAsync(dto.RoomId.Value);
                 }
-
-                // Group (optional)
                 if (dto.GroupId.HasValue)
                 {
                     dto.Group = await _groupClient.GetGroupByIdAsync(dto.GroupId.Value);
                 }
-
-                // User (optional)
                 if (dto.UserId.HasValue)
                 {
                     dto.User = await _userClient.GetUserByIdAsync(dto.UserId.Value);
@@ -122,6 +118,37 @@ namespace RentalService.Application.Services
             _unitOfWork.RentalAgreementRepository.Remove(agreement);
             await _unitOfWork.CommitAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<RentalAgreementDto>> GetActiveByUserIdAsync(Guid userId)
+        {
+            var agreements = await _unitOfWork.RentalAgreementRepository.GetActiveByUserIdAsync(userId);
+            var agreementDtos = _mapper.Map<List<RentalAgreementDto>>(agreements);
+
+            var tasks = agreementDtos.Select(async dto =>
+            {
+
+                if (dto.PropertyId.HasValue)
+                {
+                    dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId.Value);
+                }
+                if (dto.RoomId.HasValue)
+                {
+                    dto.Room = await _propertyClient.GetRoomByIdAsync(dto.RoomId.Value);
+                }
+                if (dto.GroupId.HasValue)
+                {
+                    dto.Group = await _groupClient.GetGroupByIdAsync(dto.GroupId.Value);
+                }
+                if (dto.UserId.HasValue)
+                {
+                    dto.User = await _userClient.GetUserByIdAsync(dto.UserId.Value);
+                }
+
+                return dto;
+            });
+
+            return await Task.WhenAll(tasks);
         }
     }
 }

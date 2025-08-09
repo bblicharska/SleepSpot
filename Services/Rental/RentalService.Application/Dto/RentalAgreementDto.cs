@@ -11,7 +11,7 @@ namespace RentalService.Application.Dto
     {
         public Guid Id { get; set; }
 
-        public Guid PropertyId { get; set; }
+        public Guid? PropertyId { get; set; }
         public Guid? RoomId { get; set; }
 
         public Guid? GroupId { get; set; }

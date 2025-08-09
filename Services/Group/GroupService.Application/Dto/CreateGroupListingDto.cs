@@ -18,5 +18,4 @@ namespace GroupService.Application.Dto
         public Guid? PropertyId { get; set; }
         public Guid? RoomId { get; set; }
     }
-
 }

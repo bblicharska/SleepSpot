@@ -136,6 +136,14 @@ namespace ReviewService.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Review>> GetByOwnerIdAsync(Guid ownerId)
+        {
+            return await _context.Reviews
+                .Where(r => r.OwnerId == ownerId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Review>> GetByReviewerIdAsync(Guid reviewerId)
         {
             try

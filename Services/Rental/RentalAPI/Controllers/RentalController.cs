@@ -58,5 +58,12 @@ namespace RentalAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("user/{userId}/active")]
+        public async Task<ActionResult<IEnumerable<RentalAgreementDto>>> GetActiveByUserId(Guid userId)
+        {
+            var agreements = await _rentalService.GetActiveByUserIdAsync(userId);
+            return Ok(agreements);
+        }
     }
 }

@@ -18,16 +18,11 @@ namespace ReviewService.Application.Services
         Task UpdateReviewAsync(ReviewUpdateDto dto);
         Task DeleteReviewAsync(Guid id);
 
-        // Opinie o property
         Task<IEnumerable<ReviewDto>> GetReviewsForPropertyAsync(Guid propertyId);
-
-        // Opinie o pokoju (jeśli chcesz)
         Task<IEnumerable<ReviewDto>> GetReviewsForRoomAsync(Guid roomId);
-
-        // Opinie napisane przez użytkownika (recenzenta)
+        Task<IEnumerable<ReviewDto>> GetReviewsForOwnerAsync(Guid ownerId);
         Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId);
 
-        // Możesz też mieć średnią ocenę dla property i pokoju
         Task<double> GetAverageRatingForPropertyAsync(Guid propertyId);
         Task<double> GetAverageRatingForRoomAsync(Guid roomId);
     }

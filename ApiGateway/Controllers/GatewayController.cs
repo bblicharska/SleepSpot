@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Shared.Dto;
 using System.Net.Http.Json;
@@ -50,12 +51,17 @@ namespace ApiGateway.Controllers
             {
                 try
                 {
+                    _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
                     return JsonSerializer.Deserialize<T>(cached, _jsonOptions);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to deserialize cache key {CacheKey}", cacheKey);
                 }
+            }
+            else
+            {
+                _logger.LogInformation("Cache miss for {CacheKey}", cacheKey);
             }
 
             var freshData = await fetchFunc();
@@ -78,15 +84,17 @@ namespace ApiGateway.Controllers
             return freshData;
         }
 
+        // ---------- Property details: cache base metadata only, always fetch reviews ----------
         [HttpGet("property-details/{propertyId:guid}")]
         public async Task<IActionResult> GetPropertyDetails(Guid propertyId)
         {
-            var cacheKey = $"property-details-{propertyId}";
+            var baseCacheKey = $"property-base-{propertyId}";
             var propertyClient = _httpClientFactory.CreateClient("PropertyClient");
             var reviewClient = _httpClientFactory.CreateClient("ReviewClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            var propertyDetails = await GetOrSetCacheAsync(cacheKey, async () =>
+            // Cache only the base property (no reviews)
+            var propertyBase = await GetOrSetCacheAsync(baseCacheKey, async () =>
             {
                 var propertyResponse = await propertyClient.GetAsync($"/api/Property/{propertyId}");
                 if (!propertyResponse.IsSuccessStatusCode) return null;
@@ -94,62 +102,105 @@ namespace ApiGateway.Controllers
                 var property = await propertyResponse.Content.ReadFromJsonAsync<PropertyDto>();
                 if (property == null) return null;
 
-                var reviews = await SafeCall(async () =>
-                {
-                    var revResp = await reviewClient.GetAsync($"/api/Review/property/{propertyId}");
-                    if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
-                    var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
-                    return revs ?? new List<ReviewDto>();
-                }, "ReviewService", new List<ReviewDto>());
-
-                if (reviews.Any())
-                {
-                    var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
-                    var users = await Task.WhenAll(reviewerIds.Select(async id =>
-                    {
-                        return await SafeCall(async () =>
-                        {
-                            var userResp = await userClient.GetAsync($"/api/User/{id}");
-                            if (!userResp.IsSuccessStatusCode) return null;
-                            return await userResp.Content.ReadFromJsonAsync<UserDto>();
-                        }, "UserService", null);
-                    }));
-
-                    foreach (var review in reviews)
-                    {
-                        review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
-                    }
-                }
-                property.Reviews = reviews;
-
+                // Fetch owner (we can cache owner's basic info with the property base)
                 var owner = await SafeCall(async () =>
                 {
                     var ownerResp = await userClient.GetAsync($"/api/User/{property.OwnerId}");
-                    if (!ownerResp.IsSuccessStatusCode) return new UserDto();
-                    return await ownerResp.Content.ReadFromJsonAsync<UserDto>() ?? new UserDto();
-                }, "UserService", new UserDto());
+                    if (!ownerResp.IsSuccessStatusCode) return null;
+                    return await ownerResp.Content.ReadFromJsonAsync<UserDto>();
+                }, "UserService", null);
 
-                property.Owner = owner;
+                if (owner != null)
+                {
+                    // attach a lightweight owner DTO (without reviews)
+                    property.Owner = new UserDto
+                    {
+                        Id = owner.Id,
+                        FirstName = owner.FirstName,
+                        LastName = owner.LastName,
+                        Email = owner.Email
+                    };
+                }
+                else
+                {
+                    property.Owner = null;
+                }
+
+                // IMPORTANT: do NOT cache reviews in the base object
+                property.Reviews = new List<ReviewDto>();
 
                 return property;
             }, TimeSpan.FromMinutes(10));
 
-            if (propertyDetails == null)
+            if (propertyBase == null)
                 return NotFound($"Property {propertyId} not found.");
 
-            return Ok(propertyDetails);
+            // --- ALWAYS fetch fresh reviews (do not read from the base cache) ---
+            var propertyReviews = await SafeCall(async () =>
+            {
+                var revResp = await reviewClient.GetAsync($"/api/Review/property/{propertyId}");
+                if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
+                var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
+                return revs ?? new List<ReviewDto>();
+            }, "ReviewService", new List<ReviewDto>());
+
+            var ownerReviews = new List<ReviewDto>();
+            if (propertyBase.Owner?.Id != null && propertyBase.Owner.Id != Guid.Empty)
+            {
+                ownerReviews = await SafeCall(async () =>
+                {
+                    var ownerRevResp = await reviewClient.GetAsync($"/api/Review/owner/{propertyBase.Owner.Id}");
+                    if (!ownerRevResp.IsSuccessStatusCode) return new List<ReviewDto>();
+                    var ownerRevs = await ownerRevResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
+                    return ownerRevs ?? new List<ReviewDto>();
+                }, "ReviewService", new List<ReviewDto>());
+            }
+
+            // Enrich reviewers (fetch user details for all reviewer ids)
+            var allReviews = propertyReviews.Concat(ownerReviews).ToList();
+            if (allReviews.Any())
+            {
+                var reviewerIds = allReviews.Select(r => r.ReviewerId).Distinct();
+                var users = await Task.WhenAll(reviewerIds.Select(async id =>
+                {
+                    return await SafeCall(async () =>
+                    {
+                        var userResp = await userClient.GetAsync($"/api/User/{id}");
+                        if (!userResp.IsSuccessStatusCode) return null;
+                        return await userResp.Content.ReadFromJsonAsync<UserDto>();
+                    }, "UserService", null);
+                }));
+
+                foreach (var review in propertyReviews)
+                {
+                    review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
+                }
+
+                foreach (var review in ownerReviews)
+                {
+                    review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
+                }
+            }
+
+            // Attach fresh reviews to the cached base object for return (but do NOT persist that into the cache)
+            var propertyToReturn = propertyBase;
+            propertyToReturn.Reviews = propertyReviews;
+            if (propertyToReturn.Owner != null)
+                propertyToReturn.Owner.Reviews = ownerReviews;
+
+            return Ok(propertyToReturn);
         }
 
-
+        // ---------- Room details: cache base metadata only, always fetch reviews ----------
         [HttpGet("room-details/{roomId:guid}")]
         public async Task<IActionResult> GetRoomDetails(Guid roomId)
         {
-            var cacheKey = $"room-details-{roomId}";
+            var baseCacheKey = $"room-base-{roomId}";
             var propertyClient = _httpClientFactory.CreateClient("PropertyClient");
             var reviewClient = _httpClientFactory.CreateClient("ReviewClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            var roomDetails = await GetOrSetCacheAsync(cacheKey, async () =>
+            var roomBase = await GetOrSetCacheAsync(baseCacheKey, async () =>
             {
                 var roomDetailsResponse = await propertyClient.GetAsync($"/api/Property/rooms/{roomId}/details");
                 if (!roomDetailsResponse.IsSuccessStatusCode) return null;
@@ -157,64 +208,84 @@ namespace ApiGateway.Controllers
                 var room = await roomDetailsResponse.Content.ReadFromJsonAsync<RoomWithPropertyDetailsDto>();
                 if (room == null) return null;
 
-                if (room.OwnerId.HasValue)
+                var owner = await SafeCall(async () =>
                 {
-                    var owner = await SafeCall(async () =>
-                    {
-                        var ownerResp = await userClient.GetAsync($"/api/User/{room.OwnerId.Value}");
-                        if (!ownerResp.IsSuccessStatusCode) return null;
-                        return await ownerResp.Content.ReadFromJsonAsync<UserDto>();
-                    }, "UserService", null);
+                    if (!room.OwnerId.HasValue) return null;
+                    var ownerResp = await userClient.GetAsync($"/api/User/{room.OwnerId.Value}");
+                    if (!ownerResp.IsSuccessStatusCode) return null;
+                    return await ownerResp.Content.ReadFromJsonAsync<UserDto>();
+                }, "UserService", null);
 
-                    if (owner != null)
+                if (owner != null)
+                {
+                    room.Owner = new OwnerInfoDto
                     {
-                        room.Owner = new OwnerInfoDto
-                        {
-                            FirstName = owner.FirstName,
-                            LastName = owner.LastName,
-                            Email = owner.Email
-                        };
-                    }
+                        FirstName = owner.FirstName,
+                        LastName = owner.LastName,
+                        Email = owner.Email
+                    };
                 }
 
-                var reviews = await SafeCall(async () =>
-                {
-                    var revResp = await reviewClient.GetAsync($"/api/Review/room/{roomId}");
-                    if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
-                    var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
-                    return revs ?? new List<ReviewDto>();
-                }, "ReviewService", new List<ReviewDto>());
-
-                if (reviews.Any())
-                {
-                    var reviewerIds = reviews.Select(r => r.ReviewerId).Distinct();
-                    var users = await Task.WhenAll(reviewerIds.Select(async id =>
-                    {
-                        return await SafeCall(async () =>
-                        {
-                            var userResp = await userClient.GetAsync($"/api/User/{id}");
-                            if (!userResp.IsSuccessStatusCode) return null;
-                            return await userResp.Content.ReadFromJsonAsync<UserDto>();
-                        }, "UserService", null);
-                    }));
-
-                    foreach (var review in reviews)
-                    {
-                        review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
-                    }
-                }
-
-                room.Reviews = reviews;
+                // Do not cache reviews inside the room base
+                room.Reviews = new List<ReviewDto>();
 
                 return room;
             }, TimeSpan.FromMinutes(10));
 
-            if (roomDetails == null)
+            if (roomBase == null)
                 return NotFound($"Room {roomId} not found.");
 
-            return Ok(roomDetails);
-        }
+            // Always fetch fresh room reviews
+            var roomReviews = await SafeCall(async () =>
+            {
+                var revResp = await reviewClient.GetAsync($"/api/Review/room/{roomId}");
+                if (!revResp.IsSuccessStatusCode) return new List<ReviewDto>();
+                var revs = await revResp.Content.ReadFromJsonAsync<List<ReviewDto>>();
+                return revs ?? new List<ReviewDto>();
+            }, "ReviewService", new List<ReviewDto>());
 
+            var ownerReviews = new List<ReviewDto>();
+            if (roomBase.Owner != null)
+            {
+                // If you need owner reviews and owner has an id in a different place, adapt accordingly
+                // Here we don't have full owner.Id on OwnerInfoDto, so if you need owner reviews you may
+                // want to store Owner.Id in the base cache or fetch it here. For now we assume OwnerInfoDto
+                // is light and owner reviews are not required in many cases.
+                // If owner reviews are important, fetch owner details (including id) before requesting owner reviews.
+            }
+
+            // Enrich reviewers
+            if (roomReviews.Any() || ownerReviews.Any())
+            {
+                var reviewerIds = roomReviews.Concat(ownerReviews).Select(r => r.ReviewerId).Distinct();
+                var users = await Task.WhenAll(reviewerIds.Select(async id =>
+                {
+                    return await SafeCall(async () =>
+                    {
+                        var userResp = await userClient.GetAsync($"/api/User/{id}");
+                        if (!userResp.IsSuccessStatusCode) return null;
+                        return await userResp.Content.ReadFromJsonAsync<UserDto>();
+                    }, "UserService", null);
+                }));
+
+                foreach (var review in roomReviews)
+                {
+                    review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
+                }
+
+                foreach (var review in ownerReviews)
+                {
+                    review.Reviewer = users.FirstOrDefault(u => u?.Id == review.ReviewerId);
+                }
+            }
+
+            var roomToReturn = roomBase;
+            roomToReturn.Reviews = roomReviews;
+            if (roomToReturn.Owner != null)
+                roomToReturn.Owner.Reviews = ownerReviews;
+
+            return Ok(roomToReturn);
+        }
 
         [HttpGet("group-listing-details/{listingId:guid}")]
         public async Task<IActionResult> GetGroupListingDetails(Guid listingId)
@@ -292,7 +363,6 @@ namespace ApiGateway.Controllers
 
             return Ok(listing);
         }
-
 
         private async Task EnrichGroupMembersWithUserDetails(GroupDto group, HttpClient userClient)
         {

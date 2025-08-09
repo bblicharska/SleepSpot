@@ -40,5 +40,25 @@ namespace GroupService.Infrastructure.ExternalCients
                 return null;
             }
         }
+
+        public async Task<RoomDto?> GetRoomByIdAsync(Guid roomId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Property/rooms/{roomId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<RoomDto>();
+                }
+
+                _logger.LogWarning("Room not found: {RoomId}, status: {StatusCode}", roomId, response.StatusCode);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching room {RoomId}", roomId);
+                return null;
+            }
+        }
     }
 }

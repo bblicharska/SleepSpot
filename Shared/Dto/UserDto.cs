@@ -14,5 +14,6 @@ namespace Shared.Dto
 
         public string Email { get; set; }
         public string Role { get; set; }
+        public List<ReviewDto>? Reviews { get; set; }
     }
 }

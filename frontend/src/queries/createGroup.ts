@@ -7,48 +7,52 @@ export const createGroup = async (groupData: CreateGroupDto) => {
     body: JSON.stringify(groupData),
   });
 
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
   if (!response.ok) {
     let errorMessage = `Failed to create group (status ${response.status})`;
     let invalidEmails: string[] = [];
 
-    const contentType = response.headers.get("content-type") || "";
-
     try {
-      if (contentType.includes("application/json")) {
+      if (isJson) {
         const errorData = await response.json();
 
-        // preferred shapes:
         if (errorData.message) errorMessage = errorData.message;
         else if (errorData.title) errorMessage = errorData.title;
         else if (errorData.errors) {
-          // ASP.NET validation errors object
           errorMessage = Object.values(errorData.errors).flat().join(", ");
         }
 
-        // If backend returns a dedicated invalidEmails array -> use it
-        if (Array.isArray(errorData.invalidEmails) && errorData.invalidEmails.length) {
+        if (Array.isArray(errorData.invalidEmails)) {
           invalidEmails = errorData.invalidEmails.map((e: any) => String(e).trim());
-        }
-
-        // Some servers may put them inside errors.memberEmails
-        if (!invalidEmails.length && errorData.errors?.memberEmails) {
-          invalidEmails = [].concat(errorData.errors.memberEmails).map((e: any) => String(e).trim());
+        } else if (errorData.errors?.memberEmails) {
+          invalidEmails = []
+            .concat(errorData.errors.memberEmails)
+            .map((e: any) => String(e).trim());
         }
       } else {
-        // fallback: try reading text (HTML or plain text)
         const text = await response.text();
         if (text) errorMessage = text;
       }
     } catch (parseErr) {
-      // ignore parse errors, keep default message
       console.warn("Failed to parse error response", parseErr);
     }
 
-    // attach invalidEmails to the Error object so callers can check it
     const err: any = new Error(errorMessage);
     err.invalidEmails = invalidEmails;
     throw err;
   }
 
-  return response.json();
+  if (response.status === 204) {
+    return null; }
+  if (isJson) {
+    try {
+      return await response.json();
+    } catch {
+      return null; 
+    }
+  }
+  return await response.text(); 
 };
+

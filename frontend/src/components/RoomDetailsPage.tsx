@@ -35,10 +35,10 @@ interface OwnerInfoDto {
   firstName: string;
   lastName: string;
   email: string;
+  reviews?: ReviewDto[];
 }
 
 export interface RoomWithPropertyDetailsDto {
-  // Room data
   id: string;
   name: string;
   description: string;
@@ -49,22 +49,15 @@ export interface RoomWithPropertyDetailsDto {
   isAvailable: boolean;
   images: PropertyImageDto[];
   createdAt: string;
-
-  // Property data
   propertyId: string;
   propertyName: string;
   propertyAddress: string;
   ownerId?: string;
-
-  // Other rooms in this property
   otherRoomsInProperty: RoomSummaryDto[];
-
-  // These fields will be populated in Gateway
   owner?: OwnerInfoDto;
   reviews: ReviewDto[];
 }
 
-// Helper function to get initials
 const getInitials = (firstName: string, lastName: string): string => {
   return `${firstName?.charAt(0) || ""}${
     lastName?.charAt(0) || ""
@@ -104,7 +97,7 @@ export const RoomDetailsPage = () => {
 
   const handleContactOwner = () => {
     if (roomDetails?.owner?.email) {
-      window.location.href = `mailto:${roomDetails.owner.email}`;
+      window.location.href = `mailto:${roomDetails.owner.email}?subject=Inquiry about ${roomDetails.name}`;
     }
   };
 
@@ -117,8 +110,7 @@ export const RoomDetailsPage = () => {
     return <Typography variant="h6">Room not found</Typography>;
   }
 
-  // Calculate average rating with safety checks
-  const averageRating =
+  const roomAverageRating =
     roomDetails.reviews && roomDetails.reviews.length > 0
       ? roomDetails.reviews.reduce((sum, review) => {
           const rating =
@@ -129,44 +121,67 @@ export const RoomDetailsPage = () => {
         }, 0) / roomDetails.reviews.length
       : 0;
 
+  const ownerAverageRating =
+    roomDetails.owner?.reviews && roomDetails.owner.reviews.length > 0
+      ? roomDetails.owner.reviews.reduce((sum, review) => {
+          const rating =
+            typeof review.rating === "number" && !isNaN(review.rating)
+              ? review.rating
+              : 0;
+          return sum + rating;
+        }, 0) / roomDetails.owner.reviews.length
+      : 0;
+
   return (
     <Box sx={{ px: { xs: 2, md: 6 }, py: 4 }}>
       <Typography variant="h4" fontWeight={600} gutterBottom>
         {roomDetails.name}
       </Typography>
-
-      {/* Property Information */}
       {roomDetails.propertyName && (
         <Typography variant="h6" color="text.secondary" gutterBottom>
           {roomDetails.propertyName}
         </Typography>
       )}
-
       {roomDetails.propertyAddress && (
         <Typography variant="body1" color="text.secondary" paragraph>
           📍 {roomDetails.propertyAddress}
         </Typography>
       )}
 
-      {/* Reviews Section */}
-      <ReviewSection
-        reviews={roomDetails.reviews || []}
-        entityId={roomDetails.id}
-        entityType="room"
-        onReviewsUpdate={handleReviewsUpdate}
-      />
-
       <Typography variant="subtitle1" color="text.secondary" paragraph>
         {roomDetails.description}
       </Typography>
 
-      {/* Image Gallery */}
+      {/* Room Reviews Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: 600,
+            background: "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Room Reviews
+        </Typography>
+        <ReviewSection
+          reviews={roomDetails.reviews || []}
+          entityId={roomDetails.id}
+          entityType="room"
+          onReviewsUpdate={handleReviewsUpdate}
+        />
+      </Box>
+
+      {/* Owner Information and Reviews Section */}
+
       <ImageGallery
         images={roomDetails.images ?? []}
         title={roomDetails.name}
       />
 
-      {/* Map Section */}
       {roomDetails.propertyAddress && (
         <Box sx={{ my: 4 }}>
           <PropertyMap address={roomDetails.propertyAddress} />
@@ -177,15 +192,12 @@ export const RoomDetailsPage = () => {
 
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 8 }}>
-          {/* Detailed Description */}
           {roomDetails.detailedDescription && (
             <DetailedDescription
               title="About This Room"
               description={roomDetails.detailedDescription}
             />
           )}
-
-          {/* Other Rooms in Property */}
           {roomDetails.otherRoomsInProperty &&
             roomDetails.otherRoomsInProperty.length > 0 && (
               <OtherRoomsSection
@@ -195,116 +207,131 @@ export const RoomDetailsPage = () => {
               />
             )}
         </Grid>
-
         <Grid size={{ xs: 12, md: 4 }}>
-          {/* Room Summary Sidebar */}
           <EntitySummaryCard
             entityType="room"
             name={roomDetails.name}
             pricePerMonth={roomDetails.pricePerMonth}
             areaInSquareMeters={roomDetails.areaInSquareMeters}
-            averageRating={averageRating}
+            averageRating={roomAverageRating}
             reviewsCount={roomDetails.reviews?.length || 0}
             createdAt={roomDetails.createdAt}
             capacity={roomDetails.capacity}
             isAvailable={roomDetails.isAvailable}
             onBookRoom={handleBookRoom}
           />
-
-          {/* Owner Information Card */}
-          {roomDetails.owner && (
-            <Paper
-              elevation={3}
+        </Grid>
+      </Grid>
+      {roomDetails.owner && (
+        <Box sx={{ mb: 4 }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              background:
+                "linear-gradient(135deg, rgba(142, 68, 173, 0.08) 0%, rgba(175, 122, 197, 0.08) 100%)",
+              border: "1px solid rgba(142, 68, 173, 0.2)",
+              mb: 3,
+            }}
+          >
+            <Typography
+              variant="h5"
               sx={{
-                p: 4,
-                borderRadius: 3,
-                background:
-                  "linear-gradient(135deg, rgba(142, 68, 173, 0.08) 0%, rgba(175, 122, 197, 0.08) 100%)",
-                border: "1px solid rgba(142, 68, 173, 0.2)",
-                mt: 3,
+                mb: 3,
+                fontWeight: 600,
+                background: "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              <Typography
-                variant="h6"
-                gutterBottom
+              Property Owner
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+              <Avatar
                 sx={{
-                  fontWeight: 600,
-                  mb: 3,
+                  mr: 3,
                   background:
                     "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  width: 56,
+                  height: 56,
+                  fontSize: "1.5rem",
+                  fontWeight: 600,
                 }}
               >
-                Property Owner
-              </Typography>
-
-              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                <Avatar
+                {getInitials(
+                  roomDetails.owner.firstName,
+                  roomDetails.owner.lastName
+                )}
+              </Avatar>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="h6"
                   sx={{
-                    mr: 3,
-                    background:
-                      "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
-                    width: 56,
-                    height: 56,
-                    fontSize: "1.5rem",
                     fontWeight: 600,
+                    color: "text.primary",
+                    mb: 0.5,
                   }}
                 >
-                  {getInitials(
-                    roomDetails.owner.firstName,
-                    roomDetails.owner.lastName
+                  {roomDetails.owner.firstName} {roomDetails.owner.lastName}
+                </Typography>
+                {roomDetails.owner.reviews &&
+                  roomDetails.owner.reviews.length > 0 && (
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#8E44AD",
+                          fontWeight: 600,
+                          mr: 1,
+                        }}
+                      >
+                        Owner Rating:
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#8E44AD",
+                          fontWeight: 600,
+                        }}
+                      >
+                        ⭐ {ownerAverageRating.toFixed(1)} (
+                        {roomDetails.owner.reviews.length} review
+                        {roomDetails.owner.reviews.length !== 1 ? "s" : ""})
+                      </Typography>
+                    </Box>
                   )}
-                </Avatar>
-                <Box>
-                  <Typography
-                    variant="h6"
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <EmailIcon
                     sx={{
-                      fontWeight: 600,
-                      color: "text.primary",
-                      mb: 0.5,
+                      mr: 1,
+                      fontSize: "1.1rem",
+                      color: "#8E44AD",
                     }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#8E44AD",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      "&:hover": { color: "#6A1B9A" },
+                    }}
+                    onClick={handleContactOwner}
                   >
-                    {roomDetails.owner.firstName} {roomDetails.owner.lastName}
+                    {roomDetails.owner.email}
                   </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <EmailIcon
-                      sx={{
-                        mr: 1,
-                        fontSize: "1.1rem",
-                        color: "#8E44AD",
-                      }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#8E44AD",
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                        "&:hover": { color: "#6A1B9A" },
-                      }}
-                      onClick={handleContactOwner}
-                    >
-                      {roomDetails.owner.email}
-                    </Typography>
-                  </Box>
                 </Box>
               </Box>
-
-              <Divider sx={{ my: 2, borderColor: "rgba(142, 68, 173, 0.3)" }} />
-
               <Button
                 variant="outlined"
-                fullWidth
                 startIcon={<EmailIcon />}
                 onClick={handleContactOwner}
                 sx={{
                   borderColor: "#8E44AD",
                   color: "#8E44AD",
                   fontWeight: 600,
-                  py: 1.2,
-                  borderRadius: 2,
                   textTransform: "none",
                   "&:hover": {
                     borderColor: "#6A1B9A",
@@ -314,12 +341,19 @@ export const RoomDetailsPage = () => {
                   transition: "all 0.3s ease",
                 }}
               >
-                Send Email
+                Contact Owner
               </Button>
-            </Paper>
-          )}
-        </Grid>
-      </Grid>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            <ReviewSection
+              reviews={roomDetails.owner.reviews || []}
+              entityId={roomDetails.ownerId || ""}
+              entityType="owner"
+              onReviewsUpdate={handleReviewsUpdate}
+            />
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 };

@@ -56,6 +56,13 @@ namespace RentalService.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<RentalAgreement>> GetActiveByUserIdAsync(Guid userId)
+        {
+            return await _context.RentalAgreements
+                .Where(ra => ra.UserId == userId && ra.Status == RentalAgreementStatus.Active)
+                .ToListAsync();
+        }
+
         public async Task AddAsync(RentalAgreement agreement)
         {
             await _context.RentalAgreements.AddAsync(agreement);

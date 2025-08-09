@@ -30,6 +30,18 @@ namespace GroupAPI.Middleware
             catch (Shared.Exceptions.ValidationException ex)
             {
                 _logger.LogError(ex, ex.Message);
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+                var errorResponse = new
+                {
+                    message = ex.Message,
+                    invalidEmails = ex.InvalidEmails
+                };
+
+                var json = System.Text.Json.JsonSerializer.Serialize(errorResponse);
+                await context.Response.WriteAsync(json);
             }
             catch (Exception ex)
             {

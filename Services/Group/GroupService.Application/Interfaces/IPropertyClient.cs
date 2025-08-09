@@ -10,5 +10,6 @@ namespace GroupService.Application.Interfaces
     public interface IPropertyClient
     {
         Task<PropertyDto?> GetPropertyByIdAsync(Guid propertyId);
+        Task<RoomDto?> GetRoomByIdAsync(Guid roomId);
     }
 }

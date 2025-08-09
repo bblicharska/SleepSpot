@@ -19,6 +19,7 @@ namespace ReviewService.Infrastructure.Migrations
                     ReviewerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PropertyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)

@@ -13,7 +13,6 @@ import { PropertyMap } from "./PropertyMap";
 import EmailIcon from "@mui/icons-material/Email";
 import { Property } from "../types/types";
 import { fetchPropertyDetails } from "../queries/fetchPropertyDetails";
-import { useAuth } from "./AuthContext";
 import { LoadingComponent } from "./LoadingComponent";
 import { ImageGallery } from "./ImageGallery";
 import { DetailedDescription } from "./DetailedDescription";
@@ -51,11 +50,11 @@ export const PropertyDetailsPage = () => {
   };
 
   if (loading) return <LoadingComponent text="Loading property details..." />;
+
   if (!property)
     return <Typography variant="h6">Property not found</Typography>;
 
-  // Calculate average rating with safety checks
-  const averageRating =
+  const propertyAverageRating =
     property.reviews && property.reviews.length > 0
       ? property.reviews.reduce((sum, review) => {
           const rating =
@@ -64,6 +63,17 @@ export const PropertyDetailsPage = () => {
               : 0;
           return sum + rating;
         }, 0) / property.reviews.length
+      : 0;
+
+  const ownerAverageRating =
+    property.owner?.reviews && property.owner.reviews.length > 0
+      ? property.owner.reviews.reduce((sum, review) => {
+          const rating =
+            typeof review.rating === "number" && !isNaN(review.rating)
+              ? review.rating
+              : 0;
+          return sum + rating;
+        }, 0) / property.owner.reviews.length
       : 0;
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -81,37 +91,42 @@ export const PropertyDetailsPage = () => {
       <Typography variant="h4" fontWeight={600} gutterBottom>
         {property.name}
       </Typography>
-
       {property.address && (
         <Typography variant="body1" color="text.secondary" paragraph>
-          📍 {property.address}
+          {property.address}
         </Typography>
       )}
-      {/* Reviews Section */}
-      <ReviewSection
-        reviews={property.reviews || []}
-        entityId={property.id}
-        entityType="property"
-        onReviewsUpdate={handleReviewsUpdate}
-      />
-
       <Typography variant="subtitle1" color="text.secondary" paragraph>
         {property.description}
       </Typography>
-
-      {/* Image Gallery */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: 600,
+            background: "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Property Reviews
+        </Typography>
+        <ReviewSection
+          reviews={property.reviews || []}
+          entityId={property.id}
+          entityType="property"
+          onReviewsUpdate={handleReviewsUpdate}
+        />
+      </Box>
       <ImageGallery images={property.images} title={property.name} />
-
-      {/* Map Section */}
       <Box sx={{ my: 4 }}>
         <PropertyMap address={property.address} />
       </Box>
-
       <Divider sx={{ my: 3, borderColor: "rgba(142, 68, 173, 0.2)" }} />
-
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 8 }}>
-          {/* Detailed Description */}
           {property.detailedDescription && (
             <DetailedDescription
               title="About This Property"
@@ -119,133 +134,120 @@ export const PropertyDetailsPage = () => {
             />
           )}
         </Grid>
-
         <Grid size={{ xs: 12, md: 4 }}>
-          {/* Property Summary Sidebar using the common component */}
           <EntitySummaryCard
             entityType="property"
             name={property.name}
             pricePerMonth={property.pricePerMonth}
             areaInSquareMeters={property.areaInSquareMeters}
-            averageRating={averageRating}
+            averageRating={propertyAverageRating}
             reviewsCount={property.reviews?.length || 0}
             isEntirePlaceRentable={property.isEntirePlaceRentable}
             isAvailable={property.isAvailable}
             createdAt={property.createdAt}
           />
-
-          {/* Owner Information Card */}
-          {property.owner && (
-            <Paper
-              elevation={3}
+        </Grid>
+      </Grid>
+      {property.owner && (
+        <Box sx={{ mb: 4 }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              background:
+                "linear-gradient(135deg, rgba(142, 68, 173, 0.08) 0%, rgba(175, 122, 197, 0.08) 100%)",
+              border: "1px solid rgba(142, 68, 173, 0.2)",
+              mb: 3,
+            }}
+          >
+            <Typography
+              variant="h5"
               sx={{
-                p: 4,
-                borderRadius: 3,
-                background:
-                  "linear-gradient(135deg, rgba(142, 68, 173, 0.08) 0%, rgba(175, 122, 197, 0.08) 100%)",
-                border: "1px solid rgba(142, 68, 173, 0.2)",
+                mb: 3,
+                fontWeight: 600,
+                background: "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              <Typography
-                variant="h6"
-                gutterBottom
+              Property Owner
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+              <Avatar
                 sx={{
-                  fontWeight: 600,
-                  mb: 3,
+                  mr: 3,
                   background:
                     "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  width: 56,
+                  height: 56,
+                  fontSize: "1.5rem",
+                  fontWeight: 600,
                 }}
               >
-                Property Owner
-              </Typography>
-
-              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                <Avatar
+                {getInitials(property.owner.firstName, property.owner.lastName)}
+              </Avatar>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="h6"
                   sx={{
-                    mr: 3,
-                    background:
-                      "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)",
-                    width: 56,
-                    height: 56,
-                    fontSize: "1.5rem",
                     fontWeight: 600,
+                    color: "text.primary",
+                    mb: 0.5,
                   }}
                 >
-                  {getInitials(
-                    property.owner.firstName,
-                    property.owner.lastName
-                  )}
-                </Avatar>
-                <Box>
+                  {property.owner.firstName} {property.owner.lastName}
+                </Typography>
+                {property.owner.role && (
                   <Typography
-                    variant="h6"
+                    variant="caption"
                     sx={{
+                      color: "#8E44AD",
+                      backgroundColor: "rgba(142, 68, 173, 0.1)",
+                      px: 1,
+                      py: 0.2,
+                      borderRadius: 1,
+                      fontSize: "0.75rem",
                       fontWeight: 600,
-                      color: "text.primary",
+                      textTransform: "uppercase",
                       mb: 0.5,
+                      display: "inline-block",
                     }}
                   >
-                    {property.owner.firstName} {property.owner.lastName}
+                    {property.owner.role}
                   </Typography>
-                  {property.owner.role && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "#8E44AD",
-                        backgroundColor: "rgba(142, 68, 173, 0.1)",
-                        px: 1,
-                        py: 0.2,
-                        borderRadius: 1,
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        mb: 0.5,
-                        display: "inline-block",
-                      }}
-                    >
-                      {property.owner.role}
-                    </Typography>
-                  )}
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <EmailIcon
-                      sx={{
-                        mr: 1,
-                        fontSize: "1.1rem",
-                        color: "#8E44AD",
-                      }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#8E44AD",
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                        "&:hover": { color: "#6A1B9A" },
-                      }}
-                      onClick={handleContactOwner}
-                    >
-                      {property.owner.email}
-                    </Typography>
-                  </Box>
+                )}
+                <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+                  <EmailIcon
+                    sx={{
+                      mr: 1,
+                      fontSize: "1.1rem",
+                      color: "#8E44AD",
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#8E44AD",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      "&:hover": { color: "#6A1B9A" },
+                    }}
+                    onClick={handleContactOwner}
+                  >
+                    {property.owner.email}
+                  </Typography>
                 </Box>
               </Box>
-
-              <Divider sx={{ my: 2, borderColor: "rgba(142, 68, 173, 0.3)" }} />
-
               <Button
                 variant="outlined"
-                fullWidth
                 startIcon={<EmailIcon />}
                 onClick={handleContactOwner}
                 sx={{
                   borderColor: "#8E44AD",
                   color: "#8E44AD",
                   fontWeight: 600,
-                  py: 1.2,
-                  borderRadius: 2,
                   textTransform: "none",
                   "&:hover": {
                     borderColor: "#6A1B9A",
@@ -255,12 +257,19 @@ export const PropertyDetailsPage = () => {
                   transition: "all 0.3s ease",
                 }}
               >
-                Send Email
+                Contact Owner
               </Button>
-            </Paper>
-          )}
-        </Grid>
-      </Grid>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
+            <ReviewSection
+              reviews={property.owner.reviews || []}
+              entityId={property.owner.id || property.ownerId}
+              entityType="owner"
+              onReviewsUpdate={handleReviewsUpdate}
+            />
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 };
