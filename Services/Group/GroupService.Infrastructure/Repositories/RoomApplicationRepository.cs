@@ -30,7 +30,6 @@ namespace GroupService.Infrastructure.Repositories
         public async Task AddAsync(RoomApplication application)
         {
             await _context.RoomApplications.AddAsync(application);
-            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(RoomApplication application)

@@ -45,6 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setShowExpiryToast(true);
     }
   }, [loggedOutDueToExpiry]);
+
   const toggleDrawer = () => setCollapsed(!collapsed);
 
   const isLoggedIn = !!token;
@@ -198,29 +199,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <MenuItem
                   onClick={() => {
                     handleMenuClose();
+                    navigate("/my-groups");
+                  }}
+                  sx={menuItemStyle}
+                >
+                  My Groups
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
                     navigate("/change-password");
                   }}
-                  sx={{
-                    color: "#4a148c",
-                    "&:hover": {
-                      backgroundColor: "#fce4ec",
-                    },
-                  }}
+                  sx={menuItemStyle}
                 >
                   Change Password
                 </MenuItem>
-                <MenuItem
-                  onClick={handleLogout}
-                  sx={{
-                    color: "#4a148c",
-                    "&:hover": {
-                      backgroundColor: "#fce4ec",
-                    },
-                    "&.Mui-focusVisible": {
-                      backgroundColor: "#fce4ec",
-                    },
-                  }}
-                >
+                <MenuItem onClick={handleLogout} sx={menuItemStyle}>
                   Logout
                 </MenuItem>
               </Menu>
@@ -370,23 +364,6 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const commonBoxStyle = {
-  display: "flex",
-  alignItems: "center",
-  cursor: "pointer",
-  backgroundColor: "#f3e5f5",
-  borderRadius: 2,
-  px: 1.5,
-  py: 0.5,
-  gap: 1,
-  userSelect: "none",
-  boxShadow: "0 1px 3px rgb(0 0 0 / 0.1)",
-  transition: "background-color 0.3s ease",
-  "&:hover": {
-    backgroundColor: "#e1bee7",
-  },
-};
-
 const iconStyle = {
   color: "#6a1b9a",
   fontSize: 28,
@@ -396,4 +373,14 @@ const labelStyle = {
   fontWeight: 600,
   color: "#4a148c",
   whiteSpace: "nowrap",
+};
+
+const menuItemStyle = {
+  color: "#4a148c",
+  "&:hover": {
+    backgroundColor: "#fce4ec",
+  },
+  "&.Mui-focusVisible": {
+    backgroundColor: "#fce4ec",
+  },
 };

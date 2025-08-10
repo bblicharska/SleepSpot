@@ -462,6 +462,18 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Group/members/by-email",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5032
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/members/by-email",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Group/members/{memberId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -591,7 +603,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/rentals/user/{userId}/active",
-      "UpstreamHttpMethod": [ "GET"]
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
       "DownstreamPathTemplate": "/uploads/{everything}",

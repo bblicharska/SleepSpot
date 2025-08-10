@@ -19,6 +19,7 @@ namespace GroupService.Application.Services
 
         Task<IEnumerable<GroupMemberDto>> GetMembersByGroupIdAsync(Guid groupId);
         Task AddMemberAsync(GroupMemberDto dto);
+        Task AddMemberByEmailAsync(AddMemberByEmailRequest dto);
         Task RemoveMemberAsync(Guid memberId);
 
         Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams);

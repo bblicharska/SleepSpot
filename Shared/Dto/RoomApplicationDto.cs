@@ -12,7 +12,7 @@ namespace Shared.Dto
         public Guid ListingId { get; set; }
         public Guid ApplicantUserId { get; set; }
         public string Message { get; set; }
-        public string Status { get; set; } // lub ApplicationStatus enum
+        public string Status { get; set; }
         public UserDto? Applicant { get; set; }
         public DateTime CreatedAt { get; set; }
     }

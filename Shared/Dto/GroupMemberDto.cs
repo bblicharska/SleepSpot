@@ -12,10 +12,10 @@ namespace Shared.Dto
         public Guid Id { get; set; }
         public Guid GroupId { get; set; }
         public Guid UserId { get; set; }
-        public string Role { get; set; } // lub GroupRole enum, jeśli chcesz używać typowanego enuma
+        public string Role { get; set; } 
         public DateTime JoinedAt { get; set; }
 
-        public UserDto? User { get; set; }  // <- pełne info o użytkowniku
+        public UserDto? User { get; set; }
 
     }
 }

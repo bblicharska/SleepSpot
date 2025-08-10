@@ -19,8 +19,8 @@ namespace GroupService.Domain.Models
         public int DesiredRoommatesCount { get; set; } = 1;
         public ListingStatus Status { get; set; } = ListingStatus.Active; 
 
-        public Guid? PropertyId { get; set; } // Optional – jeśli grupa ma przypisane mieszkanie
-        public Guid? RoomId { get; set; } // Optional – jeśli grupa ma przypisany pokój
+        public Guid? PropertyId { get; set; }
+        public Guid? RoomId { get; set; } 
 
         public bool PropertyAlreadyRented { get; set; } = false;
 

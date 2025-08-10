@@ -14,5 +14,6 @@ namespace GroupService.Application.Dto
         public string Email { get; set; } = string.Empty;
 
         public GroupRole Role { get; set; } = GroupRole.Member;
+        public Guid? GroupId { get; set; }
     }
 }

@@ -157,6 +157,7 @@ export interface GroupDto {
   createdByUserId: string;
   createdAt: string;
   members: GroupMemberDto[];
+  listings?: GroupListingDto[];
 }
 
 export interface GroupMemberDto {
@@ -185,6 +186,12 @@ export interface CreateGroupDto {
   description: string;
   createdByUserId?: string;
   memberEmails: string[];
+}
+
+export interface AddMemberByEmailRequest {
+  email: string;
+  role: string;
+  groupId?: string;
 }
 
 export interface RoomApplicationDto {

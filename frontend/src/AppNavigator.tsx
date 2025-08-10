@@ -9,6 +9,7 @@ import { ChangePasswordPage } from "./components/ChangePasswordPage";
 import { GroupListingsPage } from "./components/GroupListingsPage";
 import { GroupListingDetailsPage } from "./components/GroupListingDetailsPage";
 import { GroupListingCreationPage } from "./components/CreateListing/CreateGroupListingPage";
+import { MyGroupsPage } from "./components/MyGroupsPage";
 
 export const AppNavigator: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ export const AppNavigator: React.FC = () => {
         path="/group-listing/create"
         element={<GroupListingCreationPage />}
       />
+      <Route path="/my-groups" element={<MyGroupsPage />} />
     </Routes>
   );
 };

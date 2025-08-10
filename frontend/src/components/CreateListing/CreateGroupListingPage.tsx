@@ -434,9 +434,7 @@ export const GroupListingCreationPage: React.FC = () => {
               }
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
-                    <MoneyIcon />
-                  </InputAdornment>
+                  <InputAdornment position="start">PLN</InputAdornment>
                 ),
               }}
               inputProps={{

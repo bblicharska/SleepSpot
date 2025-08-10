@@ -74,6 +74,13 @@ namespace GroupAPI.Controllers
             return NoContent();
         }
 
+        [HttpPost("members/by-email")]
+        public async Task<IActionResult> AddMemberByEmail([FromBody] AddMemberByEmailRequest dto)
+        {
+            await _groupService.AddMemberByEmailAsync(dto);
+            return NoContent();
+        }
+
         [HttpDelete("members/{memberId:guid}")]
         public async Task<IActionResult> RemoveMember(Guid memberId)
         {

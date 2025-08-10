@@ -14,6 +14,7 @@ using Shared.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using AutoMapper.Execution;
 
 namespace GroupService.Application.Services
 {
@@ -87,7 +88,6 @@ namespace GroupService.Application.Services
 
         public async Task<Guid> CreateGroupAsync(CreateGroupDto dto)
         {
-            // 1. Walidacja członków (z unikaniem duplikatów i 2x calli do API)
             var invalidEmails = new List<string>();
             var membersToAdd = new List<UserDto>();
 
@@ -104,8 +104,6 @@ namespace GroupService.Application.Services
                         invalidEmails.Add(email);
                         continue;
                     }
-
-                    // Nie dodajemy twórcy jako zwykłego membera
                     if (user.Id != dto.CreatedByUserId)
                     {
                         membersToAdd.Add(user);
@@ -118,7 +116,6 @@ namespace GroupService.Application.Services
                 throw new Shared.Exceptions.ValidationException($"The following emails were not found: {string.Join(", ", invalidEmails)}");
             }
 
-            // 2. Utworzenie grupy + członków w jednej transakcji
             var group = new Group
             {
                 Id = Guid.NewGuid(),
@@ -127,10 +124,8 @@ namespace GroupService.Application.Services
                 CreatedByUserId = dto.CreatedByUserId,
                 CreatedAt = DateTime.UtcNow
             };
-
             await _unitOfWork.GroupRepository.AddAsync(group);
 
-            // Twórca jako admin
             var creatorMember = new GroupMember
             {
                 Id = Guid.NewGuid(),
@@ -141,7 +136,6 @@ namespace GroupService.Application.Services
             };
             await _unitOfWork.GroupMemberRepository.AddAsync(creatorMember);
 
-            // Pozostali członkowie
             foreach (var user in membersToAdd)
             {
                 var member = new GroupMember
@@ -176,7 +170,14 @@ namespace GroupService.Application.Services
         public async Task DeleteGroupAsync(Guid groupId)
         {
             var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId);
-            if (group == null) throw new KeyNotFoundException("Group not found");
+            if (group == null)
+                throw new KeyNotFoundException("Group not found");
+            var listings = await _unitOfWork.GroupListingRepository.GetByGroupIdAsync(groupId);
+
+            foreach (var listing in listings)
+            {
+                await _unitOfWork.GroupListingRepository.DeleteAsync(listing);
+            }
 
             await _unitOfWork.GroupRepository.DeleteAsync(group);
             await _unitOfWork.CommitAsync();
@@ -192,6 +193,15 @@ namespace GroupService.Application.Services
                 dto.Members = _mapper.Map<List<GroupMemberDto>>(
                     await _unitOfWork.GroupMemberRepository.GetByGroupIdAsync(dto.Id)
                 );
+
+                foreach (var member in dto.Members)
+                {
+                    var userInfo = await _userClient.GetUserByIdAsync(member.UserId);
+                    if (userInfo != null)
+                    {
+                        member.User = userInfo; 
+                    }
+                }
             }
 
             return dtos;
@@ -213,6 +223,36 @@ namespace GroupService.Application.Services
             await _unitOfWork.GroupMemberRepository.AddAsync(member);
             await _unitOfWork.CommitAsync();
         }
+
+        public async Task AddMemberByEmailAsync(AddMemberByEmailRequest dto)
+        {
+            if (!dto.GroupId.HasValue) throw new ArgumentException("GroupId is required.", nameof(dto.GroupId));
+
+            var groupId = dto.GroupId.Value;
+
+            var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId);
+            if (group == null) throw new KeyNotFoundException("Group not found");
+
+            var user = await _userClient.GetUserByEmailAsync(dto.Email);
+            if (user == null) throw new KeyNotFoundException($"User with email {dto.Email} not found.");
+
+            var members = group.Members ?? (await _unitOfWork.GroupMemberRepository.GetByGroupIdAsync(groupId)).ToList();
+            if (members.Any(m => m.UserId == user.Id))
+                throw new InvalidOperationException("User is already a member of the group.");
+
+            var member = new GroupMember
+            {
+                Id = Guid.NewGuid(),
+                GroupId = groupId,
+                UserId = user.Id,
+                Role = dto.Role,
+                JoinedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.GroupMemberRepository.AddAsync(member);
+            await _unitOfWork.CommitAsync();
+        }
+
 
         public async Task RemoveMemberAsync(Guid memberId)
         {
@@ -335,7 +375,17 @@ namespace GroupService.Application.Services
         public async Task<IEnumerable<RoomApplicationDto>> GetApplicationsByListingIdAsync(Guid listingId)
         {
             var applications = await _unitOfWork.RoomApplicationRepository.GetByListingIdAsync(listingId);
-            return _mapper.Map<IEnumerable<RoomApplicationDto>>(applications);
+            var applicationDtos = new List<RoomApplicationDto>();
+
+            foreach (var app in applications)
+            {
+                var userInfo = await _userClient.GetUserByIdAsync(app.ApplicantUserId);
+                var dto = _mapper.Map<RoomApplicationDto>(app);
+                dto.Applicant = userInfo;
+                applicationDtos.Add(dto);
+            }
+
+            return applicationDtos;
         }
 
         public async Task<RoomApplicationDto?> GetApplicationByIdAsync(Guid applicationId)

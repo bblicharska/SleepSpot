@@ -12,7 +12,6 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "./AuthContext";
 
@@ -141,13 +140,11 @@ export const AuthForm: React.FC = () => {
           <Typography variant="h5" gutterBottom fontWeight={600}>
             {mode === "signin" ? "Sign In" : "Sign Up"}
           </Typography>
-
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
-
           <form onSubmit={handleSubmit}>
             {mode === "signup" && (
               <>
@@ -171,7 +168,6 @@ export const AuthForm: React.FC = () => {
                 />
               </>
             )}
-
             <TextField
               fullWidth
               label="Email"
@@ -192,7 +188,6 @@ export const AuthForm: React.FC = () => {
                   : ""
               }
             />
-
             <TextField
               fullWidth
               label="Password"
@@ -216,7 +211,6 @@ export const AuthForm: React.FC = () => {
                 ),
               }}
             />
-
             {mode === "signup" && (
               <TextField
                 fullWidth
@@ -258,7 +252,6 @@ export const AuthForm: React.FC = () => {
                 }}
               />
             )}
-
             <Button
               type="submit"
               variant="contained"
@@ -284,7 +277,6 @@ export const AuthForm: React.FC = () => {
                 "Sign Up"
               )}
             </Button>
-
             <Button
               onClick={toggleMode}
               fullWidth
