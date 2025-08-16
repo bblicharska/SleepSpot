@@ -14,6 +14,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { useAuth } from "./AuthContext";
+import { API_BASE_URL } from "../types/types";
 
 type Mode = "signin" | "signup";
 
@@ -95,7 +96,7 @@ export const AuthForm: React.FC = () => {
           };
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -119,6 +120,7 @@ export const AuthForm: React.FC = () => {
           ? "Successfully signed in!"
           : "Account created successfully!"
       );
+      console.log("Response data:", data);
       console.log("Received token:", data.token);
       login(data.accessToken);
     } catch (err: any) {

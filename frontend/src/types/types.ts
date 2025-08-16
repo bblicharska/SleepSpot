@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:5000';
+export const API_BASE_URL ='http://localhost:5000';
 
 export interface PropertyImageDto {
   id: string;
@@ -18,6 +18,7 @@ export interface RoomDto {
   capacity: number;
   isAvailable: boolean;
   createdAt?: string;
+  availableSince?: string;
   images: PropertyImageDto[];
   detailedDescription?: string;
   reviews?: ReviewDto[];
@@ -74,6 +75,7 @@ export interface Property {
   ownerId: string;
   createdAt: string;
   isAvailable: boolean;
+    availableSince?: string;
   owner?: UserDto;
   reviews?: ReviewDto[];
 }
@@ -92,6 +94,7 @@ export interface PropertyFormData {
   areaInSquareMeters: number;
   isEntirePlaceRentable: boolean;
   isAvailable: boolean;
+  availableSince: string;
   images: PropertyImageDto[];
   rooms: RoomDto[];
 }
@@ -103,6 +106,7 @@ export interface PropertyFilterDto {
   minArea?: number;
   maxArea?: number;
   isAvailable?: boolean;
+  availableSince?: string;
   isEntirePlaceRentable?: boolean;
 }
 
@@ -114,6 +118,7 @@ export interface RoomSearchFilterDto {
   maxArea?: number;
   minCapacity?: number;
   isAvailable?: boolean;
+  availableSince?: string;
 }
 
 export interface RoomFilterDto {
@@ -129,6 +134,7 @@ export interface RoomFilterDto {
   propertyName: string;
   propertyAddress: string;
   propertyOwnerId?: string;
+  availableSince?: string;
 }
 
 export interface GroupListingDto {
@@ -247,6 +253,7 @@ export const initialPropertyData: PropertyFormData = {
   areaInSquareMeters: 0,
   isEntirePlaceRentable: true,
   isAvailable: true,
+  availableSince: new Date().toISOString(),
   images: [],
   rooms: [],
 };
@@ -260,6 +267,7 @@ export const initialRoomData: RoomDto = {
   areaInSquareMeters: 0,
   capacity: 1,
   isAvailable: true,
+  availableSince: new Date().toISOString(),
   images: [],
 };
 

@@ -15,5 +15,6 @@ namespace Shared.Dto
         public decimal? MaxArea { get; set; }
         public int? MinCapacity { get; set; }
         public bool? IsAvailable { get; set; }
+        public DateTime? AvailableSince{ get; set; }
     }
 }

@@ -24,6 +24,7 @@ namespace PropertyService.Infrastructure.Migrations
                     PricePerMonth = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     IsEntirePlaceRentable = table.Column<bool>(type: "bit", nullable: false),
                     AreaInSquareMeters = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AvailableSince = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -43,6 +44,7 @@ namespace PropertyService.Infrastructure.Migrations
                     DetailedDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PricePerMonth = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AreaInSquareMeters = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AvailableSince = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)

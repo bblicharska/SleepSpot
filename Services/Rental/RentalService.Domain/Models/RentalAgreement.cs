@@ -21,7 +21,7 @@ namespace RentalService.Domain.Models
         public DateTime? EndDate { get; set; }
 
         public decimal MonthlyRent { get; set; }
-        public RentalAgreementStatus Status { get; set; } = RentalAgreementStatus.Active;
+        public RentalAgreementStatus Status { get; set; } = RentalAgreementStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
@@ -31,5 +31,5 @@ public enum RentalAgreementStatus
 {
     Active,
     Terminated,
-    Completed
+    Pending
 }

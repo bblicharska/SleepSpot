@@ -26,6 +26,19 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
   errors,
   onPropertyChange,
 }) => {
+  const handleDateChange = (dateString: string) => {
+    if (!dateString) return new Date().toISOString();
+
+    const [year, month, day] = dateString.split("-").map(Number);
+    const localDate = new Date(year, month - 1, day, 12, 0, 0); // Set to noon to avoid DST issues
+    return localDate.toISOString();
+  };
+
+  const getDateInputValue = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toISOString().split("T")[0];
+  };
+
   return (
     <Box sx={{ mt: 3 }}>
       <Grid container spacing={3}>
@@ -134,6 +147,21 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
                 </InputAdornment>
               ),
             }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField
+            fullWidth
+            type="date"
+            label="Available Since"
+            value={getDateInputValue(propertyData.availableSince)}
+            onChange={(e) =>
+              onPropertyChange(
+                "availableSince",
+                handleDateChange(e.target.value)
+              )
+            }
+            InputLabelProps={{ shrink: true }}
           />
         </Grid>
 

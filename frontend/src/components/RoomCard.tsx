@@ -2,26 +2,16 @@ import React from "react";
 import { BaseCard } from "./BaseCard";
 import { PropertyImageDto } from "../types/types";
 
-interface Image {
-  id: string;
-  imageUrl: string;
-  originalFileName: string;
-  isPrimary: boolean;
-  displayOrder: number;
-}
-
 interface RoomCardProps {
   name: string;
   description: string;
-  image?: string; // Primary image URL
-  images?: PropertyImageDto[]; // All images for carousel
+  image?: string;
+  images?: PropertyImageDto[];
   price: number;
   area: number;
   capacity: number;
   address: string;
   onViewDetails: () => void;
-  canDelete?: boolean;
-  onDelete?: () => void;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
@@ -34,8 +24,6 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   capacity,
   address,
   onViewDetails,
-  canDelete = false,
-  onDelete,
 }) => {
   return (
     <BaseCard
@@ -49,8 +37,6 @@ export const RoomCard: React.FC<RoomCardProps> = ({
       capacity={capacity}
       cardType="room"
       onViewDetails={onViewDetails}
-      canDelete={canDelete}
-      onDelete={onDelete}
     />
   );
 };

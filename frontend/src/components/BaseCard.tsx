@@ -18,7 +18,6 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import { PropertyImageDto } from "../types/types";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { getImageUrl } from "../queries/getImageUrl";
 
 interface BaseCardProps {
@@ -32,8 +31,6 @@ interface BaseCardProps {
   capacity?: number;
   cardType: "property" | "room";
   onViewDetails: () => void;
-  canDelete?: boolean;
-  onDelete?: () => void;
 }
 
 export const BaseCard: React.FC<BaseCardProps> = ({
@@ -47,8 +44,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   capacity,
   cardType,
   onViewDetails,
-  canDelete = false,
-  onDelete,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
@@ -147,29 +142,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         },
       }}
     >
-      {canDelete && (
-        <IconButton
-          aria-label="delete"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onDelete) onDelete();
-          }}
-          sx={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            color: "rgba(255, 0, 0, 0.8)",
-            backgroundColor: "rgba(255,255,255,0.8)",
-            "&:hover": {
-              backgroundColor: "rgba(255,0,0,0.15)",
-              color: "red",
-            },
-            zIndex: 10,
-          }}
-        >
-          <DeleteIcon />
-        </IconButton>
-      )}
       <Box
         sx={{
           position: "relative",

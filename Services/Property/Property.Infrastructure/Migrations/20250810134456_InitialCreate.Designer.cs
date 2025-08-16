@@ -12,7 +12,7 @@ using PropertyService.Infrastructure;
 namespace PropertyService.Infrastructure.Migrations
 {
     [DbContext(typeof(PropertyDbContext))]
-    [Migration("20250630221236_InitialCreate")]
+    [Migration("20250810134456_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -37,6 +37,9 @@ namespace PropertyService.Infrastructure.Migrations
 
                     b.Property<decimal>("AreaInSquareMeters")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("AvailableSince")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -117,6 +120,9 @@ namespace PropertyService.Infrastructure.Migrations
 
                     b.Property<decimal>("AreaInSquareMeters")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("AvailableSince")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Capacity")
                         .HasColumnType("int");

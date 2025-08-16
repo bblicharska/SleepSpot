@@ -19,7 +19,8 @@ namespace PropertyService.Domain.Models
         public string? DetailedDescription { get; set; }
 
         public decimal PricePerMonth { get; set; }
-        public decimal AreaInSquareMeters { get; set; } // Dodane
+        public decimal AreaInSquareMeters { get; set; }
+        public DateTime AvailableSince { get; set; } = DateTime.UtcNow;
 
         public int Capacity { get; set; } = 1;
         public bool IsAvailable { get; set; } = true;

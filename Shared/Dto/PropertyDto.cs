@@ -19,6 +19,7 @@ namespace Shared.Dto
 
         public decimal PricePerMonth { get; set; }
         public decimal AreaInSquareMeters { get; set; }
+        public DateTime AvailableSince { get; set; } = DateTime.UtcNow;
 
         public bool IsEntirePlaceRentable { get; set; }
         public DateTime CreatedAt { get; set; } 

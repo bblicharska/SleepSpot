@@ -1,47 +1,87 @@
 import React from "react";
-import { Box, Typography, Paper, Divider, Chip, Button } from "@mui/material";
+import { Box, Typography, Paper, Divider, Chip } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 interface EntitySummaryCardProps {
   entityType: "property" | "room";
-  name: string;
   pricePerMonth: number;
   areaInSquareMeters: number;
   averageRating?: number;
   reviewsCount?: number;
   createdAt?: string;
-  // Property specific props
+  availableSince?: string;
   isEntirePlaceRentable?: boolean;
-  // Room specific props
   capacity?: number;
   isAvailable?: boolean;
-  onBookRoom?: () => void;
-  // Display control props
   showReviews?: boolean;
   showAvailability?: boolean;
   showCreatedDate?: boolean;
+  showAvailableSince?: boolean;
 }
 
 export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
   entityType,
-  name,
   pricePerMonth,
   areaInSquareMeters,
   averageRating = 0,
   reviewsCount = 0,
   createdAt,
+  availableSince,
   isEntirePlaceRentable,
   capacity,
   isAvailable,
-  onBookRoom,
   showReviews = true,
   showAvailability = true,
   showCreatedDate = true,
+  showAvailableSince = true,
 }) => {
   const isRoom = entityType === "room";
   const isProperty = entityType === "property";
+
+  const formatAvailableSince = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+    const availableDate = new Date(date);
+    availableDate.setHours(0, 0, 0, 0);
+
+    const diffTime = availableDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const formattedDate = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    if (diffDays < 0) {
+      return {
+        text: `Since ${formattedDate}`,
+        fullText: `Available since ${formattedDate}`,
+        status: "available",
+      };
+    } else if (diffDays === 0) {
+      return {
+        text: "From today",
+        fullText: "Available from today",
+        status: "available",
+      };
+    } else {
+      return {
+        text: `From ${formattedDate}`,
+        fullText: `Available from ${formattedDate}`,
+        status: "future",
+      };
+    }
+  };
+
+  const availabilityInfo = availableSince
+    ? formatAvailableSince(availableSince)
+    : null;
 
   return (
     <Paper
@@ -71,7 +111,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
       >
         {isRoom ? "Room Summary" : "Property Summary"}
       </Typography>
-
       <Box sx={{ mb: 3 }}>
         <Typography
           variant="h4"
@@ -89,10 +128,8 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           per month
         </Typography>
       </Box>
-
       <Divider sx={{ my: 2, borderColor: "rgba(142, 68, 173, 0.3)" }} />
 
-      {/* Size */}
       <Box
         sx={{
           display: "flex",
@@ -115,7 +152,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         />
       </Box>
 
-      {/* Room specific: Capacity */}
       {isRoom && capacity && (
         <Box
           sx={{
@@ -142,7 +178,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Property specific: Type */}
       {isProperty && isEntirePlaceRentable !== undefined && (
         <Box
           sx={{
@@ -168,7 +203,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Room specific: Availability - only show if showAvailability is true */}
       {showAvailability && isAvailable !== undefined && (
         <Box
           sx={{
@@ -179,7 +213,7 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            Availability:
+            Status:
           </Typography>
           <Chip
             icon={isAvailable ? <CheckCircleIcon /> : <CancelIcon />}
@@ -196,7 +230,45 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Reviews - only show if showReviews is true */}
+      {showAvailableSince && availabilityInfo && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Available:
+          </Typography>
+          <Chip
+            icon={<CalendarTodayIcon />}
+            label={availabilityInfo.text}
+            size="small"
+            variant="outlined"
+            title={availabilityInfo.fullText}
+            sx={{
+              borderColor:
+                availabilityInfo.status === "available" ? "#4CAF50" : "#FF9800",
+              color:
+                availabilityInfo.status === "available" ? "#4CAF50" : "#FF9800",
+              backgroundColor:
+                availabilityInfo.status === "available"
+                  ? "rgba(76, 175, 80, 0.08)"
+                  : "rgba(255, 152, 0, 0.08)",
+              fontWeight: 600,
+              "& .MuiChip-icon": {
+                color:
+                  availabilityInfo.status === "available"
+                    ? "#4CAF50"
+                    : "#FF9800",
+              },
+            }}
+          />
+        </Box>
+      )}
+
       {showReviews && (
         <Box
           sx={{
@@ -225,7 +297,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Box>
       )}
 
-      {/* Created Date - only show if showCreatedDate is true */}
       {showCreatedDate && createdAt && (
         <Box
           sx={{
@@ -248,38 +319,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
             {new Date(createdAt).toLocaleDateString()}
           </Typography>
         </Box>
-      )}
-
-      {/* Book Room Button (for rooms only) */}
-      {isRoom && onBookRoom && isAvailable !== undefined && (
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={onBookRoom}
-          disabled={!isAvailable}
-          sx={{
-            background: isAvailable
-              ? "linear-gradient(45deg, #8E44AD 30%, #AF7AC5 90%)"
-              : "rgba(0, 0, 0, 0.12)",
-            color: "white",
-            fontWeight: 600,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: "none",
-            fontSize: "1rem",
-            "&:hover": {
-              background: isAvailable
-                ? "linear-gradient(45deg, #6A1B9A 30%, #8E44AD 90%)"
-                : "rgba(0, 0, 0, 0.12)",
-            },
-            "&:disabled": {
-              color: "rgba(0, 0, 0, 0.26)",
-            },
-            transition: "all 0.3s ease",
-          }}
-        >
-          {isAvailable ? "Book This Room" : "Room Not Available"}
-        </Button>
       )}
     </Paper>
   );

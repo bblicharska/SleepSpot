@@ -13,7 +13,8 @@ public enum PropertySortBy
     Name,
     Price,
     Area,
-    Address
+    Address,
+    AvailableSince
 }
 public enum SortDirection
 {

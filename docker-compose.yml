@@ -44,8 +44,8 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PropertyService;User Id=sa;Password=Password@1235#;TrustServerCertificate=True;
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      - sqlserver
+      - identityapi
     volumes:
       - ./Services/Property/PropertyAPI/wwwroot/uploads:/app/wwwroot/uploads
     networks:
@@ -142,3 +142,4 @@ services:
       - rentalapi
     networks:
       - sleepspot
+      

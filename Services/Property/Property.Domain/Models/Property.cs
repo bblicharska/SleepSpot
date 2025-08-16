@@ -19,6 +19,7 @@ namespace PropertyService.Domain.Models
         public decimal PricePerMonth { get; set; } 
         public bool IsEntirePlaceRentable { get; set; } = true;
         public decimal AreaInSquareMeters { get; set; } 
+        public DateTime AvailableSince { get; set; } = DateTime.UtcNow;
 
         public Guid OwnerId { get; set; }
 

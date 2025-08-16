@@ -28,6 +28,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { API_BASE_URL } from "../types/types";
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 
 const drawerWidth = 240;
 const collapsedWidth = 72;
@@ -39,6 +41,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const { token, user, logout, loggedOutDueToExpiry } = useAuth();
   const [showExpiryToast, setShowExpiryToast] = useState(loggedOutDueToExpiry);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (loggedOutDueToExpiry) {
@@ -65,6 +69,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     logout();
     handleMenuClose();
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleteLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/${user.userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        logout();
+        navigate("/login");
+      } else {
+        console.error("Failed to delete account");
+      }
+    } catch (err) {
+      console.error("Error deleting account", err);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -217,6 +247,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <MenuItem onClick={handleLogout} sx={menuItemStyle}>
                   Logout
                 </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setDeleteDialogOpen(true);
+                  }}
+                  sx={menuItemStyle}
+                >
+                  Delete Account
+                </MenuItem>
+                <DeleteConfirmationDialog
+                  open={deleteDialogOpen}
+                  onClose={() => setDeleteDialogOpen(false)}
+                  onConfirm={handleDeleteAccount}
+                  title="Delete Account"
+                  message="Are you sure you want to delete your account? This action cannot be undone."
+                  loading={deleteLoading}
+                  variant="gradient"
+                />
               </Menu>
             </>
           ) : (

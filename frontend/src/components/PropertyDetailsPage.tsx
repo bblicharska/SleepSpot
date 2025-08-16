@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -8,9 +8,14 @@ import {
   Grid,
   Avatar,
   Button,
+  IconButton,
+  Chip,
 } from "@mui/material";
 import { PropertyMap } from "./PropertyMap";
 import EmailIcon from "@mui/icons-material/Email";
+import SendIcon from "@mui/icons-material/Send";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { Property } from "../types/types";
 import { fetchPropertyDetails } from "../queries/fetchPropertyDetails";
 import { LoadingComponent } from "./LoadingComponent";
@@ -18,11 +23,20 @@ import { ImageGallery } from "./ImageGallery";
 import { DetailedDescription } from "./DetailedDescription";
 import { ReviewSection } from "./ReviewSection";
 import { EntitySummaryCard } from "./EntitySummaryCard";
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
+import { useAuth } from "./AuthContext";
+import { deleteProperty } from "../queries/deleteProperty";
+import { RentalRequestModal } from "./RentalRequestModal";
 
 export const PropertyDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [rentalModalOpen, setRentalModalOpen] = useState(false);
 
   useEffect(() => {
     const loadProperty = async () => {
@@ -49,6 +63,54 @@ export const PropertyDetailsPage = () => {
     }
   };
 
+  const handleDeleteProperty = async () => {
+    if (!property) return;
+
+    setDeleting(true);
+    try {
+      await deleteProperty(property.id);
+      navigate("/properties");
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete property. Please try again."
+      );
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const formatAvailableSince = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+    const availableDate = new Date(date);
+    availableDate.setHours(0, 0, 0, 0);
+
+    const diffTime = availableDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const formattedDate = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    if (diffDays < 0) {
+      return { text: `Available since ${formattedDate}`, status: "available" };
+    } else if (diffDays === 0) {
+      return { text: "Available from today", status: "available" };
+    } else {
+      return { text: `Available from ${formattedDate}`, status: "future" };
+    }
+  };
+
+  const canDelete = property && property.ownerId === user?.userId;
+
   if (loading) return <LoadingComponent text="Loading property details..." />;
 
   if (!property)
@@ -65,17 +127,6 @@ export const PropertyDetailsPage = () => {
         }, 0) / property.reviews.length
       : 0;
 
-  const ownerAverageRating =
-    property.owner?.reviews && property.owner.reviews.length > 0
-      ? property.owner.reviews.reduce((sum, review) => {
-          const rating =
-            typeof review.rating === "number" && !isNaN(review.rating)
-              ? review.rating
-              : 0;
-          return sum + rating;
-        }, 0) / property.owner.reviews.length
-      : 0;
-
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
@@ -86,19 +137,100 @@ export const PropertyDetailsPage = () => {
     }
   };
 
+  const availabilityInfo = property.availableSince
+    ? formatAvailableSince(property.availableSince)
+    : null;
+
   return (
-    <Box sx={{ px: { xs: 2, md: 6 }, py: 4 }}>
-      <Typography variant="h4" fontWeight={600} gutterBottom>
-        {property.name}
-      </Typography>
-      {property.address && (
-        <Typography variant="body1" color="text.secondary" paragraph>
-          {property.address}
+    <Box sx={{ px: { xs: 2, md: 6 }, py: 4, position: "relative" }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mb={2}
+      >
+        <Typography variant="h4" fontWeight={600} gutterBottom>
+          {property.name}
         </Typography>
-      )}
-      <Typography variant="subtitle1" color="text.secondary" paragraph>
-        {property.description}
-      </Typography>
+        {canDelete && (
+          <IconButton
+            onClick={() => setDeleteDialogOpen(true)}
+            sx={{
+              color: "rgba(255, 0, 0, 0.8)",
+              backgroundColor: "rgba(255,255,255,0.8)",
+              border: "1px solid rgba(255, 0, 0, 0.3)",
+              "&:hover": {
+                backgroundColor: "rgba(255,0,0,0.15)",
+                color: "red",
+                borderColor: "red",
+              },
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        )}
+        {property.ownerId !== user?.userId && (
+          <Button
+            variant="contained"
+            startIcon={<SendIcon />}
+            sx={{
+              flexShrink: 0,
+              backgroundColor: "#8B5CF6",
+              color: "white",
+              "&:hover": { backgroundColor: "#7C3AED" },
+              "&:active": { backgroundColor: "#6D28D9" },
+            }}
+            onClick={() => setRentalModalOpen(true)}
+          >
+            Send Rental Request
+          </Button>
+        )}
+        <RentalRequestModal
+          open={rentalModalOpen}
+          onClose={() => setRentalModalOpen(false)}
+          propertyId={id!}
+        />
+      </Box>
+      <Box sx={{ mb: 3 }}>
+        {property.address && (
+          <Typography variant="body1" color="text.secondary" paragraph>
+            {property.address}
+          </Typography>
+        )}
+        {availabilityInfo && (
+          <Box sx={{ mb: 2 }}>
+            <Chip
+              icon={<CalendarTodayIcon />}
+              label={availabilityInfo.text}
+              variant="outlined"
+              sx={{
+                color:
+                  availabilityInfo.status === "available"
+                    ? "#2E7D32"
+                    : "#ED6C02",
+                borderColor:
+                  availabilityInfo.status === "available"
+                    ? "#2E7D32"
+                    : "#ED6C02",
+                backgroundColor:
+                  availabilityInfo.status === "available"
+                    ? "rgba(46, 125, 50, 0.08)"
+                    : "rgba(237, 108, 2, 0.08)",
+                fontWeight: 600,
+                "& .MuiChip-icon": {
+                  color:
+                    availabilityInfo.status === "available"
+                      ? "#2E7D32"
+                      : "#ED6C02",
+                },
+              }}
+            />
+          </Box>
+        )}
+        <Typography variant="subtitle1" color="text.secondary" paragraph>
+          {property.description}
+        </Typography>
+      </Box>
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h5"
@@ -137,7 +269,6 @@ export const PropertyDetailsPage = () => {
         <Grid size={{ xs: 12, md: 4 }}>
           <EntitySummaryCard
             entityType="property"
-            name={property.name}
             pricePerMonth={property.pricePerMonth}
             areaInSquareMeters={property.areaInSquareMeters}
             averageRating={propertyAverageRating}
@@ -145,6 +276,7 @@ export const PropertyDetailsPage = () => {
             isEntirePlaceRentable={property.isEntirePlaceRentable}
             isAvailable={property.isAvailable}
             createdAt={property.createdAt}
+            availableSince={property.availableSince}
           />
         </Grid>
       </Grid>
@@ -270,6 +402,15 @@ export const PropertyDetailsPage = () => {
           </Paper>
         </Box>
       )}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteProperty}
+        title="Delete Property"
+        message={`Are you sure you want to delete "${property.name}"? This action cannot be undone and will also delete all associated rooms.`}
+        variant="gradient"
+        loading={deleting}
+      />
     </Box>
   );
 };

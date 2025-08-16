@@ -35,6 +35,9 @@ namespace PropertyService.Infrastructure.Migrations
                     b.Property<decimal>("AreaInSquareMeters")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("AvailableSince")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -114,6 +117,9 @@ namespace PropertyService.Infrastructure.Migrations
 
                     b.Property<decimal>("AreaInSquareMeters")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("AvailableSince")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Capacity")
                         .HasColumnType("int");

@@ -24,7 +24,7 @@ namespace IdentityService.Infrastructure.Repositories
                 return await _context.Users.FindAsync(id);
             }
 
-            public async Task<List<User>> GetAllAsync() // Zmieniono IList<User> na List<User>
+            public async Task<List<User>> GetAllAsync() 
             {
                 return await _context.Users.ToListAsync();
             }
@@ -34,12 +34,12 @@ namespace IdentityService.Infrastructure.Repositories
                 await _context.Users.AddAsync(user);
             }
 
-            public void Update(User user) // Zmieniono na metodę synchroniczną
+            public void Update(User user) 
             {
                 _context.Users.Update(user);
             }
 
-            public void Delete(User user) // Zmieniono na metodę synchroniczną
+            public void Delete(User user)
             {
                 _context.Users.Remove(user);
             }

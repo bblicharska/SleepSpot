@@ -62,19 +62,16 @@ export const ReviewSection = ({
     severity: "success" as "success" | "error",
   });
 
-  // Calculate average rating from local reviews
   const averageRating = React.useMemo(() => {
     if (!localReviews || localReviews.length === 0) return 0;
     const total = localReviews.reduce((sum, review) => sum + review.rating, 0);
     return total / localReviews.length;
   }, [localReviews]);
 
-  // Update local reviews when props change
   React.useEffect(() => {
     setLocalReviews(reviews || []);
   }, [reviews]);
 
-  // Get entity display name for UI
   const getEntityDisplayName = () => {
     switch (entityType) {
       case "property":
@@ -88,7 +85,6 @@ export const ReviewSection = ({
     }
   };
 
-  // Get review placeholder text
   const getReviewPlaceholder = () => {
     switch (entityType) {
       case "property":
@@ -124,14 +120,12 @@ export const ReviewSection = ({
     setSubmittingReview(true);
 
     try {
-      // Map entityType to the correct field name for the API
       const reviewData: any = {
         rating: reviewForm.rating,
         comment: reviewForm.comment.trim(),
         reviewerId: user.userId,
       };
 
-      // Add the correct ID field based on entityType
       switch (entityType) {
         case "property":
           reviewData.propertyId = entityId;
@@ -148,14 +142,10 @@ export const ReviewSection = ({
 
       const newReview = await postReview(reviewData, token);
 
-      // Immediately update local state for instant UI feedback
       setLocalReviews((prevReviews) => [newReview, ...prevReviews]);
 
-      // Close modal first to prevent UI glitch
       setReviewForm({ rating: 0, comment: "" });
       setAddReviewModalOpen(false);
-
-      // Call the callback to refresh data from parent (in background)
       onReviewsUpdate();
 
       setSnackbar({
@@ -204,10 +194,8 @@ export const ReviewSection = ({
         comment: reviewForm.comment.trim(),
       };
 
-      // Make the API call
       await updateReview(editingReview.id, updateData, token);
 
-      // Immediately update local state with the new data
       setLocalReviews((prevReviews) =>
         prevReviews.map((review) =>
           review.id === editingReview.id
@@ -220,24 +208,20 @@ export const ReviewSection = ({
         )
       );
 
-      // Close modal and reset form immediately after successful update
       setEditReviewModalOpen(false);
       setReviewForm({ rating: 0, comment: "" });
       setEditingReview(null);
 
-      // Show success message
       setSnackbar({
         open: true,
         message: "Review updated successfully!",
         severity: "success",
       });
 
-      // Refresh data from parent in the background (optional)
       try {
         await onReviewsUpdate();
       } catch (refreshError) {
         console.warn("Failed to refresh reviews from parent:", refreshError);
-        // Don't show error to user since the local update was successful
       }
     } catch (error) {
       console.error("Error updating review:", error);
@@ -276,12 +260,10 @@ export const ReviewSection = ({
     try {
       await deleteReview(reviewId, token);
 
-      // Immediately update local state for instant UI feedback
       setLocalReviews((prevReviews) =>
         prevReviews.filter((review) => review.id !== reviewId)
       );
 
-      // Call the callback to refresh data from parent (in background)
       onReviewsUpdate();
 
       setSnackbar({
@@ -411,8 +393,6 @@ export const ReviewSection = ({
           </Button>
         )}
       </Box>
-
-      {/* Add Review Modal */}
       <Dialog
         open={addReviewModalOpen}
         onClose={() => {
@@ -528,8 +508,6 @@ export const ReviewSection = ({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Edit Review Modal */}
       <Dialog
         open={editReviewModalOpen}
         onClose={() => {

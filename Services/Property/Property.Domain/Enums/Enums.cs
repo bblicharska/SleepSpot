@@ -12,7 +12,8 @@ namespace PropertyService.Domain.Enums
         Name,
         Price,
         Area,
-        Address
+        Address,
+        AvailableSince
     }
 
     public enum RoomSortBy
@@ -23,7 +24,8 @@ namespace PropertyService.Domain.Enums
         Area,
         Capacity,
         PropertyName,
-        PropertyAddress
+        PropertyAddress,
+        AvailableSince
     }
 
     public enum SortDirection

@@ -1,4 +1,4 @@
-import { Property, RoomSearchFilterDto, PropertyFilterDto, RoomFilterDto } from "../types/types";
+import { Property, RoomSearchFilterDto, PropertyFilterDto, RoomFilterDto, API_BASE_URL } from "../types/types";
 
 export const searchProperties = async (filters: PropertyFilterDto): Promise<Property[]> => {
   const queryParams = new URLSearchParams();
@@ -10,8 +10,9 @@ export const searchProperties = async (filters: PropertyFilterDto): Promise<Prop
   if (filters.maxArea !== undefined) queryParams.append('maxArea', filters.maxArea.toString());
   if (filters.isAvailable !== undefined) queryParams.append('isAvailable', filters.isAvailable.toString());
   if (filters.isEntirePlaceRentable !== undefined) queryParams.append('isEntirePlaceRentable', filters.isEntirePlaceRentable.toString());
+  if (filters.availableSince) queryParams.append('availableSince', filters.availableSince);
 
-  const response = await fetch(`http://localhost:5000/api/properties/search?${queryParams}`);
+  const response = await fetch(`${API_BASE_URL}/api/properties/search?${queryParams}`);
   
   if (!response.ok) {
     throw new Error('Failed to search properties');
@@ -30,8 +31,9 @@ export const searchRooms = async (filters: RoomSearchFilterDto): Promise<RoomFil
   if (filters.maxArea !== undefined) queryParams.append('maxArea', filters.maxArea.toString());
   if (filters.minCapacity !== undefined) queryParams.append('minCapacity', filters.minCapacity.toString());
   if (filters.isAvailable !== undefined) queryParams.append('isAvailable', filters.isAvailable.toString());
+if (filters.availableSince) queryParams.append('availableSince', filters.availableSince);
 
-  const response = await fetch(`http://localhost:5000/api/properties/rooms/search?${queryParams}`);
+  const response = await fetch(`${API_BASE_URL}/api/properties/rooms/search?${queryParams}`);
   
   if (!response.ok) {
     throw new Error('Failed to search rooms');

@@ -21,6 +21,7 @@ import {
   StarBorder,
   PhotoCamera,
 } from "@mui/icons-material";
+import { API_BASE_URL } from "../types/types";
 
 interface UploadAreaProps {
   isDragOver: boolean;
@@ -82,7 +83,9 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
 
   const loadImages = async () => {
     try {
-      const response = await fetch(`/api/properties/${propertyId}/images`);
+      const response = await fetch(
+        `${API_BASE_URL}/api/properties/${propertyId}/images`
+      );
       if (response.ok) {
         const data = await response.json();
         setImages(data);
@@ -115,7 +118,7 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
 
     try {
       const response: Response = await fetch(
-        `/api/properties/${propertyId}/images`,
+        `${API_BASE_URL}/api/properties/${propertyId}/images`,
         {
           method: "POST",
           body: formData,
@@ -180,7 +183,7 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
   const deleteImage = async (imageId: string): Promise<void> => {
     try {
       const response: DeleteImageResponse & Response = await fetch(
-        `/api/properties/images/${imageId}`,
+        `${API_BASE_URL}/api/properties/images/${imageId}`,
         {
           method: "DELETE",
         }
@@ -203,7 +206,7 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
   const setPrimary = async (imageId: string): Promise<void> => {
     try {
       const response: SetPrimaryResponse = await fetch(
-        `/api/properties/images/${imageId}/primary`,
+        `${API_BASE_URL}/api/properties/images/${imageId}/primary`,
         {
           method: "PUT",
         }

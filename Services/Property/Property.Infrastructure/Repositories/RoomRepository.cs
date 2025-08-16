@@ -123,6 +123,9 @@ namespace PropertyService.Infrastructure.Repositories
             if (f.IsAvailable.HasValue)
                 q = q.Where(r => r.IsAvailable == f.IsAvailable.Value);
 
+            if (f.AvailableSince.HasValue)
+                q = q.Where(r => r.AvailableSince.Date <= f.AvailableSince.Value.Date);
+
             return q;
         }
 
@@ -148,6 +151,9 @@ namespace PropertyService.Infrastructure.Repositories
                 RoomSortBy.PropertyAddress => direction == SortDirection.Ascending
                     ? query.OrderBy(r => r.Property.Address)
                     : query.OrderByDescending(r => r.Property.Address),
+                RoomSortBy.AvailableSince => direction == SortDirection.Ascending
+               ? query.OrderBy(r => r.AvailableSince)
+               : query.OrderByDescending(r => r.AvailableSince),
                 RoomSortBy.CreatedAt => direction == SortDirection.Ascending
                     ? query.OrderBy(r => r.CreatedAt)
                     : query.OrderByDescending(r => r.CreatedAt),

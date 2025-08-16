@@ -15,6 +15,7 @@ namespace Shared.Dto
         public decimal? MinArea { get; set; }
         public decimal? MaxArea { get; set; }
         public bool? IsAvailable { get; set; }
+        public DateTime? AvailableSince { get; set; }
         public bool? IsEntirePlaceRentable { get; set; }
     }
 }

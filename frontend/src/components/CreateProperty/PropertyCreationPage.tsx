@@ -9,6 +9,7 @@ import {
   StepLabel,
 } from "@mui/material";
 import {
+  API_BASE_URL,
   PropertyFormData,
   RoomDto,
   initialPropertyData,
@@ -204,7 +205,7 @@ export const PropertyCreationPage: React.FC = () => {
         id: undefined,
       }));
 
-      const response = await fetch("http://localhost:5000/api/properties", {
+      const response = await fetch(`${API_BASE_URL}/api/properties`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -216,6 +217,7 @@ export const PropertyCreationPage: React.FC = () => {
           areaInSquareMeters: propertyData.areaInSquareMeters,
           isEntirePlaceRentable: propertyData.isEntirePlaceRentable,
           isAvailable: propertyData.isAvailable,
+          availableSince: propertyData.availableSince,
           ownerId: user.userId,
           rooms: sanitizedRooms,
           images: [],
@@ -255,7 +257,7 @@ export const PropertyCreationPage: React.FC = () => {
         });
 
         const imageUploadResponse = await fetch(
-          `http://localhost:5000/api/properties/${createdProperty.id}/images`,
+          `${API_BASE_URL}/api/properties/${createdProperty.id}/images`,
           {
             method: "POST",
             body: imageFormData,
@@ -292,7 +294,7 @@ export const PropertyCreationPage: React.FC = () => {
         });
 
         const uploadRoomImagesResponse = await fetch(
-          `http://localhost:5000/api/properties/rooms/${serverRoomId}/images`,
+          `${API_BASE_URL}/api/properties/rooms/${serverRoomId}/images`,
           {
             method: "POST",
             body: roomFormData,

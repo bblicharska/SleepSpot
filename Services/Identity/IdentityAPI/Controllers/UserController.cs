@@ -21,27 +21,26 @@ namespace IdentityAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> Get() // Zmieniamy metodę na asynchroniczną
+        public async Task<ActionResult<IEnumerable<UserDto>>> Get() 
         {
-            var result = await _userService.GetAllAsync(); // Czekamy na wynik operacji
+            var result = await _userService.GetAllAsync(); 
             return Ok(result);
         }
 
         [HttpDelete("{userId}")]
-        public async Task<ActionResult> Delete(Guid id) // Zmieniamy metodę na asynchroniczną
+        public async Task<ActionResult> Delete(Guid userId)
         {
-            await _userService.DeleteAsync(id); // Czekamy na zakończenie operacji
+            await _userService.DeleteAsync(userId);
             return NoContent();
         }
 
-        // Rejestracja nowego użytkownika
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUserDto) // Asynchroniczna metoda
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUserDto) 
         {
             try
             {
-                var tokenDto = await _userService.RegisterAsync(registerUserDto); // Czekamy na wynik
-                return Ok(tokenDto); // Zwracamy token w odpowiedzi
+                var tokenDto = await _userService.RegisterAsync(registerUserDto); 
+                return Ok(tokenDto); 
             }
             catch (BadRequestException ex)
             {
@@ -49,7 +48,6 @@ namespace IdentityAPI.Controllers
             }
         }
 
-        // Logowanie użytkownika
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginUserDto loginUserDto)
         {
@@ -60,33 +58,31 @@ namespace IdentityAPI.Controllers
                     return BadRequest("Invalid login data.");
                 }
 
-                var tokenDto = await _userService.LoginAsync(loginUserDto); // Zmieniamy na await
-                return Ok(tokenDto); // Zwracamy token w odpowiedzi
+                var tokenDto = await _userService.LoginAsync(loginUserDto); 
+                return Ok(tokenDto);
             }
             catch (BadRequestException ex)
             {
-                return BadRequest(ex.Message); // Zwracamy błąd, jeśli dane są niepoprawne
+                return BadRequest(ex.Message); 
             }
             catch (Exception ex)
             {
-                // Logowanie błędów ogólnych
                 Console.WriteLine($"Error: {ex.Message}");
                 return StatusCode(500, "Something went wrong");
             }
         }
 
-        // Pobieranie danych użytkownika po ID
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(Guid userId) // Asynchroniczna metoda
+        public async Task<IActionResult> GetUserById(Guid userId) 
         {
             try
             {
-                var userDto = await _userService.GetUserByIdAsync(userId); // Czekamy na wynik
-                return Ok(userDto); // Zwracamy dane użytkownika
+                var userDto = await _userService.GetUserByIdAsync(userId);
+                return Ok(userDto); 
             }
             catch (NotFoundException ex)
             {
-                return NotFound(ex.Message); // Zwracamy 404, jeśli użytkownik nie istnieje
+                return NotFound(ex.Message); 
             }
         }
 
@@ -104,14 +100,13 @@ namespace IdentityAPI.Controllers
             }
         }
 
-        // Aktualizowanie danych użytkownika
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserDto updateUserDto) // Asynchroniczna metoda
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserDto updateUserDto) 
         {
             try
             {
-                await _userService.UpdateUserAsync(userId, updateUserDto); // Czekamy na zakończenie operacji
-                return NoContent(); // Zwracamy 204 po udanej aktualizacji
+                await _userService.UpdateUserAsync(userId, updateUserDto);
+                return NoContent();
             }
             catch (NotFoundException ex)
             {
@@ -119,13 +114,12 @@ namespace IdentityAPI.Controllers
             }
         }
 
-        // Zmiana hasła użytkownika
         [HttpPut("{userId}/change-password")]
-        public async Task<IActionResult> ChangePassword(Guid userId, [FromBody] ChangePasswordDto changePasswordDto) // Asynchroniczna metoda
+        public async Task<IActionResult> ChangePassword(Guid userId, [FromBody] ChangePasswordDto changePasswordDto)
         {
             try
             {
-                await _userService.ChangePasswordAsync(userId, changePasswordDto); // Czekamy na zakończenie operacji
+                await _userService.ChangePasswordAsync(userId, changePasswordDto);
                 return NoContent();
             }
             catch (NotFoundException ex)

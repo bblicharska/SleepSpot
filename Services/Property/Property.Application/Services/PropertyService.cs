@@ -109,6 +109,7 @@ namespace PropertyService.Application.Services
                 Description = r.Description,
                 PricePerMonth = r.PricePerMonth,
                 AreaInSquareMeters = r.AreaInSquareMeters,
+                AvailableSince = r.AvailableSince,
                 Capacity = r.Capacity,
                 IsAvailable = r.IsAvailable,
                 Images = _mapper.Map<List<PropertyImageDto>>(r.Images),
@@ -159,6 +160,7 @@ namespace PropertyService.Application.Services
             property.Address = updateDto.Address;
             property.PricePerMonth = updateDto.PricePerMonth;
             property.AreaInSquareMeters = updateDto.AreaInSquareMeters;
+            property.AvailableSince = updateDto.AvailableSince;
             property.IsEntirePlaceRentable = updateDto.IsEntirePlaceRentable;
 
             _unitOfWork.PropertyRepository.Update(property);
@@ -426,6 +428,7 @@ namespace PropertyService.Application.Services
                 DetailedDescription = room.DetailedDescription,
                 PricePerMonth = room.PricePerMonth,
                 AreaInSquareMeters = room.AreaInSquareMeters,
+                AvailableSince = room.AvailableSince,
                 Capacity = room.Capacity,
                 IsAvailable = room.IsAvailable,
                 Images = room.Images?.Select(i => new PropertyImageDto
@@ -453,6 +456,7 @@ namespace PropertyService.Application.Services
                         Description = r.Description,
                         PricePerMonth = r.PricePerMonth,
                         AreaInSquareMeters = r.AreaInSquareMeters,
+                        AvailableSince = r.AvailableSince,
                         Capacity = r.Capacity,
                         IsAvailable = r.IsAvailable,
                         MainImage = r.Images?.OrderBy(img => img.DisplayOrder)

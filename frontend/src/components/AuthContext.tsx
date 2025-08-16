@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../types/types";
 
 interface User {
   userId: string;
@@ -19,7 +20,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  loading: boolean; // Add loading state
+  loading: boolean;
   login: (token: string) => void;
   logout: () => void;
   loggedOutDueToExpiry: boolean;
@@ -33,17 +34,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.getItem("authToken")
   );
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
   const [loggedOutDueToExpiry, setLoggedOutDueToExpiry] = useState(false);
 
   const fetchUserData = async (userId: string, token: string) => {
     try {
-      setLoading(true); // Set loading when starting fetch
-      const response = await fetch(`/api/users/${userId}`, {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Failed to fetch user data");
       const data = await response.json();
+      console.log(response);
+
       setUser({
         userId,
         firstName: data.firstName,
@@ -57,10 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(null);
       localStorage.removeItem("authToken");
     } finally {
-      setLoading(false); // Always set loading to false when done
+      setLoading(false);
     }
   };
-
   useEffect(() => {
     if (token) {
       try {
@@ -77,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(null);
           localStorage.removeItem("authToken");
           setLoggedOutDueToExpiry(true);
-          setLoading(false); // Set loading to false for expired token
+          setLoading(false);
           navigate("/login");
         } else {
           localStorage.setItem("authToken", token);
@@ -88,17 +90,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setToken(null);
         localStorage.removeItem("authToken");
-        setLoading(false); // Set loading to false for invalid token
+        setLoading(false);
       }
     } else {
       setUser(null);
       localStorage.removeItem("authToken");
-      setLoading(false); // Set loading to false when no token
+      setLoading(false);
     }
   }, [token]);
 
   const login = (newToken: string) => {
-    setLoggedOutDueToExpiry(false); // reset flag
+    setLoggedOutDueToExpiry(false);
     setToken(newToken);
     navigate("/main");
   };
@@ -107,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem("authToken");
-    setLoading(false); // Ensure loading is false on logout
+    setLoading(false);
     navigate("/login");
   };
 

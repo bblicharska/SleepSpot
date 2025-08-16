@@ -18,6 +18,7 @@ import {
   ExpandLess,
   AttachMoney,
   Straighten,
+  CalendarToday,
 } from "@mui/icons-material";
 import { RoomSearchFilterDto } from "../types/types";
 
@@ -40,6 +41,7 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
     maxPrice: undefined,
     minArea: undefined,
     maxArea: undefined,
+    availableSince: "",
     isAvailable: true,
   });
 
@@ -50,7 +52,7 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
       setFilters((prev) => ({
         ...prev,
         [field]:
-          field === "location"
+          field === "location" || field === "availableSince"
             ? value
             : value === ""
             ? undefined
@@ -60,10 +62,17 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
 
   const handleSubmit = () => {
     const cleanFilters = Object.fromEntries(
-      Object.entries(filters).filter(
-        ([_, value]) => value !== "" && value !== undefined && value !== null
-      )
+      Object.entries(filters).filter(([key, value]) => {
+        // Keep boolean values as they are meaningful
+        if (typeof value === "boolean") return true;
+        // Filter out empty strings and undefined/null values
+        return value !== "" && value !== undefined && value !== null;
+      })
     ) as RoomSearchFilterDto;
+
+    // Debug log to see what's being sent
+    console.log("RoomFilter - Sending filters:", cleanFilters);
+    console.log("Raw filters before cleaning:", filters);
 
     onFilter(cleanFilters);
   };
@@ -76,6 +85,7 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
       maxPrice: undefined,
       minArea: undefined,
       maxArea: undefined,
+      availableSince: "",
       isAvailable: true,
     });
     onClear();
@@ -225,6 +235,31 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
                     }}
                   />
                 </Box>
+              </Grid>
+
+              {/* Availability Date */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Available From
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Available From"
+                  type="date"
+                  value={filters.availableSince || ""}
+                  onChange={handleInputChange("availableSince")}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CalendarToday />
+                      </InputAdornment>
+                    ),
+                  }}
+                  helperText="Find rooms available from this date onwards"
+                />
               </Grid>
             </Grid>
           </Box>

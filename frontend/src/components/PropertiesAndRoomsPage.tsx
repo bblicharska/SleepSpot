@@ -6,15 +6,11 @@ import {
   Button,
   Tabs,
   Tab,
-  Dialog,
-  DialogContent,
-  IconButton,
   FormControl,
   Select,
   MenuItem,
   Chip,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import SortIcon from "@mui/icons-material/Sort";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import { PropertyCard } from "../components/PropertyCard";
@@ -34,7 +30,6 @@ import { ErrorComponent } from "../components/ErrorComponent";
 import { fetchProperties } from "../queries/fetchProperties";
 import { searchProperties, searchRooms } from "../queries/searchProperties";
 import { useAuth } from "../components/AuthContext";
-import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog";
 
 interface ExtendedRoom extends RoomDto {
   propertyId: string;
@@ -47,12 +42,14 @@ type PropertySortBy =
   | "name"
   | "pricePerMonth"
   | "areaInSquareMeters"
+  | "availableSince"
   | "createdAt";
 type RoomSortBy =
   | "name"
   | "pricePerMonth"
   | "areaInSquareMeters"
   | "capacity"
+  | "availableSince"
   | "createdAt"
   | "propertyName";
 type SortDirection = "asc" | "desc";
@@ -61,6 +58,7 @@ const PROPERTY_SORT_OPTIONS = [
   { value: "name", label: "Name" },
   { value: "pricePerMonth", label: "Price" },
   { value: "areaInSquareMeters", label: "Area" },
+  { value: "availableSince", label: "Available Since" },
   { value: "createdAt", label: "Date Added" },
 ] as const;
 
@@ -69,6 +67,7 @@ const ROOM_SORT_OPTIONS = [
   { value: "pricePerMonth", label: "Price" },
   { value: "areaInSquareMeters", label: "Area" },
   { value: "capacity", label: "Capacity" },
+  { value: "availableSince", label: "Available Since" },
   { value: "propertyName", label: "Property Name" },
   { value: "createdAt", label: "Date Added" },
 ] as const;
@@ -83,10 +82,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     properties?: PropertyFilterDto;
     rooms?: RoomSearchFilterDto;
   }>({});
-  const [deleteTarget, setDeleteTarget] = useState<{
-    type: "property" | "room";
-    id: string;
-  } | null>(null);
 
   const [propertySortBy, setPropertySortBy] =
     useState<PropertySortBy>("createdAt");
@@ -129,6 +124,10 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           aValue = a.areaInSquareMeters || 0;
           bValue = b.areaInSquareMeters || 0;
           break;
+        case "availableSince":
+          aValue = a.availableSince ? new Date(a.availableSince).getTime() : 0;
+          bValue = b.availableSince ? new Date(b.availableSince).getTime() : 0;
+          break;
         case "createdAt":
           aValue = new Date(a.createdAt || 0).getTime();
           bValue = new Date(b.createdAt || 0).getTime();
@@ -168,6 +167,10 @@ export const PropertiesAndRoomsPage: React.FC = () => {
         case "capacity":
           aValue = a.capacity || 0;
           bValue = b.capacity || 0;
+          break;
+        case "availableSince":
+          aValue = a.availableSince ? new Date(a.availableSince).getTime() : 0;
+          bValue = b.availableSince ? new Date(b.availableSince).getTime() : 0;
           break;
         case "propertyName":
           aValue = a.propertyName?.toLowerCase() || "";
@@ -247,6 +250,7 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           areaInSquareMeters: room.areaInSquareMeters!,
           capacity: room.capacity!,
           isAvailable: room.isAvailable!,
+          availableSince: room.availableSince,
           images: room.images || [],
           propertyId: room.propertyId!,
           propertyName: room.propertyName!,
@@ -314,47 +318,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     id: `simple-tab-${index}`,
     "aria-controls": `simple-tabpanel-${index}`,
   });
-
-  const confirmDelete = (type: "property" | "room", id: string) => {
-    setDeleteTarget({ type, id });
-  };
-
-  const cancelDelete = () => {
-    setDeleteTarget(null);
-  };
-
-  const handleDeleteConfirmed = async () => {
-    if (!deleteTarget) return;
-    try {
-      const { type, id } = deleteTarget;
-      const url =
-        type === "property"
-          ? `http://localhost:5000/api/properties/${id}`
-          : `http://localhost:5000/api/properties/rooms/${id}`;
-
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete");
-      }
-
-      // Reload data after delete
-      await loadProperties();
-    } catch (err) {
-      alert(
-        err instanceof Error
-          ? err.message
-          : "Failed to delete. Please try again later."
-      );
-    } finally {
-      setDeleteTarget(null);
-    }
-  };
 
   const InlineSortControls = ({
     isRoom = false,
@@ -520,14 +483,14 @@ export const PropertiesAndRoomsPage: React.FC = () => {
                   price={p.pricePerMonth}
                   area={p.areaInSquareMeters}
                   onViewDetails={() => handleViewPropertyDetails(p.id)}
-                  canDelete={p.ownerId === user?.userId}
-                  onDelete={() => confirmDelete("property", p.id)}
                 />
               </Grid>
             ))}
           </Grid>
         )}
       </Box>
+
+      {/* Rooms Tab */}
       <Box hidden={tabValue !== 1} role="tabpanel">
         <RoomFilter
           onFilter={handleRoomFilter}
@@ -571,24 +534,12 @@ export const PropertiesAndRoomsPage: React.FC = () => {
                   capacity={room.capacity}
                   address={room.propertyAddress}
                   onViewDetails={() => handleViewRoomDetails(room)}
-                  canDelete={room.propertyOwnerId === user?.userId}
-                  onDelete={() => confirmDelete("room", room.id)}
                 />
               </Grid>
             ))}
           </Grid>
         )}
       </Box>
-      <DeleteConfirmationDialog
-        open={!!deleteTarget}
-        onClose={cancelDelete}
-        onConfirm={handleDeleteConfirmed}
-        title="Confirm Deletion"
-        message={`Are you sure you want to delete this ${
-          deleteTarget?.type === "property" ? "property" : "room"
-        }? This action cannot be undone.`}
-        variant="gradient"
-      />
     </Box>
   );
 };

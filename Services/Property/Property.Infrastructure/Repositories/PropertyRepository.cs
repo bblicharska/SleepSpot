@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NLog.Filters;
 using PropertyService.Application.Dto;
 using PropertyService.Domain.Contracts;
 using PropertyService.Domain.Models;
@@ -149,6 +150,9 @@ namespace PropertyService.Infrastructure.Repositories
             if (f.IsAvailable.HasValue)
                 q = q.Where(p => p.isAvailable == f.IsAvailable.Value);
 
+            if (f.AvailableSince.HasValue)
+                q = q.Where(p => p.AvailableSince.Date <= f.AvailableSince.Value.Date);
+
             if (f.IsEntirePlaceRentable.HasValue)
                 q = q.Where(p => p.IsEntirePlaceRentable == f.IsEntirePlaceRentable.Value);
 
@@ -171,6 +175,9 @@ namespace PropertyService.Infrastructure.Repositories
                 PropertySortBy.Address => direction == SortDirection.Ascending
                     ? query.OrderBy(p => p.Address)
                     : query.OrderByDescending(p => p.Address),
+                PropertySortBy.AvailableSince => direction == SortDirection.Ascending
+                ? query.OrderBy(p => p.AvailableSince)
+                : query.OrderByDescending(p => p.AvailableSince),
                 PropertySortBy.CreatedAt => direction == SortDirection.Ascending
                     ? query.OrderBy(p => p.CreatedAt)
                     : query.OrderByDescending(p => p.CreatedAt),

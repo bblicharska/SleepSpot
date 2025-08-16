@@ -33,6 +33,7 @@ import { PropertyMap } from "../components/PropertyMap";
 import { ImageGallery } from "../components/ImageGallery";
 import { DeleteConfirmationDialog } from "../components/DeleteConfirmationDialog";
 import {
+  API_BASE_URL,
   GroupListingDto,
   GroupMemberDto,
   RoomApplicationDto,
@@ -124,16 +125,13 @@ export const GroupListingDetailsPage = () => {
         createdAt: new Date().toISOString(),
       };
 
-      const response = await fetch(
-        "http://localhost:5000/api/groups/applications",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(applicationDto),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/groups/applications`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(applicationDto),
+      });
 
       if (response.ok) {
         setSnackbarMessage("Application submitted successfully!");

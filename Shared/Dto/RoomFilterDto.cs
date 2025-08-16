@@ -16,6 +16,7 @@ namespace Shared.Dto
         public decimal AreaInSquareMeters { get; set; }
         public int Capacity { get; set; }
         public bool IsAvailable { get; set; }
+        public DateTime AvailableSince { get; set; } = DateTime.UtcNow;
         public List<PropertyImageDto> Images { get; set; } = new();
 
         public Guid PropertyId { get; set; }

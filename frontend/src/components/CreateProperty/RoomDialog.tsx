@@ -159,7 +159,21 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               </Select>
             </FormControl>
           </Grid>
-
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              fullWidth
+              type="date"
+              label="Available Since"
+              value={room.availableSince?.split("T")[0]}
+              onChange={(e) =>
+                onRoomChange(
+                  "availableSince",
+                  new Date(e.target.value).toISOString()
+                )
+              }
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
           <Grid size={{ xs: 12 }}>
             <FormControlLabel
               control={
@@ -174,7 +188,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               label="Available for rent"
             />
           </Grid>
-
           <Grid size={{ xs: 12 }}>
             <Divider sx={{ my: 2 }} />
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
