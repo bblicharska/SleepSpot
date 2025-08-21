@@ -570,6 +570,18 @@
       "UpstreamHttpMethod": [ "PUT" ]
     },
     {
+      "DownstreamPathTemplate": "/api/Group/applications/applicant/{applicantId:guid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "group-api",
+          "Port": 5032
+        }
+      ],
+      "UpstreamPathTemplate": "/api/groups/applications/applicant/{applicantId:guid}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Rental",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -594,7 +606,7 @@
       "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Rental/user/{userId}/active}",
+      "DownstreamPathTemplate": "/api/Rental/user/{userId}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -602,8 +614,56 @@
           "Port": 5033
         }
       ],
-      "UpstreamPathTemplate": "/api/rentals/user/{userId}/active",
+      "UpstreamPathTemplate": "/api/rentals/user/{userId}",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/group/{groupId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5033
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/group/{groupId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/{id}/activate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5033
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/{id}/activate",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/{id}/decline",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5033
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/{id}/decline",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Rental/{id}/terminate",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "rental-api",
+          "Port": 5033
+        }
+      ],
+      "UpstreamPathTemplate": "/api/rentals/{id}/terminate",
+      "UpstreamHttpMethod": [ "POST" ]
     },
     {
       "DownstreamPathTemplate": "/uploads/{everything}",

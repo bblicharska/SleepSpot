@@ -18,7 +18,7 @@ namespace RentalService.Application.Mappings
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             CreateMap<CreateRentalAgreementDto, RentalAgreement>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => RentalAgreementStatus.Active))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
             CreateMap<UpdateRentalAgreementDto, RentalAgreement>()

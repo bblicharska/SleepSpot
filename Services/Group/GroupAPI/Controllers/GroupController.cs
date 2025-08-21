@@ -17,13 +17,6 @@ namespace GroupAPI.Controllers
             _groupService = groupService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllGroups()
-        {
-            var result = await _groupService.GetAllGroupsAsync();
-            return Ok(result);
-        }
-
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetGroupById(Guid id)
         {
@@ -37,13 +30,6 @@ namespace GroupAPI.Controllers
         {
             var id = await _groupService.CreateGroupAsync(dto);
             return CreatedAtAction(nameof(GetGroupById), new { id }, id);
-        }
-
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> UpdateGroup(Guid id, [FromBody] CreateGroupDto dto)
-        {
-            await _groupService.UpdateGroupAsync(id, dto);
-            return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
@@ -65,13 +51,6 @@ namespace GroupAPI.Controllers
         {
             var members = await _groupService.GetMembersByGroupIdAsync(groupId);
             return Ok(members);
-        }
-
-        [HttpPost("members")]
-        public async Task<IActionResult> AddMember([FromBody] GroupMemberDto dto)
-        {
-            await _groupService.AddMemberAsync(dto);
-            return NoContent();
         }
 
         [HttpPost("members/by-email")]
@@ -117,13 +96,6 @@ namespace GroupAPI.Controllers
             return CreatedAtAction(nameof(GetListingById), new { listingId = id }, id);
         }
 
-        [HttpPut("listings/{listingId:guid}")]
-        public async Task<IActionResult> UpdateListing(Guid listingId, [FromBody] CreateGroupListingDto dto)
-        {
-            await _groupService.UpdateListingAsync(listingId, dto);
-            return NoContent();
-        }
-
         [HttpDelete("listings/{listingId:guid}")]
         public async Task<IActionResult> DeleteListing(Guid listingId)
         {
@@ -151,6 +123,13 @@ namespace GroupAPI.Controllers
         {
             var id = await _groupService.CreateApplicationAsync(dto);
             return CreatedAtAction(nameof(GetApplicationById), new { applicationId = id }, id);
+        }
+
+        [HttpGet("applications/applicant/{applicantId:guid}")]
+        public async Task<IActionResult> GetApplicationsByApplicantId(Guid applicantId)
+        {
+            var applications = await _groupService.GetApplicationsByApplicantIdAsync(applicantId);
+            return Ok(applications);
         }
 
         [HttpPut("applications/{applicationId:guid}/status")]

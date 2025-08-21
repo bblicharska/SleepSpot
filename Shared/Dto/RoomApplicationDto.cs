@@ -16,5 +16,4 @@ namespace Shared.Dto
         public UserDto? Applicant { get; set; }
         public DateTime CreatedAt { get; set; }
     }
-
 }

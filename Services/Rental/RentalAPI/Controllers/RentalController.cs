@@ -59,11 +59,47 @@ namespace RentalAPI.Controllers
             return NoContent();
         }
 
-        [HttpGet("user/{userId}/active")]
+        [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<RentalAgreementDto>>> GetActiveByUserId(Guid userId)
         {
             var agreements = await _rentalService.GetActiveByUserIdAsync(userId);
             return Ok(agreements);
+        }
+
+        [HttpGet("group/{groupId}")]
+        public async Task<ActionResult<IEnumerable<RentalAgreementDto>>> GetActiveByGroupId(Guid groupId)
+        {
+            var agreements = await _rentalService.GetActiveByGroupIdAsync(groupId);
+            return Ok(agreements);
+        }
+
+        [HttpPost("{id}/activate")]
+        public async Task<ActionResult<RentalAgreementDto>> ActivateRental(Guid id)
+        {
+            var updated = await _rentalService.ActivateRentalAsync(id);
+            if (updated == null)
+                return NotFound();
+
+            return Ok(updated);
+        }
+
+        [HttpPost("{id}/decline")]
+        public async Task<ActionResult<RentalAgreementDto>> DeclineRental(Guid id)
+        {
+            
+                var updated = await _rentalService.DeclineRentalAsync(id);
+                if (updated == null)
+                    return NotFound();
+            return Ok(updated);
+        }
+
+        [HttpPost("{id}/terminate")]
+        public async Task<ActionResult<RentalAgreementDto>> TerminateRental(Guid id)
+        {
+             var updated = await _rentalService.TerminateRentalAsync(id);
+                if (updated == null)
+                    return NotFound();
+            return Ok(updated);
         }
     }
 }

@@ -229,11 +229,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <MenuItem
                   onClick={() => {
                     handleMenuClose();
+                    navigate("/my-applications-rentals");
+                  }}
+                  sx={menuItemStyle}
+                >
+                  My Requests
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
                     navigate("/my-groups");
                   }}
                   sx={menuItemStyle}
                 >
                   My Groups
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
+                    navigate("/my-rental-requests");
+                  }}
+                  sx={menuItemStyle}
+                >
+                  Rental Requests
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -309,10 +327,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              backgroundColor: "#f3e5f5",
             },
           }}
         >
-          <div>
+          <Box>
             <Toolbar />
             <List>
               <ListItem disablePadding onClick={() => navigate("/main")}>
@@ -361,7 +380,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </ListItemButton>
               </ListItem>
             </List>
-          </div>
+          </Box>
           <Box sx={{ textAlign: "center", py: 1 }}>
             <Divider />
             <IconButton onClick={toggleDrawer}>

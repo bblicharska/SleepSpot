@@ -23,7 +23,8 @@ namespace PropertyService.Application.Services
         Task<IEnumerable<RoomDto>> GetRoomsForPropertyAsync(Guid propertyId, RoomSortBy sortBy = RoomSortBy.CreatedAt, SortDirection sortDirection = SortDirection.Descending);
        Task AddRoomToPropertyAsync(Guid propertyId, CreateRoomDto dto);
         Task<List<PropertyImage>> AddMultipleRoomImagesAsync(Guid roomId, List<IFormFile> files);
-        Task RentRoomAsync(Guid roomId);
+        Task RentRoomAsync(Guid roomId, DateTime? availableSince = null);
+        Task RentPropertyAsync(Guid propertyId, DateTime? availableSince = null);
         Task<PropertyImage> AddImageAsync(Guid propertyId, IFormFile file);
         Task<List<PropertyImage>> AddMultipleImagesAsync(Guid propertyId, List<IFormFile> files);
         Task<List<PropertyImage>> GetPropertyImagesAsync(Guid propertyId);
@@ -33,5 +34,8 @@ namespace PropertyService.Application.Services
         Task<RoomWithPropertyDetailsDto?> GetRoomWithPropertyDetailsAsync(Guid roomId);
         Task<IEnumerable<PropertyDto>> SearchPropertiesAsync(PropertyFilterDto filters);
         Task<IEnumerable<RoomFilterDto>> SearchAllRoomsAsync(RoomSearchFilterDto f);
+        Task UpdateRoomAvailabilityAsync(Guid roomId, bool isAvailable, DateTime availableSince );
+        Task UpdatePropertyAvailabilityAsync(Guid propertyId, bool isAvailable, DateTime availableSince );
+
     }
 }

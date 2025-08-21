@@ -46,6 +46,15 @@ namespace GroupService.Infrastructure.Repositories
 
         public async Task<bool> HasPendingApplicationAsync(Guid listingId, Guid userId)
             => await _context.RoomApplications.AnyAsync(a => a.ListingId == listingId && a.ApplicantUserId == userId && a.Status == ApplicationStatus.Pending);
+
+        public async Task<IEnumerable<RoomApplication>> GetByApplicantIdAsync(Guid applicantUserId)
+        {
+            return await _context.RoomApplications
+                .AsNoTracking()
+                .Where(r => r.ApplicantUserId == applicantUserId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
     }
 
 }

@@ -221,6 +221,7 @@ export const PropertyFilter: React.FC<PropertyFilterProps> = ({
                     shrink: true,
                   }}
                   InputProps={{
+                    lang: "en",
                     startAdornment: (
                       <InputAdornment position="start">
                         <CalendarToday />

@@ -277,7 +277,7 @@ namespace PropertyService.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task RentRoomAsync(Guid roomId)
+        public async Task RentRoomAsync(Guid roomId, DateTime? availableSince = null)
         {
             var room = await _unitOfWork.RoomRepository.GetByIdAsync(roomId);
             if (room == null)
@@ -287,7 +287,27 @@ namespace PropertyService.Application.Services
                 throw new InvalidOperationException("Room is already rented.");
 
             room.IsAvailable = false;
+            if (availableSince.HasValue)
+                room.AvailableSince = availableSince.Value;
+
             _unitOfWork.RoomRepository.Update(room);
+            await _unitOfWork.CommitAsync();
+        }
+
+        public async Task RentPropertyAsync(Guid propertyId, DateTime? availableSince = null)
+        {
+            var property = await _unitOfWork.PropertyRepository.GetByIdAsync(propertyId);
+            if (property == null)
+                throw new KeyNotFoundException($"Property with ID {propertyId} not found.");
+
+            if (!property.isAvailable)
+                throw new InvalidOperationException("Property is already rented.");
+
+            property.isAvailable = false;
+            if (availableSince.HasValue)
+                property.AvailableSince = availableSince.Value;
+
+            _unitOfWork.PropertyRepository.Update(property);
             await _unitOfWork.CommitAsync();
         }
 
@@ -489,6 +509,58 @@ namespace PropertyService.Application.Services
             }
 
             return uploadedImages;
+        }
+
+        public async Task UpdateRoomAvailabilityAsync(Guid roomId, bool isAvailable, DateTime availableSince )
+        {
+            var room = await _unitOfWork.RoomRepository.GetByIdAsync(roomId);
+            if (room == null)
+            {
+                _logger.LogWarning("Attempt to update availability for non-existent room {RoomId}", roomId);
+                throw new KeyNotFoundException($"Room with ID {roomId} not found.");
+            }
+
+            try
+            {
+                room.IsAvailable = isAvailable;
+                room.AvailableSince = availableSince;
+
+                _unitOfWork.RoomRepository.Update(room);
+                await _unitOfWork.CommitAsync();
+
+                _logger.LogInformation("Room availability updated: RoomId={RoomId}, IsAvailable={IsAvailable}, AvailableSince={AvailableSince}", roomId, isAvailable, availableSince);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating availability for room {RoomId}", roomId);
+                throw;
+            }
+        }
+
+        public async Task UpdatePropertyAvailabilityAsync(Guid propertyId, bool isAvailable, DateTime availableSince )
+        {
+            var property = await _unitOfWork.PropertyRepository.GetByIdAsync(propertyId);
+            if (property == null)
+            {
+                _logger.LogWarning("Attempt to update availability for non-existent property {PropertyId}", propertyId);
+                throw new KeyNotFoundException($"Property with ID {propertyId} not found.");
+            }
+
+            try
+            {
+                property.isAvailable = isAvailable;
+                property.AvailableSince = availableSince;
+
+                _unitOfWork.PropertyRepository.Update(property);
+                await _unitOfWork.CommitAsync();
+
+                _logger.LogInformation("Property availability updated: PropertyId={PropertyId}, IsAvailable={IsAvailable}, AvailableSince={AvailableSince}", propertyId, isAvailable, availableSince);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating availability for property {PropertyId}", propertyId);
+                throw;
+            }
         }
 
         private bool IsValidImageFile(IFormFile file)

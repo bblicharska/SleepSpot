@@ -59,7 +59,14 @@ namespace RentalService.Infrastructure.Repositories
         public async Task<IEnumerable<RentalAgreement>> GetActiveByUserIdAsync(Guid userId)
         {
             return await _context.RentalAgreements
-                .Where(ra => ra.UserId == userId && ra.Status == RentalAgreementStatus.Active)
+                .Where(ra => ra.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<RentalAgreement>> GetActiveByGroupIdAsync(Guid groupId)
+        {
+            return await _context.RentalAgreements
+                .Where(ra => ra.GroupId == groupId)
                 .ToListAsync();
         }
 

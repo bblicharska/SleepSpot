@@ -27,6 +27,7 @@ export interface RoomDto {
 export interface RoomDetailsResponseDto extends RoomDto {
   propertyAddress: string;
   propertyName: string;
+  ownerId?: string;
   otherRoomsInProperty: RoomSummaryDto[];
 }
 
@@ -228,10 +229,19 @@ export interface GroupListingFilters {
 
 export interface RentalAgreementDto {
   id: string;
+  status: string;
+  monthlyRent: number;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  userId?: string;
+  user?: UserDto;
+  groupId?: string;
+  group?: GroupDto;
   propertyId: string;
   roomId: string | null;
   property?: Property;
-  room?:RoomDto;
+  room?:RoomDetailsResponseDto;
 }
 
 export interface PagedResult<T> {

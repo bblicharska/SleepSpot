@@ -25,13 +25,6 @@ namespace ReviewAPI.Controllers
                 return Ok(review);
             }
 
-            [HttpGet]
-            public async Task<ActionResult<IEnumerable<ReviewDto>>> GetAll()
-            {
-                var reviews = await _reviewService.GetAllReviewsAsync();
-                return Ok(reviews);
-            }
-
             [HttpPost]
             public async Task<ActionResult<Guid>> Create([FromBody] ReviewCreateDto dto)
             {
@@ -56,13 +49,6 @@ namespace ReviewAPI.Controllers
                 return NoContent();
             }
 
-            [HttpGet("by-reviewer/{reviewerId:guid}")]
-            public async Task<ActionResult<IEnumerable<ReviewDto>>> GetByReviewer(Guid reviewerId)
-            {
-                var reviews = await _reviewService.GetReviewsByUserAsync(reviewerId);
-                return Ok(reviews);
-            }
-
             [HttpGet("property/{propertyId:guid}")]
             public async Task<ActionResult<IEnumerable<ReviewDto>>> GetForProperty(Guid propertyId)
             {
@@ -82,20 +68,6 @@ namespace ReviewAPI.Controllers
             {
                 var reviews = await _reviewService.GetReviewsForOwnerAsync(ownerId);
                 return Ok(reviews);
-            }
-
-            [HttpGet("average-rating/property/{propertyId:guid}")]
-            public async Task<ActionResult<double>> GetPropertyAverageRating(Guid propertyId)
-            {
-                var average = await _reviewService.GetAverageRatingForPropertyAsync(propertyId);
-                return Ok(average);
-            }
-
-            [HttpGet("average-rating/room/{roomId:guid}")]
-            public async Task<ActionResult<double>> GetRoomAverageRating(Guid roomId)
-            {
-                var average = await _reviewService.GetAverageRatingForRoomAsync(roomId);
-                return Ok(average);
             }
         }
     }

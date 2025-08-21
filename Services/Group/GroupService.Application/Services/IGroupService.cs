@@ -34,5 +34,6 @@ namespace GroupService.Application.Services
         Task<Guid> CreateApplicationAsync(RoomApplicationDto dto);
         Task UpdateApplicationStatusAsync(Guid applicationId, string status);
         Task DeleteApplicationAsync(Guid applicationId);
+        Task<IEnumerable<RoomApplicationDto>> GetApplicationsByApplicantIdAsync(Guid applicantId);
     }
 }

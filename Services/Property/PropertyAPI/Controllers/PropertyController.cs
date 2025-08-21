@@ -89,41 +89,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            // PUT api/property/{id}
-            [HttpPut("{id}")]
-            public async Task<IActionResult> UpdateProperty(Guid id, [FromBody] UpdatePropertyDto updatePropertyDto)
-            {
-                if (updatePropertyDto == null)
-                {
-                    return BadRequest("Property data is required.");
-                }
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                try
-                {
-                    var updatedProperty = await _propertyService.UpdatePropertyAsync(id, updatePropertyDto);
-                    return Ok(updatedProperty); // Return the updated property instead of NoContent
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    return NotFound(ex.Message);
-                }
-                catch (ArgumentException ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating property with ID {PropertyId}", id);
-                    return StatusCode(500, "An unexpected error occurred while updating the property.");
-                }
-            }
-
-            // DELETE api/property/{id}
             [HttpDelete("{id}")]
             public async Task<ActionResult> DeleteProperty(Guid id)
             {
@@ -217,29 +182,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            [HttpPost("rooms/{roomId}/rent")]
-            public async Task<ActionResult> RentRoom(Guid roomId)
-            {
-                try
-                {
-                    await _propertyService.RentRoomAsync(roomId);
-                    return Ok(new { message = "Room rented successfully" });
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    return NotFound(ex.Message);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error renting room {RoomId}", roomId);
-                    return StatusCode(500, "An unexpected error occurred while renting the room.");
-                }
-            }
-
             [HttpPost("{id}/images")]
             public async Task<IActionResult> UploadImages(Guid id, [FromForm] List<IFormFile> files)
             {
@@ -275,30 +217,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            [HttpGet("{id}/images")]
-            public async Task<IActionResult> GetPropertyImages(Guid id)
-            {
-                try
-                {
-                    var images = await _propertyService.GetPropertyImagesAsync(id);
-                    var imageDtos = images.Select(img => new PropertyImageDto
-                    {
-                        Id = img.Id,
-                        ImageUrl = img.ImageUrl,
-                        OriginalFileName = img.OriginalFileName,
-                        IsPrimary = img.IsPrimary,
-                        DisplayOrder = img.DisplayOrder
-                    }).ToList();
-
-                    return Ok(imageDtos);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error retrieving images for property {PropertyId}", id);
-                    return StatusCode(500, "An unexpected error occurred while retrieving images.");
-                }
-            }
-
             [HttpDelete("images/{imageId}")]
             public async Task<IActionResult> DeleteImage(Guid imageId)
             {
@@ -329,41 +247,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            [HttpGet("{id}/with-images")]
-            public async Task<IActionResult> GetPropertyWithImages(Guid id)
-            {
-                try
-                {
-                    var property = await _propertyService.GetPropertyByIdAsync(id);
-                    var images = await _propertyService.GetPropertyImagesAsync(id);
-
-                    var result = new
-                    {
-                        Property = property,
-                        Images = images.Select(img => new PropertyImageDto
-                        {
-                            Id = img.Id,
-                            ImageUrl = img.ImageUrl,
-                            OriginalFileName = img.OriginalFileName,
-                            IsPrimary = img.IsPrimary,
-                            DisplayOrder = img.DisplayOrder
-                        }).ToList()
-                    };
-
-                    return Ok(result);
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    return NotFound(ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error retrieving property with images {PropertyId}", id);
-                    return StatusCode(500, "An unexpected error occurred while retrieving property with images.");
-                }
-            }
-
-            // Add search endpoint that seems to be missing
             [HttpGet("search")]
             public async Task<ActionResult<IEnumerable<PropertyDto>>> SearchProperties([FromQuery] PropertyFilterDto filters)
             {
@@ -391,22 +274,6 @@ namespace PropertyAPI.Controllers
                 {
                     _logger.LogError(ex, "Error searching all rooms");
                     return StatusCode(500, "An unexpected error occurred while searching rooms.");
-                }
-            }
-
-            // Add endpoint to get properties by owner
-            [HttpGet("owner/{ownerId}")]
-            public async Task<ActionResult<IEnumerable<PropertyDto>>> GetPropertiesByOwner(Guid ownerId)
-            {
-                try
-                {
-                    var properties = await _propertyService.GetPropertiesByOwnerIdAsync(ownerId);
-                    return Ok(properties);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error retrieving properties for owner {OwnerId}", ownerId);
-                    return StatusCode(500, "An unexpected error occurred while retrieving properties for owner.");
                 }
             }
 
@@ -479,6 +346,48 @@ namespace PropertyAPI.Controllers
                 {
                     _logger.LogError(ex, "Error occurred while fetching room details for room ID: {RoomId}", roomId);
                     return StatusCode(500, "An error occurred while processing your request.");
+                }
+            }
+
+            [HttpPut("rooms/{roomId}/availability")]
+            public async Task<IActionResult> UpdateRoomAvailability(Guid roomId, [FromBody] AvailabilityUpdateDto dto)
+            {
+                if (dto == null) return BadRequest("Payload is required.");
+                try
+                {
+                    await _propertyService.UpdateRoomAvailabilityAsync(roomId, dto.IsAvailable, dto.AvailableSince);
+                    return NoContent();
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    _logger.LogWarning(ex, "Room not found when updating availability: {RoomId}", roomId);
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating availability for room {RoomId}", roomId);
+                    return StatusCode(500, "An unexpected error occurred while updating room availability.");
+                }
+            }
+
+            [HttpPut("{propertyId}/availability")]
+            public async Task<IActionResult> UpdatePropertyAvailability(Guid propertyId, [FromBody] AvailabilityUpdateDto dto)
+            {
+                if (dto == null) return BadRequest("Payload is required.");
+                try
+                {
+                    await _propertyService.UpdatePropertyAvailabilityAsync(propertyId, dto.IsAvailable, dto.AvailableSince);
+                    return NoContent();
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    _logger.LogWarning(ex, "Property not found when updating availability: {PropertyId}", propertyId);
+                    return NotFound(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating availability for property {PropertyId}", propertyId);
+                    return StatusCode(500, "An unexpected error occurred while updating property availability.");
                 }
             }
         }

@@ -16,6 +16,7 @@ namespace GroupService.Domain.Contracts
         Task UpdateAsync(RoomApplication application);
         Task DeleteAsync(RoomApplication application);
         Task<bool> HasPendingApplicationAsync(Guid listingId, Guid userId);
+        Task<IEnumerable<RoomApplication>> GetByApplicantIdAsync(Guid applicantUserId);
     }
 
 }

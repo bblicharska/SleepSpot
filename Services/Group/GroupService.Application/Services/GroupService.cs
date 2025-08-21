@@ -298,6 +298,10 @@ namespace GroupService.Application.Services
             {
                 dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId.Value);
             }
+            if (dto.GroupId!=null)
+            {
+                dto.Group = await GetGroupByIdAsync(dto.GroupId);
+            }
 
             return dto;
         }
@@ -428,7 +432,31 @@ namespace GroupService.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        // Helper
+        public async Task<IEnumerable<RoomApplicationDto>> GetApplicationsByApplicantIdAsync(Guid applicantId)
+        {
+            var applications = await _unitOfWork.RoomApplicationRepository.GetByApplicantIdAsync(applicantId);
+            var dtos = new List<RoomApplicationDto>();
+
+            foreach (var app in applications)
+            {
+                UserDto userInfo = null;
+                try
+                {
+                    userInfo = await _userClient.GetUserByIdAsync(app.ApplicantUserId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to fetch user {app.ApplicantUserId}: {ex.Message}");
+                }
+
+                var dto = _mapper.Map<RoomApplicationDto>(app);
+                dto.Applicant = userInfo;
+                dtos.Add(dto);
+            }
+
+            return dtos;
+        }
+
         private async Task<IEnumerable<GroupListingDto>> MapListingsWithApplicationsAsync(IEnumerable<GroupListing> listings)
         {
             var dtos = _mapper.Map<List<GroupListingDto>>(listings);

@@ -14,6 +14,7 @@ using RentalService.Infrastructure;
 using RentalService.Infrastructure.ExternalClients;
 using RentalService.Infrastructure.Repositories;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -29,7 +30,11 @@ try
     // Register health checks
     builder.Services.AddHealthChecks();
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
     builder.Services.AddEndpointsApiExplorer();
 

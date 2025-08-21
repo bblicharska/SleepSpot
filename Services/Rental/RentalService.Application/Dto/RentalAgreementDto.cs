@@ -26,7 +26,7 @@ namespace RentalService.Application.Dto
         public DateTime CreatedAt { get; set; }
 
         public PropertyDto Property { get; set; }
-        public RoomDto Room { get; set; }
+        public RoomWithPropertyDetailsDto Room { get; set; }
         public GroupDto Group { get; set; }
         public UserDto User { get; set; }
     }

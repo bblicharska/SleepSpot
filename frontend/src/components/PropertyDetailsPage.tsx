@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -189,6 +189,8 @@ export const PropertyDetailsPage = () => {
           open={rentalModalOpen}
           onClose={() => setRentalModalOpen(false)}
           propertyId={id!}
+          currentUserId={user?.userId}
+          availableSince={property.availableSince} // <-- pass availableSince so modal can validate
         />
       </Box>
       <Box sx={{ mb: 3 }}>

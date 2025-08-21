@@ -31,5 +31,6 @@ public enum RentalAgreementStatus
 {
     Active,
     Terminated,
-    Pending
+    Pending,
+    Declined
 }

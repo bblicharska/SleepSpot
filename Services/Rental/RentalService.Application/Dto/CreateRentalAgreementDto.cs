@@ -19,6 +19,7 @@ namespace RentalService.Application.Dto
         public DateTime StartDate { get; set; }
 
         public DateTime EndDate { get; set; }
+        public RentalAgreementStatus Status { get; set; } = RentalAgreementStatus.Pending;
 
         [Required]
         [Range(0, double.MaxValue)]

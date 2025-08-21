@@ -20,13 +20,6 @@ namespace IdentityAPI.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> Get() 
-        {
-            var result = await _userService.GetAllAsync(); 
-            return Ok(result);
-        }
-
         [HttpDelete("{userId}")]
         public async Task<ActionResult> Delete(Guid userId)
         {
@@ -100,20 +93,6 @@ namespace IdentityAPI.Controllers
             }
         }
 
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserDto updateUserDto) 
-        {
-            try
-            {
-                await _userService.UpdateUserAsync(userId, updateUserDto);
-                return NoContent();
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
         [HttpPut("{userId}/change-password")]
         public async Task<IActionResult> ChangePassword(Guid userId, [FromBody] ChangePasswordDto changePasswordDto)
         {
@@ -130,20 +109,6 @@ namespace IdentityAPI.Controllers
             {
                 return BadRequest(ex.Message);
             }
-        }
-
-        [Route("validate-token")]
-        [HttpGet]
-        public IActionResult ValidateToken()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Unauthorized("Invalid token");
-            }
-
-            return Ok(new { Message = "Token is valid" });
         }
     }
 }
