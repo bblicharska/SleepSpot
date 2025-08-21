@@ -192,10 +192,10 @@ namespace RentalService.Application.Services
                 return _mapper.Map<RentalAgreementDto>(agreement);
             }
 
-            agreement.Status =RentalAgreementStatus.Active;
+            agreement.Status = RentalAgreementStatus.Active;
             _unitOfWork.RentalAgreementRepository.Update(agreement);
 
-            DateTime? newAvailableSince = agreement.EndDate; 
+            DateTime? newAvailableSince = agreement.EndDate;
 
             if (agreement.RoomId.HasValue)
             {
@@ -221,40 +221,72 @@ namespace RentalService.Application.Services
 
         public async Task<RentalAgreementDto?> TerminateRentalAsync(Guid rentalAgreementId)
         {
-            var agreement = await _unitOfWork.RentalAgreementRepository.GetByIdAsync(rentalAgreementId);
-            if (agreement == null) return null;
+            var now = DateTime.UtcNow;
 
-            if (string.Equals(agreement.Status.ToString(), "Terminated", StringComparison.OrdinalIgnoreCase))
+            var current = await _unitOfWork.RentalAgreementRepository.GetByIdAsync(rentalAgreementId);
+            if (current == null) return null;
+
+            if (current.Status == RentalAgreementStatus.Terminated)
             {
-                return _mapper.Map<RentalAgreementDto>(agreement);
+                return _mapper.Map<RentalAgreementDto>(current);
             }
 
-            agreement.Status = RentalAgreementStatus.Terminated;
-            _unitOfWork.RentalAgreementRepository.Update(agreement);
-
-            DateTime? newAvailableSince = DateTime.UtcNow;
-
-            if (agreement.RoomId.HasValue)
+            if (current.Status == RentalAgreementStatus.Active)
             {
-                await _propertyClient.UpdateRoomAvailabilityAsync(agreement.RoomId.Value, true, newAvailableSince);
-            }
-            else if (agreement.PropertyId != Guid.Empty && agreement.PropertyId != default(Guid))
-            {
-                await _propertyClient.UpdatePropertyAvailabilityAsync(agreement.PropertyId, true, newAvailableSince);
+                var terminated = await _unitOfWork.RentalAgreementRepository.TryTerminateAsync(rentalAgreementId, now);
+
+                if (!terminated)
+                {
+                    var refreshed = await _unitOfWork.RentalAgreementRepository.GetByIdAsync(rentalAgreementId);
+                    return _mapper.Map<RentalAgreementDto>(refreshed);
+                }
+
+                await _unitOfWork.CommitAsync();
+
+                var rental = await _unitOfWork.RentalAgreementRepository.GetByIdAsync(rentalAgreementId);
+                if (rental == null) return null;
+
+                try
+                {
+                    if (rental.RoomId.HasValue)
+                    {
+                        await _propertyClient.UpdateRoomAvailabilityAsync(rental.RoomId.Value, true, now);
+                    }
+                    else
+                    {
+                        await _propertyClient.UpdatePropertyAvailabilityAsync(rental.PropertyId, true, now);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+
+                var dto = _mapper.Map<RentalAgreementDto>(rental);
+                if (dto.PropertyId.HasValue)
+                    dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId.Value);
+                if (dto.RoomId.HasValue)
+                    dto.Room = await _propertyClient.GetRoomByIdAsync(dto.RoomId.Value);
+
+                return dto;
             }
 
+            // Jeżeli umowa nie była Active (np. Pending/Declined), ale użytkownik chce zakończyć -> oznacz Terminated
+            // (tutaj nie ma race z workerem, bo worker operuje tylko na Active)
+            current.Status = RentalAgreementStatus.Terminated;
+            current.EndDate = now;
+            _unitOfWork.RentalAgreementRepository.Update(current);
             await _unitOfWork.CommitAsync();
 
-            var dto = _mapper.Map<RentalAgreementDto>(agreement);
+            var dto2 = _mapper.Map<RentalAgreementDto>(current);
+            if (dto2.PropertyId.HasValue)
+                dto2.Property = await _propertyClient.GetPropertyByIdAsync(dto2.PropertyId.Value);
+            if (dto2.RoomId.HasValue)
+                dto2.Room = await _propertyClient.GetRoomByIdAsync(dto2.RoomId.Value);
 
-            if (dto.PropertyId.HasValue)
-                dto.Property = await _propertyClient.GetPropertyByIdAsync(dto.PropertyId.Value);
-
-            if (dto.RoomId.HasValue)
-                dto.Room = await _propertyClient.GetRoomByIdAsync(dto.RoomId.Value);
-
-            return dto;
+            return dto2;
         }
+
 
         public async Task<RentalAgreementDto?> DeclineRentalAsync(Guid rentalAgreementId)
         {

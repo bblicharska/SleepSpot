@@ -13,6 +13,7 @@ using RentalService.Domain.Contracts;
 using RentalService.Infrastructure;
 using RentalService.Infrastructure.ExternalClients;
 using RentalService.Infrastructure.Repositories;
+using RentalService.Infrastructure.Workers;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -40,54 +41,9 @@ try
 
     builder.Configuration.AddEnvironmentVariables();
 
-    //builder.Services.AddSwaggerGen(options =>
-    //{
-    //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //    {
-    //        In = ParameterLocation.Header,
-    //        Name = "Authorization",
-    //        Type = SecuritySchemeType.ApiKey,
-    //        BearerFormat = "JWT",
-    //        Description = "Enter 'Bearer' followed by a space and your JWT token"
-    //    });
-
-    //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    //    {
-    //        {
-    //            new OpenApiSecurityScheme
-    //            {
-    //                Reference = new OpenApiReference
-    //                {
-    //                    Type = ReferenceType.SecurityScheme,
-    //                    Id = "Bearer"
-    //                }
-    //            },
-    //            new string[] {}
-    //        }
-    //    });
-    //});
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddAutoMapper(typeof(RentalAgreementMappingProfile));
-
-    //var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    //    .AddJwtBearer(options =>
-    //    {
-    //        options.TokenValidationParameters = new TokenValidationParameters
-    //        {
-    //            ValidateIssuer = true,
-    //            ValidIssuer = jwtSettings["Issuer"],
-    //            ValidateAudience = true,
-    //            ValidAudience = jwtSettings["Audience"],
-    //            ValidateLifetime = true,
-    //            ValidateIssuerSigningKey = true,
-    //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
-    //        };
-    //    });
-
-    //builder.Services.AddAuthorization();
-
 
     var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     //builder.Services.AddDbContext<PropertyDbContext>(options =>
@@ -122,7 +78,7 @@ try
     {
         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     }));
-
+    builder.Services.AddHostedService<ExpiredRentalWorker>();
 
     var app = builder.Build();
 

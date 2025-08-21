@@ -21,5 +21,9 @@ namespace RentalService.Domain.Contracts
         Task AddAsync(RentalAgreement agreement);
         void Update(RentalAgreement agreement);
         void Remove(RentalAgreement agreement);
+
+        Task<IEnumerable<RentalAgreement>> GetExpiredActiveRentalsAsync(DateTime nowUtc);
+        Task<bool> TryTerminateAsync(Guid rentalId, DateTime endDateUtc);
+
     }
 }

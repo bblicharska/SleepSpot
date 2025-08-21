@@ -84,5 +84,22 @@ namespace RentalService.Infrastructure.Repositories
         {
             _context.RentalAgreements.Remove(agreement);
         }
+        public async Task<IEnumerable<RentalAgreement>> GetExpiredActiveRentalsAsync(DateTime nowUtc)
+        {
+            return await _context.RentalAgreements
+                .Where(ra => ra.Status == RentalAgreementStatus.Active
+                             && ra.EndDate.HasValue
+                             && ra.EndDate.Value <= nowUtc)
+                .ToListAsync();
+        }
+
+        public async Task<bool> TryTerminateAsync(Guid rentalId, DateTime endDateUtc)
+        {
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE [RentalAgreements]
+SET [Status] = {RentalAgreementStatus.Terminated.ToString()}, [EndDate] = {endDateUtc}
+WHERE [Id] = {rentalId} AND [Status] = {RentalAgreementStatus.Active.ToString()}");
+            return rows > 0;
+        }
     }
 }
