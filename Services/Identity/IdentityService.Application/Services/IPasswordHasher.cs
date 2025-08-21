@@ -8,7 +8,7 @@ namespace IdentityService.Application.Services
 {
     public interface IPasswordHasher
     {
-        string HashPassword(string password); // Tworzy hash z podanego hasła
-        bool VerifyPassword(string hashedPassword, string password); // Weryfikuje, czy hasło jest zgodne z hashem
+        string HashPassword(string password);
+        bool VerifyPassword(string hashedPassword, string password); 
     }
 }

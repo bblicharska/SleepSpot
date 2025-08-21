@@ -58,6 +58,8 @@ namespace ReviewService.Application.Services
 
         public async Task DeleteReviewAsync(Guid id)
         {
+            var review = await _unitOfWork.ReviewRepository.GetByIdAsync(id)
+                         ?? throw new KeyNotFoundException($"Review with ID {id} not found.");
             await _unitOfWork.ReviewRepository.DeleteAsync(id);
         }
 

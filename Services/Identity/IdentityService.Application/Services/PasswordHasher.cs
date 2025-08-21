@@ -10,7 +10,7 @@ namespace IdentityService.Application.Services
     {
         public string HashPassword(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password); // Używa popularnej biblioteki BCrypt
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
         public bool VerifyPassword(string hashedPassword, string password)
