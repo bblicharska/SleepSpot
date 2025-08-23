@@ -12,7 +12,6 @@ namespace GroupService.Domain.Contracts
         IGroupMemberRepository GroupMemberRepository{ get; }
         IGroupListingRepository GroupListingRepository { get; }
         IRoomApplicationRepository RoomApplicationRepository { get; }
-
         void Commit();
         Task<int> CommitAsync();
     }

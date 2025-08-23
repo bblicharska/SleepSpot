@@ -8,7 +8,7 @@ namespace IdentityService.Application.Dto
 {
     public class TokenDto
     {
-        public string AccessToken { get; set; } // Twój JWT
-        public DateTime ExpiresAt { get; set; } // Data wygaśnięcia tokenu
+        public string AccessToken { get; set; } 
+        public DateTime ExpiresAt { get; set; } 
     }
 }

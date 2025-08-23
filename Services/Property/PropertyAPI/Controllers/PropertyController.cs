@@ -21,7 +21,6 @@ namespace PropertyAPI.Controllers
                 _logger = logger;
             }
 
-            // GET api/property
             [HttpGet]
             public async Task<ActionResult<IEnumerable<PropertyDto>>> GetAllProperties(
      [FromQuery] PropertySortBy sortBy = PropertySortBy.CreatedAt,
@@ -39,7 +38,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            // GET api/property/{id}
             [HttpGet("{id}")]
             public async Task<ActionResult<PropertyDto>> GetPropertyById(Guid id)
             {
@@ -59,7 +57,6 @@ namespace PropertyAPI.Controllers
                 }
             }
 
-            // POST api/property
             [HttpPost]
             public async Task<ActionResult<PropertyDto>> CreateProperty([FromBody] CreatePropertyDto createPropertyDto)
             {

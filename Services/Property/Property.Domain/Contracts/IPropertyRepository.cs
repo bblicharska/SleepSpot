@@ -35,7 +35,6 @@ namespace PropertyService.Domain.Contracts
         Task<int> SaveChangesAsync();
         Task<Property?> GetByIdWithRoomsAndImagesAsync(Guid id);
         Task<Property> GetByIdWithRoomsAsync(Guid id);
-
         Task<IEnumerable<Property>> GetAllWithRoomsAndImagesAsync(PropertySortBy sortBy,  SortDirection sortDirection);
         Task<IEnumerable<Property>> GetByOwnerIdWithRoomsAndImagesAsync(Guid ownerId, PropertySortBy sortBy, SortDirection sortDirection);
         Task<IEnumerable<Property>> SearchAsync(PropertyFilterDto f);

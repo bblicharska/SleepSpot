@@ -11,13 +11,10 @@ namespace RentalService.Application.Dto
     {
         [Required]
         public Guid Id { get; set; }
-
         public DateTime? EndDate { get; set; }
-
         [Required]
         [Range(0, double.MaxValue)]
         public decimal MonthlyRent { get; set; }
-
         [Required]
         public string Status { get; set; }
     }

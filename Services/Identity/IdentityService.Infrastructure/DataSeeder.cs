@@ -70,7 +70,6 @@ namespace IdentityService.Infrastructure
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred during seeding: {ex.Message}");
-                // Rzucanie wyjątku, jeśli konieczne
                 throw;
             }
         }

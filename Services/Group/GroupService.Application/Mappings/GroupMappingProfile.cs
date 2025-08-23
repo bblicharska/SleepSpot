@@ -11,7 +11,6 @@ using Shared.Dto;
 
 namespace GroupService.Application.Mappings
 {
-
     public class GroupMappingProfile : Profile
     {
         public GroupMappingProfile()
@@ -31,7 +30,7 @@ namespace GroupService.Application.Mappings
 
             CreateMap<AddGroupMemberDto, GroupMember>();
             CreateMap<UpdateGroupMemberDto, GroupMember>()
-                .ForMember(dest => dest.GroupId, opt => opt.Ignore()) 
+                .ForMember(dest => dest.GroupId, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             CreateMap<GroupListing, GroupListingDto>()
@@ -39,7 +38,7 @@ namespace GroupService.Application.Mappings
 
             CreateMap<CreateGroupListingDto, GroupListing>();
             CreateMap<UpdateGroupListingDto, GroupListing>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)) 
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.Group, opt => opt.Ignore());
 
             CreateMap<RoomApplication, RoomApplicationDto>()
@@ -48,7 +47,7 @@ namespace GroupService.Application.Mappings
         .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<ApplicationStatus>(src.Status)));
             CreateMap<CreateRoomApplicationDto, RoomApplication>();
             CreateMap<UpdateRoomApplicationDto, RoomApplication>()
-                .ForMember(dest => dest.ApplicantUserId, opt => opt.Ignore()) 
+                .ForMember(dest => dest.ApplicantUserId, opt => opt.Ignore())
                 .ForMember(dest => dest.ListingId, opt => opt.Ignore());
         }
     }

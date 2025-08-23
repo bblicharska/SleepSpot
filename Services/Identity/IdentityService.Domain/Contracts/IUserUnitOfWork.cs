@@ -9,7 +9,6 @@ namespace IdentityService.Domain.Contracts
     public interface IUserUnitOfWork : IDisposable
     {
         IUserRepository UserRepository { get; }
-
         Task CommitAsync();
     }
 }

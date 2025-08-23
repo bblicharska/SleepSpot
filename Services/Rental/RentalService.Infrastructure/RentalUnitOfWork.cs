@@ -24,7 +24,7 @@ namespace RentalService.Infrastructure
             _context.SaveChanges();
         }
 
-        public async Task<int> CommitAsync()  // Teraz zwraca int
+        public async Task<int> CommitAsync()
         {
             return await _context.SaveChangesAsync();
         }

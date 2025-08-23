@@ -16,19 +16,16 @@ namespace GroupService.Application.Services
         Task UpdateGroupAsync(Guid groupId, CreateGroupDto dto);
         Task DeleteGroupAsync(Guid groupId);
         Task<IEnumerable<GroupDto>> GetGroupsForUserAsync(Guid userId);
-
         Task<IEnumerable<GroupMemberDto>> GetMembersByGroupIdAsync(Guid groupId);
         Task AddMemberAsync(GroupMemberDto dto);
         Task AddMemberByEmailAsync(AddMemberByEmailRequest dto);
         Task RemoveMemberAsync(Guid memberId);
-
         Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams);
         Task<GroupListingDto?> GetListingByIdAsync(Guid listingId);
         Task<IEnumerable<GroupListingDto>> GetListingsByGroupIdAsync(Guid groupId);
         Task<Guid> CreateListingAsync(CreateGroupListingDto dto);
         Task UpdateListingAsync(Guid listingId, CreateGroupListingDto dto);
         Task DeleteListingAsync(Guid listingId);
-
         Task<IEnumerable<RoomApplicationDto>> GetApplicationsByListingIdAsync(Guid listingId);
         Task<RoomApplicationDto?> GetApplicationByIdAsync(Guid applicationId);
         Task<Guid> CreateApplicationAsync(RoomApplicationDto dto);

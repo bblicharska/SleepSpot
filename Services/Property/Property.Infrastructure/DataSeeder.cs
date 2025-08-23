@@ -23,10 +23,10 @@ namespace PropertyService.Infrastructure
             try
             {
                 if (_context.Database.CanConnect())
-            {
-
-                if (!_context.Properties.Any())
                 {
+
+                    if (!_context.Properties.Any())
+                    {
 
                         var properties = new List<Property>
 {
@@ -242,9 +242,8 @@ namespace PropertyService.Infrastructure
     }
 };
 
-                        // Dodanie przykładowych nieruchomości do bazy danych
                         _context.Properties.AddRange(properties);
-                    _context.SaveChanges(); // Zapisanie danych w bazie
+                        _context.SaveChanges();
                         Console.WriteLine("Seeding completed successfully.");
                     }
                     else
@@ -260,7 +259,6 @@ namespace PropertyService.Infrastructure
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred during seeding: {ex.Message}");
-                // Rzucanie wyjątku, jeśli konieczne
                 throw;
             }
         }

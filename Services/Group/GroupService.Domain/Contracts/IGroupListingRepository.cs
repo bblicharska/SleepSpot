@@ -13,7 +13,6 @@ namespace GroupService.Domain.Contracts
         Task<GroupListing?> GetByIdAsync(Guid listingId);
         Task<IEnumerable<GroupListing>> GetByGroupIdAsync(Guid groupId);
         Task<IQueryable<GroupListing>> GetFilteredListingsQueryAsync(GroupListingQueryParams queryParams);
-
         Task AddAsync(GroupListing listing);
         Task UpdateAsync(GroupListing listing);
         Task DeleteAsync(GroupListing listing);

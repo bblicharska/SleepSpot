@@ -138,10 +138,18 @@ namespace ReviewService.Infrastructure.Repositories
 
         public async Task<IEnumerable<Review>> GetByOwnerIdAsync(Guid ownerId)
         {
-            return await _context.Reviews
-                .Where(r => r.OwnerId == ownerId)
-                .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
+            try
+            {
+                return await _context.Reviews
+               .Where(r => r.OwnerId == ownerId)
+               .OrderByDescending(r => r.CreatedAt)
+               .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving reviews for user ID {UserId}", ownerId);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Review>> GetByReviewerIdAsync(Guid reviewerId)

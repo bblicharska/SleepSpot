@@ -50,10 +50,8 @@ namespace ReviewService.Infrastructure
                             CreatedAt = DateTime.Now.AddDays(-3)
                         },
                     };
-
-                        // Dodanie przykładowych nieruchomości do bazy danych
                         _context.Reviews.AddRange(properties);
-                        _context.SaveChanges(); // Zapisanie danych w bazie
+                        _context.SaveChanges();
                         Console.WriteLine("Seeding completed successfully.");
                     }
                     else
@@ -69,7 +67,6 @@ namespace ReviewService.Infrastructure
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred during seeding: {ex.Message}");
-                // Rzucanie wyjątku, jeśli konieczne
                 throw;
             }
         }

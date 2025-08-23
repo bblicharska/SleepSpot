@@ -13,5 +13,4 @@ namespace PropertyService.Application.Dto
         public bool IsPrimary { get; set; }
         public int DisplayOrder { get; set; }
     }
-
 }

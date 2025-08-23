@@ -101,7 +101,6 @@ namespace PropertyService.Infrastructure.Repositories
                             .Include(r => r.Property)
                             .AsQueryable();
 
-            // Add location filtering by property address
             if (!string.IsNullOrWhiteSpace(f.Location))
                 q = q.Where(r => EF.Functions.Like(r.Property.Address, $"%{f.Location}%"));
 

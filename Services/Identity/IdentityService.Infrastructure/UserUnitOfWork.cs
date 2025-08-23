@@ -13,7 +13,6 @@ namespace IdentityService.Infrastructure
 
         public IUserRepository UserRepository { get; }
 
-
         public UserUnitOfWork(UserDbContext context, IUserRepository userRepository)
         {
             _context = context;
@@ -27,7 +26,6 @@ namespace IdentityService.Infrastructure
         {
             await _context.SaveChangesAsync();
         }
-
         public void Dispose()
         {
             _context.Dispose();

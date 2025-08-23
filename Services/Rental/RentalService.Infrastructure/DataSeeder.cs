@@ -28,7 +28,7 @@ namespace RentalService.Infrastructure
                             {
                                 Id = Guid.NewGuid(),
                                 PropertyId = new Guid("58d744b5-77e7-497a-8a92-24eee8dcfb8a"),
-                                RoomId = null, // cała nieruchomość
+                                RoomId = null,
                                 GroupId = new Guid("65857791-7319-4bd2-82e4-34f53812ffb6"),
                                 UserId = new Guid("d93a381b-3b00-44c4-2165-08dd6f90dd1f"),
                                 StartDate = DateTime.UtcNow,

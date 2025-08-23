@@ -45,7 +45,6 @@ namespace ReviewService.Infrastructure
                 entity.Property(r => r.CreatedAt)
                     .IsRequired();
 
-                // Indeksy
                 entity.HasIndex(r => r.PropertyId);
                 entity.HasIndex(r => r.RoomId);
                 entity.HasIndex(r => r.ReviewerId);

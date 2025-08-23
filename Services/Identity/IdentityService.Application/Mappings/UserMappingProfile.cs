@@ -18,21 +18,20 @@ namespace IdentityService.Application.Mappings
             CreateMap<User, UserDto>();
 
             CreateMap<RegisterUserDto, User>()
-                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Haszowanie hasła nie jest obsługiwane tutaj
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow)) // Dodanie CreatedAt
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => "User")); // Domyślna rola użytkownika
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => "User"));
 
             CreateMap<UpdateUserDto, User>()
-                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Ignorowanie hasła
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // Ignorowanie CreatedAt
-                .ForMember(dest => dest.Role, opt => opt.Ignore()); // Ignorowanie roli
-
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore());
             CreateMap<TokenDto, object>();
 
             CreateMap<LoginUserDto, User>();
 
             CreateMap<ChangePasswordDto, User>()
-                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()); // Haszowanie hasła w UserService
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
         }
     }
 }

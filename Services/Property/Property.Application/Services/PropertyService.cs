@@ -45,7 +45,7 @@ namespace PropertyService.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create upload directory");
-                throw; // Albo obsłuż błąd inaczej
+                throw;
             }
         }
 
@@ -64,14 +64,12 @@ namespace PropertyService.Application.Services
         {
             var properties = await _unitOfWork.PropertyRepository.GetAllWithRoomsAndImagesAsync(sortBy, sortDirection);
 
-            // Configure JSON serializer settings to handle circular references
             var options = new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 Formatting = Formatting.Indented
             };
 
-            // Log the serialized data for debugging
             var json = JsonConvert.SerializeObject(properties, options);
             _logger.LogInformation("Retrieved properties: {Json}", json);
 
@@ -92,18 +90,14 @@ namespace PropertyService.Application.Services
 
         public async Task<IEnumerable<RoomFilterDto>> SearchAllRoomsAsync(RoomSearchFilterDto f)
         {
-            // Build the query over all rooms
             var query = _unitOfWork.RoomRepository.BuildSearchQuery(f);
 
-            // Execute with property information included (Property should already be included in BuildSearchQuery)
             var rooms = await query
                 .OrderBy(r => r.CreatedAt)
                 .ToListAsync();
 
-            // Map to RoomFilterDto with property information
             return rooms.Select(r => new RoomFilterDto
             {
-                // Map room properties
                 Id = r.Id,
                 Name = r.Name,
                 Description = r.Description,
@@ -113,8 +107,6 @@ namespace PropertyService.Application.Services
                 Capacity = r.Capacity,
                 IsAvailable = r.IsAvailable,
                 Images = _mapper.Map<List<PropertyImageDto>>(r.Images),
-
-                // Add property information
                 PropertyId = r.Property.Id,
                 PropertyName = r.Property.Name,
                 PropertyAddress = r.Property.Address,
@@ -124,12 +116,10 @@ namespace PropertyService.Application.Services
 
         public async Task<PropertyDto> CreatePropertyAsync(CreatePropertyDto createPropertyDto)
         {
-            // Map base property (without rooms)
             var property = _mapper.Map<Property>(createPropertyDto);
-            property.Id = Guid.NewGuid(); // ensure new ID
+            property.Id = Guid.NewGuid();
             property.CreatedAt = DateTime.UtcNow;
 
-            // Handle rooms (if any)
             if (createPropertyDto.Rooms != null && createPropertyDto.Rooms.Any())
             {
                 var rooms = _mapper.Map<List<Room>>(createPropertyDto.Rooms);
@@ -154,7 +144,6 @@ namespace PropertyService.Application.Services
             if (property == null)
                 throw new KeyNotFoundException($"Property with ID {id} not found.");
 
-            // Update basic fields
             property.Name = updateDto.Name;
             property.Description = updateDto.Description;
             property.Address = updateDto.Address;
@@ -166,7 +155,6 @@ namespace PropertyService.Application.Services
             _unitOfWork.PropertyRepository.Update(property);
             await _unitOfWork.CommitAsync();
 
-            // Update images
             var existingImages = await _unitOfWork.PropertyImageRepository.GetImagesByPropertyIdAsync(id);
 
             foreach (var imageDto in updateDto.Images ?? new List<ImageUpdateDto>())
@@ -176,14 +164,13 @@ namespace PropertyService.Application.Services
                     var existingImage = existingImages.FirstOrDefault(img => img.ImageUrl == imageDto.Url);
                     if (existingImage != null)
                     {
-                        await DeleteImageAsync(existingImage.Id); // also deletes file
+                        await DeleteImageAsync(existingImage.Id);
                     }
                     continue;
                 }
 
                 if (imageDto.File != null)
                 {
-                    // New upload
                     var uploadedImage = await AddImageAsync(id, imageDto.File);
                     uploadedImage.IsPrimary = imageDto.IsPrimary;
                     uploadedImage.DisplayOrder = imageDto.DisplayOrder;
@@ -191,7 +178,6 @@ namespace PropertyService.Application.Services
                 }
                 else if (!string.IsNullOrWhiteSpace(imageDto.Url))
                 {
-                    // Existing image update
                     var existingImage = existingImages.FirstOrDefault(img => img.ImageUrl == imageDto.Url);
                     if (existingImage != null)
                     {
@@ -204,11 +190,8 @@ namespace PropertyService.Application.Services
 
             await _unitOfWork.CommitAsync();
 
-
-
-            // Update rooms
             var existingRooms = property.Rooms.ToList();
-            _unitOfWork.RoomRepository.RemoveRange(existingRooms); // full replace strategy
+            _unitOfWork.RoomRepository.RemoveRange(existingRooms);
             await _unitOfWork.CommitAsync();
 
             if (updateDto.Rooms != null && updateDto.Rooms.Any())
@@ -231,14 +214,12 @@ namespace PropertyService.Application.Services
             if (property == null)
                 throw new KeyNotFoundException($"Property with ID {id} not found.");
 
-            // Usuń tylko obrazy bez przypisanego RoomId (czyli te przypisane bezpośrednio do Property)
             var directImages = property.Images
                 .Where(img => img.RoomId == null)
                 .ToList();
 
             _unitOfWork.PropertyImageRepository.RemoveRange(directImages);
 
-            // Reszta (Rooms + ich obrazy) zostaną usunięte automatycznie przez kaskadowość
             _unitOfWork.PropertyRepository.Delete(property);
             await _unitOfWork.CommitAsync();
         }
@@ -319,7 +300,7 @@ namespace PropertyService.Application.Services
             if (!IsValidImageFile(file))
                 throw new ArgumentException("Invalid image file type");
 
-            if (file.Length > 5 * 1024 * 1024) // 5MB limit
+            if (file.Length > 5 * 1024 * 1024)
                 throw new ArgumentException("File size too large (max 5MB)");
 
             var fileName = GenerateUniqueFileName(file.FileName);
@@ -327,13 +308,11 @@ namespace PropertyService.Application.Services
 
             try
             {
-                // Save file
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                // Get next display order
                 var maxOrder = await _unitOfWork.PropertyImageRepository.GetMaxImageDisplayOrderAsync(propertyId);
 
                 var propertyImage = new PropertyImage
@@ -353,7 +332,6 @@ namespace PropertyService.Application.Services
             {
                 _logger.LogError(ex, "Error uploading image for property {PropertyId}", propertyId);
 
-                // Cleanup file if database save fails
                 if (File.Exists(filePath)) File.Delete(filePath);
                 throw;
             }
@@ -373,7 +351,6 @@ namespace PropertyService.Application.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to upload image {FileName}", file.FileName);
-                    // Continue with other files
                 }
             }
 
@@ -392,11 +369,9 @@ namespace PropertyService.Application.Services
 
             try
             {
-                // Delete physical file
                 var fullPath = Path.Combine(_environment.WebRootPath, image.ImageUrl.TrimStart('/'));
                 if (File.Exists(fullPath)) File.Delete(fullPath);
 
-                // Delete from database
                 await _unitOfWork.PropertyImageRepository.DeleteImageAsync(imageId);
                 return true;
             }
@@ -412,13 +387,11 @@ namespace PropertyService.Application.Services
             var image = await _unitOfWork.PropertyImageRepository.GetImageByIdAsync(imageId);
             if (image == null) return false;
 
-            // Remove primary flag from other images
             if (image.PropertyId.HasValue)
             {
                 await _unitOfWork.PropertyImageRepository.ClearPrimaryImageFlagAsync(image.PropertyId.Value);
             }
 
-            // Set this image as primary
             await _unitOfWork.PropertyImageRepository.SetImageAsPrimaryAsync(imageId);
             return true;
         }
@@ -438,10 +411,8 @@ namespace PropertyService.Application.Services
             if (room == null)
                 return null;
 
-            // Mapowanie na DTO - bez danych User (będą pobrane w Gateway)
             var result = new RoomWithPropertyDetailsDto
             {
-                // Dane pokoju
                 Id = room.Id,
                 Name = room.Name,
                 Description = room.Description,
@@ -460,13 +431,11 @@ namespace PropertyService.Application.Services
                     DisplayOrder = i.DisplayOrder
                 }).ToList() ?? new List<PropertyImageDto>(),
 
-                // Dane property
                 PropertyId = room.PropertyId,
                 PropertyName = room.Property?.Name,
                 PropertyAddress = room.Property?.Address,
-                OwnerId = room.Property?.OwnerId, // Zwracamy OwnerId dla Gateway
+                OwnerId = room.Property?.OwnerId,
 
-                // Inne pokoje w tej nieruchomości
                 OtherRoomsInProperty = room.Property?.Rooms?
                     .Where(r => r.Id != roomId)
                     .Select(r => new RoomSummaryDto
@@ -511,7 +480,7 @@ namespace PropertyService.Application.Services
             return uploadedImages;
         }
 
-        public async Task UpdateRoomAvailabilityAsync(Guid roomId, bool isAvailable, DateTime availableSince )
+        public async Task UpdateRoomAvailabilityAsync(Guid roomId, bool isAvailable, DateTime availableSince)
         {
             var room = await _unitOfWork.RoomRepository.GetByIdAsync(roomId);
             if (room == null)
@@ -537,7 +506,7 @@ namespace PropertyService.Application.Services
             }
         }
 
-        public async Task UpdatePropertyAvailabilityAsync(Guid propertyId, bool isAvailable, DateTime availableSince )
+        public async Task UpdatePropertyAvailabilityAsync(Guid propertyId, bool isAvailable, DateTime availableSince)
         {
             var property = await _unitOfWork.PropertyRepository.GetByIdAsync(propertyId);
             if (property == null)
@@ -583,7 +552,7 @@ namespace PropertyService.Application.Services
             if (!IsValidImageFile(file))
                 throw new ArgumentException("Invalid image file type");
 
-            if (file.Length > 5 * 1024 * 1024) // 5MB
+            if (file.Length > 5 * 1024 * 1024)
                 throw new ArgumentException("File too large");
 
             var fileName = GenerateUniqueFileName(file.FileName);

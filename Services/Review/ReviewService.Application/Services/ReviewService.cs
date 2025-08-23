@@ -76,7 +76,7 @@ namespace ReviewService.Application.Services
             var reviewDtos = _mapper.Map<IEnumerable<ReviewDto>>(reviews);
             return reviewDtos;
         }
-        
+
         public async Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId)
         {
             var reviews = await _unitOfWork.ReviewRepository.GetByReviewerIdAsync(reviewerId);

@@ -15,7 +15,6 @@ namespace RentalService.Application.Services
         Task<RentalAgreementDto> UpdateAsync(Guid id, UpdateRentalAgreementDto dto);
         Task<IEnumerable<RentalAgreementDto>> GetActiveByUserIdAsync(Guid userId);
         Task<IEnumerable<RentalAgreementDto>> GetActiveByGroupIdAsync(Guid groupId);
-
         Task<bool> DeleteAsync(Guid id);
         Task<RentalAgreementDto?> ActivateRentalAsync(Guid rentalAgreementId);
         Task<RentalAgreementDto?> DeclineRentalAsync(Guid rentalAgreementId);

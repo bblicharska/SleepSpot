@@ -84,7 +84,6 @@ namespace ApiGateway.Controllers
             return freshData;
         }
 
-        // ---------- Property details: cache base metadata only, always fetch reviews ----------
         [HttpGet("property-details/{propertyId:guid}")]
         public async Task<IActionResult> GetPropertyDetails(Guid propertyId)
         {
@@ -93,7 +92,6 @@ namespace ApiGateway.Controllers
             var reviewClient = _httpClientFactory.CreateClient("ReviewClient");
             var userClient = _httpClientFactory.CreateClient("UserClient");
 
-            // Cache only the base property (no reviews)
             var propertyBase = await GetOrSetCacheAsync(baseCacheKey, async () =>
             {
                 var propertyResponse = await propertyClient.GetAsync($"/api/Property/{propertyId}");
@@ -102,7 +100,6 @@ namespace ApiGateway.Controllers
                 var property = await propertyResponse.Content.ReadFromJsonAsync<PropertyDto>();
                 if (property == null) return null;
 
-                // Fetch owner (we can cache owner's basic info with the property base)
                 var owner = await SafeCall(async () =>
                 {
                     var ownerResp = await userClient.GetAsync($"/api/User/{property.OwnerId}");
@@ -112,7 +109,6 @@ namespace ApiGateway.Controllers
 
                 if (owner != null)
                 {
-                    // attach a lightweight owner DTO (without reviews)
                     property.Owner = new UserDto
                     {
                         Id = owner.Id,
@@ -126,7 +122,6 @@ namespace ApiGateway.Controllers
                     property.Owner = null;
                 }
 
-                // IMPORTANT: do NOT cache reviews in the base object
                 property.Reviews = new List<ReviewDto>();
 
                 return property;
@@ -135,7 +130,6 @@ namespace ApiGateway.Controllers
             if (propertyBase == null)
                 return NotFound($"Property {propertyId} not found.");
 
-            // --- ALWAYS fetch fresh reviews (do not read from the base cache) ---
             var propertyReviews = await SafeCall(async () =>
             {
                 var revResp = await reviewClient.GetAsync($"/api/Review/property/{propertyId}");
@@ -156,7 +150,6 @@ namespace ApiGateway.Controllers
                 }, "ReviewService", new List<ReviewDto>());
             }
 
-            // Enrich reviewers (fetch user details for all reviewer ids)
             var allReviews = propertyReviews.Concat(ownerReviews).ToList();
             if (allReviews.Any())
             {
@@ -182,7 +175,6 @@ namespace ApiGateway.Controllers
                 }
             }
 
-            // Attach fresh reviews to the cached base object for return (but do NOT persist that into the cache)
             var propertyToReturn = propertyBase;
             propertyToReturn.Reviews = propertyReviews;
             if (propertyToReturn.Owner != null)
@@ -191,7 +183,6 @@ namespace ApiGateway.Controllers
             return Ok(propertyToReturn);
         }
 
-        // ---------- Room details: cache base metadata only, always fetch reviews ----------
         [HttpGet("room-details/{roomId:guid}")]
         public async Task<IActionResult> GetRoomDetails(Guid roomId)
         {
@@ -226,7 +217,6 @@ namespace ApiGateway.Controllers
                     };
                 }
 
-                // Do not cache reviews inside the room base
                 room.Reviews = new List<ReviewDto>();
 
                 return room;
@@ -235,7 +225,6 @@ namespace ApiGateway.Controllers
             if (roomBase == null)
                 return NotFound($"Room {roomId} not found.");
 
-            // Always fetch fresh room reviews
             var roomReviews = await SafeCall(async () =>
             {
                 var revResp = await reviewClient.GetAsync($"/api/Review/room/{roomId}");
@@ -245,16 +234,7 @@ namespace ApiGateway.Controllers
             }, "ReviewService", new List<ReviewDto>());
 
             var ownerReviews = new List<ReviewDto>();
-            if (roomBase.Owner != null)
-            {
-                // If you need owner reviews and owner has an id in a different place, adapt accordingly
-                // Here we don't have full owner.Id on OwnerInfoDto, so if you need owner reviews you may
-                // want to store Owner.Id in the base cache or fetch it here. For now we assume OwnerInfoDto
-                // is light and owner reviews are not required in many cases.
-                // If owner reviews are important, fetch owner details (including id) before requesting owner reviews.
-            }
-
-            // Enrich reviewers
+            
             if (roomReviews.Any() || ownerReviews.Any())
             {
                 var reviewerIds = roomReviews.Concat(ownerReviews).Select(r => r.ReviewerId).Distinct();

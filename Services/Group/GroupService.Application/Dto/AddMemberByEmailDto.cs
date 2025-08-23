@@ -12,10 +12,8 @@ namespace GroupService.Application.Dto
         [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
-
         [Required]
         public Guid GroupId { get; set; }
-
         public GroupRole Role { get; set; } = GroupRole.Member;
     }
 }

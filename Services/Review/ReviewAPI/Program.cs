@@ -25,7 +25,6 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    // Register health checks
     builder.Services.AddHealthChecks();
 
     builder.Services.AddControllers();
@@ -34,63 +33,14 @@ try
 
     builder.Configuration.AddEnvironmentVariables();
 
-    //builder.Services.AddSwaggerGen(options =>
-    //{
-    //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //    {
-    //        In = ParameterLocation.Header,
-    //        Name = "Authorization",
-    //        Type = SecuritySchemeType.ApiKey,
-    //        BearerFormat = "JWT",
-    //        Description = "Enter 'Bearer' followed by a space and your JWT token"
-    //    });
-
-    //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    //    {
-    //        {
-    //            new OpenApiSecurityScheme
-    //            {
-    //                Reference = new OpenApiReference
-    //                {
-    //                    Type = ReferenceType.SecurityScheme,
-    //                    Id = "Bearer"
-    //                }
-    //            },
-    //            new string[] {}
-    //        }
-    //    });
-    //});
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddAutoMapper(typeof(ReviewMappingProfile));
 
-    //var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-    //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    //    .AddJwtBearer(options =>
-    //    {
-    //        options.TokenValidationParameters = new TokenValidationParameters
-    //        {
-    //            ValidateIssuer = true,
-    //            ValidIssuer = jwtSettings["Issuer"],
-    //            ValidateAudience = true,
-    //            ValidAudience = jwtSettings["Audience"],
-    //            ValidateLifetime = true,
-    //            ValidateIssuerSigningKey = true,
-    //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
-    //        };
-    //    });
-
-    //builder.Services.AddAuthorization();
-
-
     var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    //builder.Services.AddDbContext<PropertyDbContext>(options =>
-    // options.UseSqlServer(mssqlConnectionString));
+
     builder.Services.AddDbContext<ReviewDbContext>(options =>
       options.UseSqlServer(mssqlConnectionString, sqlOptions => sqlOptions.MigrationsAssembly("ReviewService.Infrastructure")));
-
-
-    //builder.Services.AddHttpClient();
 
     builder.Services.AddScoped<IReviewUnitOfWork, ReviewUnitOfWork>();
     builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
@@ -111,13 +61,9 @@ try
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Map the /health endpoint
     app.MapHealthChecks("/health");
 
     app.UseMiddleware<ExceptionMiddleware>();
-
-    //app.UseAuthentication();
-    //app.UseAuthorization();
 
     app.MapControllers();
 
@@ -129,7 +75,6 @@ try
         var context = services.GetRequiredService<ReviewDbContext>();
         var seeder = services.GetRequiredService<DataSeeder>();
 
-        // Retry policy to wait if SQL Server isn't ready yet
         var retryPolicy = Policy
             .Handle<SqlException>()
             .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5),
@@ -140,10 +85,6 @@ try
 
         retryPolicy.Execute(() =>
         {
-            // Ensure database exists (optional)
-            //context.Database.EnsureCreated(); // You may remove this if you rely solely on Migrations
-
-            // Apply pending migrations
             var pendingMigrations = context.Database.GetPendingMigrations();
             if (pendingMigrations.Any())
             {
@@ -155,7 +96,6 @@ try
                 Console.WriteLine("No pending migrations.");
             }
 
-            // Seed initial data
             seeder.Seed();
         });
     }
@@ -164,13 +104,11 @@ try
 }
 catch (Exception exception)
 {
-    // NLog: catch setup errors
     logger.Error(exception, "Stopped program because of exception");
     throw;
 }
 finally
 {
-    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     NLog.LogManager.Shutdown();
 }
 

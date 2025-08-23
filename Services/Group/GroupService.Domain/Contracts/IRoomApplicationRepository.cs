@@ -18,5 +18,4 @@ namespace GroupService.Domain.Contracts
         Task<bool> HasPendingApplicationAsync(Guid listingId, Guid userId);
         Task<IEnumerable<RoomApplication>> GetByApplicantIdAsync(Guid applicantUserId);
     }
-
 }

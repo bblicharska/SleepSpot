@@ -14,17 +14,13 @@ namespace ReviewService.Application.Mappings
     {
         public ReviewMappingProfile()
         {
-            // Review -> ReviewDto
             CreateMap<Review, ReviewDto>()
-                // Reviewer i Reviewed będą ustawiane ręcznie po mapowaniu
                 .ForMember(dest => dest.Reviewer, opt => opt.Ignore());
 
-            // ReviewCreateDto -> Review
             CreateMap<ReviewCreateDto, Review>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
-            // ReviewUpdateDto -> Review
             CreateMap<ReviewUpdateDto, Review>()
                 .ForMember(dest => dest.ReviewerId, opt => opt.Ignore())
                 .ForMember(dest => dest.PropertyId, opt => opt.Ignore())

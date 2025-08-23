@@ -14,7 +14,7 @@ namespace IdentityService.Domain.Contracts
         Task<User> GetAsync(Guid id);
         Task InsertAsync(User user);
         Task<bool> UserExistsAsync(string email);
-        Task<List<User>> GetAllAsync(); // Dodajemy metodę GetAllAsync
+        Task<List<User>> GetAllAsync(); 
         Task SaveChangesAsync();
         void Update(User user);
         void Delete(User user);

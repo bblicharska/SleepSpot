@@ -66,22 +66,16 @@ namespace RentalService.Application.Services
 
             var dto = _mapper.Map<RentalAgreementDto>(agreement);
 
-            // Pobierz szczegóły Property
             dto.Property = await _propertyClient.GetPropertyByIdAsync(agreement.PropertyId);
 
-            // Pobierz szczegóły Room, jeśli jest RoomId
             if (agreement.RoomId.HasValue)
             {
                 dto.Room = await _propertyClient.GetRoomByIdAsync(agreement.RoomId.Value);
             }
-
-            // Pobierz szczegóły Group, jeśli jest GroupId
             if (dto.GroupId.HasValue)
             {
                 dto.Group = await _groupClient.GetGroupByIdAsync(dto.GroupId.Value);
             }
-
-            // Pobierz szczegóły User, jeśli jest UserId
             if (agreement.UserId.HasValue)
             {
                 dto.User = await _userClient.GetUserByIdAsync(agreement.UserId.Value);
@@ -271,8 +265,6 @@ namespace RentalService.Application.Services
                 return dto;
             }
 
-            // Jeżeli umowa nie była Active (np. Pending/Declined), ale użytkownik chce zakończyć -> oznacz Terminated
-            // (tutaj nie ma race z workerem, bo worker operuje tylko na Active)
             current.Status = RentalAgreementStatus.Terminated;
             current.EndDate = now;
             _unitOfWork.RentalAgreementRepository.Update(current);

@@ -9,10 +9,10 @@ namespace PropertyService.Application.Dto
 {
     public class ImageUpdateDto
     {
-        public string? Url { get; set; }  // For existing images
-        public IFormFile? File { get; set; }  // For new uploads
+        public string? Url { get; set; }
+        public IFormFile? File { get; set; }
         public bool IsPrimary { get; set; }
         public int DisplayOrder { get; set; }
-        public bool ToDelete { get; set; }  // Flag for deletion
+        public bool ToDelete { get; set; }
     }
 }

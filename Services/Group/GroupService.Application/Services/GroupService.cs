@@ -36,8 +36,7 @@ namespace GroupService.Application.Services
             _propertyClient = propertyClient;
             _mapper = mapper;
         }
-
-        // GROUPS
+        
         public async Task<IEnumerable<GroupDto>> GetAllGroupsAsync()
         {
             var groups = await _unitOfWork.GroupRepository.GetAllAsync();
@@ -50,14 +49,12 @@ namespace GroupService.Application.Services
 
                 foreach (var memberDto in memberDtos)
                 {
-                    // Pobierz dane użytkownika dla danego userId
                     try
                     {
                         memberDto.User = await _userClient.GetUserByIdAsync(memberDto.UserId);
                     }
                     catch (Exception ex)
                     {
-                        // logowanie lub fallback
                         Console.WriteLine($"Nie udało się pobrać użytkownika {memberDto.UserId}: {ex.Message}");
                     }
                 }
@@ -77,7 +74,6 @@ namespace GroupService.Application.Services
             var members = await _unitOfWork.GroupMemberRepository.GetByGroupIdAsync(group.Id);
             dto.Members = _mapper.Map<List<GroupMemberDto>>(members);
 
-            // Pobierz i przypisz dane użytkowników dla każdego członka
             foreach (var member in dto.Members)
             {
                 member.User = await _userClient.GetUserByIdAsync(member.UserId);
@@ -154,7 +150,6 @@ namespace GroupService.Application.Services
             return group.Id;
         }
 
-
         public async Task UpdateGroupAsync(Guid groupId, CreateGroupDto dto)
         {
             var group = await _unitOfWork.GroupRepository.GetByIdAsync(groupId);
@@ -207,7 +202,6 @@ namespace GroupService.Application.Services
             return dtos;
         }
 
-        // MEMBERS
         public async Task<IEnumerable<GroupMemberDto>> GetMembersByGroupIdAsync(Guid groupId)
         {
             var members = await _unitOfWork.GroupMemberRepository.GetByGroupIdAsync(groupId);
@@ -223,7 +217,6 @@ namespace GroupService.Application.Services
             await _unitOfWork.GroupMemberRepository.AddAsync(member);
             await _unitOfWork.CommitAsync();
         }
-
         public async Task AddMemberByEmailAsync(AddMemberByEmailRequest dto)
         {
             if (!dto.GroupId.HasValue) throw new ArgumentException("GroupId is required.", nameof(dto.GroupId));
@@ -253,7 +246,6 @@ namespace GroupService.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-
         public async Task RemoveMemberAsync(Guid memberId)
         {
             var member = await _unitOfWork.GroupMemberRepository.GetByIdAsync(memberId);
@@ -263,7 +255,6 @@ namespace GroupService.Application.Services
             await _unitOfWork.CommitAsync();
         }
 
-        // LISTINGS
         public async Task<PagedResult<GroupListingDto>> GetPagedListingsAsync(GroupListingQueryParams queryParams)
         {
             var query = await _unitOfWork.GroupListingRepository.GetFilteredListingsQueryAsync(queryParams);
@@ -374,8 +365,7 @@ namespace GroupService.Application.Services
             await _unitOfWork.GroupListingRepository.DeleteAsync(listing);
             await _unitOfWork.CommitAsync();
         }
-
-        // APPLICATIONS
+        
         public async Task<IEnumerable<RoomApplicationDto>> GetApplicationsByListingIdAsync(Guid listingId)
         {
             var applications = await _unitOfWork.RoomApplicationRepository.GetByListingIdAsync(listingId);

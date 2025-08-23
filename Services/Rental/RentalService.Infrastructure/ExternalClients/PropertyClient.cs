@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RentalService.Application.Interfaces;
-using Shared.Dto; 
+using Shared.Dto;
 
 public class PropertyClient : IPropertyClient
 {
@@ -62,7 +62,7 @@ public class PropertyClient : IPropertyClient
         var dto = new AvailabilityUpdateDto
         {
             IsAvailable = isAvailable,
-            AvailableSince = availableSince
+            AvailableSince = availableSince ?? default(DateTime)
         };
 
         try
@@ -91,7 +91,7 @@ public class PropertyClient : IPropertyClient
         var dto = new AvailabilityUpdateDto
         {
             IsAvailable = isAvailable,
-            AvailableSince = availableSince
+            AvailableSince = availableSince ?? default(DateTime)
         };
 
         try
@@ -113,11 +113,5 @@ public class PropertyClient : IPropertyClient
             _logger.LogError(ex, "Error updating availability for property {PropertyId}", propertyId);
             throw;
         }
-    }
-
-    private class AvailabilityUpdateDto
-    {
-        public bool IsAvailable { get; set; }
-        public DateTime? AvailableSince { get; set; }
     }
 }

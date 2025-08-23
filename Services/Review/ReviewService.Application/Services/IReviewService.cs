@@ -13,16 +13,13 @@ namespace ReviewService.Application.Services
     {
         Task<ReviewDto> GetReviewByIdAsync(Guid id);
         Task<IEnumerable<ReviewDto>> GetAllReviewsAsync();
-
         Task<Guid> CreateReviewAsync(ReviewCreateDto dto);
         Task UpdateReviewAsync(ReviewUpdateDto dto);
         Task DeleteReviewAsync(Guid id);
-
         Task<IEnumerable<ReviewDto>> GetReviewsForPropertyAsync(Guid propertyId);
         Task<IEnumerable<ReviewDto>> GetReviewsForRoomAsync(Guid roomId);
         Task<IEnumerable<ReviewDto>> GetReviewsForOwnerAsync(Guid ownerId);
         Task<IEnumerable<ReviewDto>> GetReviewsByUserAsync(Guid reviewerId);
-
         Task<double> GetAverageRatingForPropertyAsync(Guid propertyId);
         Task<double> GetAverageRatingForRoomAsync(Guid roomId);
     }

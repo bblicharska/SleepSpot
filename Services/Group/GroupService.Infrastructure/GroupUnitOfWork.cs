@@ -17,8 +17,6 @@ namespace GroupService.Infrastructure
         public IGroupListingRepository GroupListingRepository { get; }
         public IRoomApplicationRepository RoomApplicationRepository { get; }
 
-
-
         public GroupUnitOfWork(GroupDbContext context, IGroupRepository groupRepository, IGroupMemberRepository groupMemberRepository, IGroupListingRepository groupListingRepository, IRoomApplicationRepository roomApplicationRepository)
         {
             _context = context;
@@ -33,7 +31,7 @@ namespace GroupService.Infrastructure
             _context.SaveChanges();
         }
 
-        public async Task<int> CommitAsync() 
+        public async Task<int> CommitAsync()
         {
             return await _context.SaveChangesAsync();
         }

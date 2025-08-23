@@ -113,7 +113,7 @@ namespace GroupService.Infrastructure
                         _context.Groups.AddRange(groups);
                         _context.GroupListings.AddRange(listings);
 
-                        _context.SaveChanges(); // Zapisanie danych w bazie
+                        _context.SaveChanges();
                         Console.WriteLine("Seeding completed successfully.");
                     }
                     else
@@ -129,7 +129,6 @@ namespace GroupService.Infrastructure
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred during seeding: {ex.Message}");
-                // Rzucanie wyjątku, jeśli konieczne
                 throw;
             }
         }

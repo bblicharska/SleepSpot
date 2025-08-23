@@ -31,13 +31,11 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    // Register health checks
     builder.Services.AddHealthChecks();
 
     builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Handle circular references
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
@@ -64,16 +62,15 @@ try
 
     builder.Services.AddCors(o => o.AddPolicy("SleepSpot", builder =>
     {
-        builder.WithOrigins("http://localhost:3000") // Only allow your React app
+        builder.WithOrigins("http://localhost:3000")
                .AllowAnyMethod()
                .AllowAnyHeader()
-               .AllowCredentials(); // Optional: Needed if using cookies/auth
+               .AllowCredentials();
     }));
 
     builder.Logging.AddConsole();
     var app = builder.Build();
 
-    // Ensure the uploads directory exists
     var uploadsPath = Path.Combine(app.Environment.WebRootPath, "uploads", "properties");
     if (!Directory.Exists(uploadsPath))
     {
@@ -82,7 +79,6 @@ try
     }
     Console.WriteLine($"Static File Path: {uploadsPath}");
 
-    // Add logging middleware to debug requests (before static files)
     app.Use(async (context, next) =>
     {
         if (context.Request.Path.StartsWithSegments("/uploads"))
@@ -93,13 +89,10 @@ try
         await next();
     });
 
-    // Configure CORS before static files
     app.UseCors("SleepSpot");
 
-    // Default static files middleware
     app.UseStaticFiles();
 
-    // Configure static files for uploads with enhanced logging and CORS
     app.UseStaticFiles(new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
@@ -107,7 +100,6 @@ try
         RequestPath = "/uploads",
         OnPrepareResponse = ctx =>
         {
-            // Add CORS headers for images
             ctx.Context.Response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
             ctx.Context.Response.Headers.Add("Access-Control-Allow-Methods", "GET");
             ctx.Context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
@@ -117,7 +109,6 @@ try
         }
     });
 
-    // Global exception handling
     app.Use(async (context, next) =>
     {
         try
@@ -135,7 +126,6 @@ try
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Map the /health endpoint
     app.MapHealthChecks("/health");
 
     app.UseMiddleware<ExceptionMiddleware>();
@@ -144,14 +134,12 @@ try
 
     app.MapControllers();
 
-    // Database initialization
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<PropertyDbContext>();
         var seeder = services.GetRequiredService<DataSeeder>();
 
-        // Retry policy to wait if SQL Server isn't ready yet
         var retryPolicy = Policy
             .Handle<SqlException>()
             .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5),
@@ -162,7 +150,6 @@ try
 
         retryPolicy.Execute(() =>
         {
-            // Apply pending migrations
             var pendingMigrations = context.Database.GetPendingMigrations();
             if (pendingMigrations.Any())
             {
@@ -174,7 +161,6 @@ try
                 Console.WriteLine("No pending migrations.");
             }
 
-            // Seed initial data
             seeder.Seed();
         });
     }
@@ -183,12 +169,10 @@ try
 }
 catch (Exception exception)
 {
-    // NLog: catch setup errors
     logger.Error(exception, "Stopped program because of exception");
     throw;
 }
 finally
 {
-    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     NLog.LogManager.Shutdown();
 }

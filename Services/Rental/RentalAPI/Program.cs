@@ -28,7 +28,6 @@ try
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    // Register health checks
     builder.Services.AddHealthChecks();
 
     builder.Services.AddControllers()
@@ -46,13 +45,9 @@ try
     builder.Services.AddAutoMapper(typeof(RentalAgreementMappingProfile));
 
     var mssqlConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    //builder.Services.AddDbContext<PropertyDbContext>(options =>
-    // options.UseSqlServer(mssqlConnectionString));
+
     builder.Services.AddDbContext<RentalDbContext>(options =>
       options.UseSqlServer(mssqlConnectionString, sqlOptions => sqlOptions.MigrationsAssembly("RentalService.Infrastructure")));
-
-
-    //builder.Services.AddHttpClient();
 
     builder.Services.AddScoped<IRentalUnitOfWork, RentalUnitOfWork>();
     builder.Services.AddScoped<IRentalAgreementRepository, RentalAgreementRepository>();
@@ -86,13 +81,9 @@ try
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Map the /health endpoint
     app.MapHealthChecks("/health");
 
     app.UseMiddleware<ExceptionMiddleware>();
-
-    //app.UseAuthentication();
-    //app.UseAuthorization();
 
     app.MapControllers();
 
@@ -104,7 +95,6 @@ try
         var context = services.GetRequiredService<RentalDbContext>();
         var seeder = services.GetRequiredService<DataSeeder>();
 
-        // Retry policy to wait if SQL Server isn't ready yet
         var retryPolicy = Policy
             .Handle<SqlException>()
             .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5),
@@ -115,22 +105,16 @@ try
 
         retryPolicy.Execute(() =>
         {
-            // Ensure database exists (optional)
-            //context.Database.EnsureCreated(); // You may remove this if you rely solely on Migrations
-
-            // Apply pending migrations
             var pendingMigrations = context.Database.GetPendingMigrations();
             if (pendingMigrations.Any())
             {
                 Console.WriteLine("Applying pending migrations...");
-                //context.Database.Migrate();
             }
             else
             {
                 Console.WriteLine("No pending migrations.");
             }
 
-            // Seed initial data
             seeder.Seed();
         });
     }
@@ -139,13 +123,11 @@ try
 }
 catch (Exception exception)
 {
-    // NLog: catch setup errors
     logger.Error(exception, "Stopped program because of exception");
     throw;
 }
 finally
 {
-    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
     NLog.LogManager.Shutdown();
 }
 
