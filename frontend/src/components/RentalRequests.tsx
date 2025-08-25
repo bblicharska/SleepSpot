@@ -28,18 +28,12 @@ export const RentalRequests: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [agreements, setAgreements] = useState<RentalAgreementDto[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // per-request processing set (ids being processed)
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
-
-  // snackbar
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackMsg, setSnackMsg] = useState("");
   const [snackSeverity, setSnackSeverity] = useState<
     "success" | "error" | "info" | "warning"
   >("success");
-
-  // terminate dialog
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminateId, setTerminateId] = useState<string | null>(null);
 
@@ -201,7 +195,6 @@ export const RentalRequests: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           Rental Requests
         </Typography>
-
         <Box>
           <Button
             startIcon={<RefreshIcon />}
@@ -214,7 +207,6 @@ export const RentalRequests: React.FC = () => {
           </Button>
         </Box>
       </Box>
-
       {loading ? (
         <Box display="flex" justifyContent="center" py={8}>
           <CircularProgress />
@@ -236,7 +228,6 @@ export const RentalRequests: React.FC = () => {
             const isPending = a.status?.toLowerCase() === "pending";
             const isActive = a.status?.toLowerCase() === "active";
             const processing = processingIds.has(a.id);
-
             return (
               <Grid size={{ xs: 12, md: 6 }} key={a.id}>
                 <Paper sx={{ p: 2 }}>
@@ -268,9 +259,7 @@ export const RentalRequests: React.FC = () => {
                       </Typography>
                     </Box>
                   </Box>
-
                   <Divider sx={{ my: 1 }} />
-
                   <Box
                     display="flex"
                     justifyContent="space-between"
@@ -298,7 +287,6 @@ export const RentalRequests: React.FC = () => {
                         </Typography>
                       )}
                     </Box>
-
                     <Box textAlign="right">
                       <Typography variant="body2" color="text.secondary">
                         Rent
@@ -310,7 +298,6 @@ export const RentalRequests: React.FC = () => {
                       </Typography>
                     </Box>
                   </Box>
-
                   <Box display="flex" gap={2} flexWrap="wrap" mb={1}>
                     <Typography variant="body2" color="text.secondary">
                       Start:{" "}
@@ -325,7 +312,6 @@ export const RentalRequests: React.FC = () => {
                       </strong>
                     </Typography>
                   </Box>
-
                   <Box display="flex" justifyContent="space-between" mt={1}>
                     <Box>
                       <Button
@@ -336,7 +322,6 @@ export const RentalRequests: React.FC = () => {
                         View
                       </Button>
                     </Box>
-
                     <Box>
                       {isPending && (
                         <>
@@ -357,7 +342,6 @@ export const RentalRequests: React.FC = () => {
                           >
                             Accept
                           </Button>
-
                           <Button
                             size="small"
                             startIcon={
@@ -376,7 +360,6 @@ export const RentalRequests: React.FC = () => {
                           </Button>
                         </>
                       )}
-
                       {isActive && (
                         <Button
                           size="small"
@@ -398,7 +381,6 @@ export const RentalRequests: React.FC = () => {
           })}
         </Grid>
       )}
-
       <Snackbar
         open={snackOpen}
         autoHideDuration={6000}
@@ -413,7 +395,6 @@ export const RentalRequests: React.FC = () => {
           {snackMsg}
         </Alert>
       </Snackbar>
-
       <DeleteConfirmationDialog
         open={terminateOpen}
         onClose={() => setTerminateOpen(false)}

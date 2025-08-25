@@ -85,8 +85,6 @@ export const MyGroupsPage: React.FC = () => {
   const [rentalsModalOpen, setRentalsModalOpen] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [loadingRentals, setLoadingRentals] = useState(false);
-
-  // New states for member removal
   const [memberPendingRemoveId, setMemberPendingRemoveId] = useState<
     string | null
   >(null);
@@ -191,7 +189,7 @@ export const MyGroupsPage: React.FC = () => {
         ),
       }));
       showSnackbar("Application accepted", "success");
-      // refresh groups to show new member
+
       await fetchGroupsWithListingsAndApps();
     } catch (err) {
       console.error("Error accepting application:", err);
@@ -278,7 +276,6 @@ export const MyGroupsPage: React.FC = () => {
     }
   };
 
-  // --- New: member removal flow ---
   const openRemoveMemberDialog = (memberId: string, memberName: string) => {
     setMemberPendingRemoveId(memberId);
     setMemberPendingRemoveName(memberName);
@@ -292,7 +289,6 @@ export const MyGroupsPage: React.FC = () => {
       setRemovingMemberId(id);
       await deleteGroupMember(id);
 
-      // update local groups state: find which group had the member and remove it
       setGroups((prev) =>
         prev.map((g) => ({
           ...g,
@@ -369,7 +365,6 @@ export const MyGroupsPage: React.FC = () => {
                           >
                             <PersonAddIcon />
                           </IconButton>
-
                           <IconButton
                             color="error"
                             onClick={() => confirmDeleteGroup(group.id)}
@@ -385,11 +380,9 @@ export const MyGroupsPage: React.FC = () => {
                     <Typography variant="body1" gutterBottom>
                       {group.description || "No description provided."}
                     </Typography>
-
                     <Typography variant="subtitle2" gutterBottom>
                       Members:
                     </Typography>
-
                     <List dense>
                       {group.members.map((member: any) => {
                         const memberName =
@@ -399,7 +392,7 @@ export const MyGroupsPage: React.FC = () => {
                           member.user?.email ||
                           "Unknown";
                         const isSelf = member.userId === user?.userId;
-                        const canRemove = isCurrentUserAdmin(group) && !isSelf; // admin can remove others, but not themselves
+                        const canRemove = isCurrentUserAdmin(group) && !isSelf;
 
                         return (
                           <ListItem
@@ -467,7 +460,6 @@ export const MyGroupsPage: React.FC = () => {
                         );
                       })}
                     </List>
-
                     <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
                       Listings:
                     </Typography>
@@ -526,8 +518,6 @@ export const MyGroupsPage: React.FC = () => {
           </Grid>
         )}
       </Container>
-
-      {/* Add member dialog */}
       <Dialog
         open={openAddMemberDialog}
         onClose={() => {
@@ -580,8 +570,6 @@ export const MyGroupsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Delete group confirmation */}
       <DeleteConfirmationDialog
         open={openDeleteModal}
         onClose={() => {
@@ -597,8 +585,6 @@ export const MyGroupsPage: React.FC = () => {
         loading={loading}
         variant="gradient"
       />
-
-      {/* Remove member confirmation */}
       <DeleteConfirmationDialog
         open={memberRemoveDialogOpen}
         onClose={() => {
@@ -614,8 +600,6 @@ export const MyGroupsPage: React.FC = () => {
         loading={removingMemberId !== null}
         variant="gradient"
       />
-
-      {/* Applications modal */}
       <Dialog
         open={modalOpen}
         onClose={closeModal}

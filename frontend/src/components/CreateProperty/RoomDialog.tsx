@@ -73,7 +73,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               }}
             />
           </Grid>
-
           <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
@@ -84,7 +83,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               onChange={(e) => onRoomChange("description", e.target.value)}
             />
           </Grid>
-
           <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
@@ -97,7 +95,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               }
             />
           </Grid>
-
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               fullWidth
@@ -116,7 +113,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               }}
             />
           </Grid>
-
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               fullWidth
@@ -138,7 +134,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               }}
             />
           </Grid>
-
           <Grid size={{ xs: 12, sm: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Capacity</InputLabel>
@@ -203,7 +198,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
                 Add images specific to this room
               </Typography>
             </Box>
-
             <input
               ref={fileInputRef}
               type="file"
@@ -212,7 +206,6 @@ export const RoomDialog: React.FC<RoomDialogProps> = ({
               onChange={onImageUpload}
               style={{ display: "none" }}
             />
-
             <ImageGallery
               images={room.images}
               onRemoveImage={onRemoveImage}

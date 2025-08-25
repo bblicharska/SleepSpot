@@ -5,7 +5,6 @@ import 'leaflet/dist/leaflet.css';
 import { CircularProgress, Paper, Typography } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-// Create a properly positioned custom icon
 const createCustomIcon = () => {
   return L.divIcon({
     html: `<div style="
@@ -29,8 +28,8 @@ const createCustomIcon = () => {
     </div>`,
     className: '',
     iconSize: [30, 30],
-    iconAnchor: [15, 30],  // This is critical - point at bottom center of pin
-    popupAnchor: [0, -30]  // This positions popup above the pin
+    iconAnchor: [15, 30],  
+    popupAnchor: [0, -30]  
   });
 };
 

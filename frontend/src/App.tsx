@@ -9,7 +9,6 @@ export const App = () => {
     <Layout>
       <ToastContainer position="bottom-left" autoClose={3000} />
       <AppNavigator />
-      {/* tu dodasz swoje komponenty, np. listę nieruchomości */}
     </Layout>
   );
 };

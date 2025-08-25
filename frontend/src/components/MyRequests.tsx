@@ -74,7 +74,6 @@ export const MyRequests: React.FC = () => {
       setRentals(rentalsData);
       setApplications(appsData);
 
-      // Fetch listing details in parallel
       const listingResponses = await Promise.all(
         appsData.map((app) =>
           fetch(`${API_BASE_URL}/api/groups/listings/${app.listingId}`)
@@ -85,7 +84,6 @@ export const MyRequests: React.FC = () => {
         listingResponses.map((res) => res.json())
       );
 
-      // Convert to dictionary for quick access
       const listingsMap: Record<string, GroupListingDto> = {};
       listingsData.forEach((listing) => {
         listingsMap[listing.id] = listing;
@@ -140,9 +138,7 @@ export const MyRequests: React.FC = () => {
           <Tab label="Rental Requests" />
           <Tab label="Group Applications" />
         </Tabs>
-
         <Box sx={{ mt: 2 }}>
-          {/* Rental Agreements */}
           {tab === 0 && (
             <List>
               {rentals.length > 0 ? (
@@ -177,8 +173,6 @@ export const MyRequests: React.FC = () => {
                             color={statusColor(r.status)}
                           />
                         </Stack>
-
-                        {/* Delete icon */}
                         {r.status?.toLowerCase() === "pending" ? (
                           <IconButton
                             color="error"
@@ -191,8 +185,6 @@ export const MyRequests: React.FC = () => {
                         ) : (
                           <Box />
                         )}
-
-                        {/* Details row */}
                         <Stack spacing={0.5} sx={{ gridColumn: "1 / -1" }}>
                           {r.room?.name && (
                             <Typography variant="body2">
@@ -242,8 +234,6 @@ export const MyRequests: React.FC = () => {
               )}
             </List>
           )}
-
-          {/* Room Applications */}
           {tab === 1 && (
             <List>
               {applications.length > 0 ? (
@@ -260,7 +250,6 @@ export const MyRequests: React.FC = () => {
                           alignItems: "center",
                         }}
                       >
-                        {/* Header */}
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Typography
                             variant="subtitle1"
@@ -276,8 +265,6 @@ export const MyRequests: React.FC = () => {
                             color={statusColor(app.status)}
                           />
                         </Stack>
-
-                        {/* Delete icon */}
                         {app.status?.toLowerCase() === "pending" ? (
                           <IconButton
                             color="error"
@@ -290,8 +277,6 @@ export const MyRequests: React.FC = () => {
                         ) : (
                           <Box />
                         )}
-
-                        {/* Details */}
                         <Stack spacing={0.5} sx={{ gridColumn: "1 / -1" }}>
                           {app.message && (
                             <Typography variant="body2">

@@ -465,7 +465,6 @@ export const GroupListingDetailsPage = () => {
         loading={deleteLoading}
         variant="standard"
       />
-
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

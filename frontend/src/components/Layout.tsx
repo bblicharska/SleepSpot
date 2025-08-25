@@ -167,7 +167,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   Create Property
                 </Typography>
               </Box>
-
               <Box
                 onClick={handleMenuOpen}
                 sx={{
@@ -189,7 +188,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 }}
               >
                 <PersonIcon sx={iconStyle} />
-
                 <Box
                   sx={{
                     display: "flex",

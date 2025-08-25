@@ -281,7 +281,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
     loadProperties();
   }, []);
 
-  // Memoized filtered and sorted data
   const sortedEntirePlaces = useMemo(() => {
     const filtered = properties.filter(
       (p) => p.isEntirePlaceRentable && p.isAvailable
@@ -369,7 +368,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           )}
         </Select>
       </FormControl>
-
       <Button
         variant="outlined"
         size="small"
@@ -397,7 +395,6 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           ? "Ascending"
           : "Descending"}
       </Button>
-
       <Chip
         label={`${resultCount} results`}
         size="small"
@@ -442,23 +439,18 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           />
         </Tabs>
       </Box>
-
-      {/* Properties Tab */}
       <Box hidden={tabValue !== 0} role="tabpanel">
         <PropertyFilter
           onFilter={handlePropertyFilter}
           onClear={handleClearPropertyFilters}
           loading={isFiltering}
         />
-
         <InlineSortControls resultCount={sortedEntirePlaces.length} />
-
         {error && (
           <Box sx={{ mb: 2, p: 2, bgcolor: "error.light", borderRadius: 1 }}>
             <Typography color="error">{error}</Typography>
           </Box>
         )}
-
         {sortedEntirePlaces.length === 0 ? (
           <Box textAlign="center" mt={4}>
             <Typography variant="h5">
@@ -489,26 +481,21 @@ export const PropertiesAndRoomsPage: React.FC = () => {
           </Grid>
         )}
       </Box>
-
-      {/* Rooms Tab */}
       <Box hidden={tabValue !== 1} role="tabpanel">
         <RoomFilter
           onFilter={handleRoomFilter}
           onClear={handleClearRoomFilters}
           loading={isFiltering}
         />
-
         <InlineSortControls
           isRoom={true}
           resultCount={sortedAvailableRooms.length}
         />
-
         {error && (
           <Box sx={{ mb: 2, p: 2, bgcolor: "error.light", borderRadius: 1 }}>
             <Typography color="error">{error}</Typography>
           </Box>
         )}
-
         {sortedAvailableRooms.length === 0 ? (
           <Box textAlign="center" mt={4}>
             <Typography variant="h5">

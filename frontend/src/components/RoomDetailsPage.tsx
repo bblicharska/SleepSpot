@@ -84,7 +84,6 @@ export const RoomDetailsPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // NEW: rental modal state
   const [rentalModalOpen, setRentalModalOpen] = useState(false);
 
   useEffect(() => {
@@ -210,7 +209,6 @@ export const RoomDetailsPage = () => {
         <Typography variant="h4" fontWeight={600} gutterBottom>
           {roomDetails.name}
         </Typography>
-
         {canDelete && (
           <IconButton
             onClick={() => setDeleteDialogOpen(true)}
@@ -228,7 +226,6 @@ export const RoomDetailsPage = () => {
             <DeleteIcon />
           </IconButton>
         )}
-
         {roomDetails.ownerId !== user?.userId && (
           <Button
             variant="contained"
@@ -244,13 +241,12 @@ export const RoomDetailsPage = () => {
                 backgroundColor: "#6D28D9",
               },
             }}
-            onClick={() => setRentalModalOpen(true)} // <-- open modal
+            onClick={() => setRentalModalOpen(true)}
           >
             Send Rental Request
           </Button>
         )}
       </Box>
-
       <Box sx={{ mb: 3 }}>
         {roomDetails.propertyName && (
           <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -296,7 +292,6 @@ export const RoomDetailsPage = () => {
           {roomDetails.description}
         </Typography>
       </Box>
-
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h5"
@@ -318,20 +313,16 @@ export const RoomDetailsPage = () => {
           onReviewsUpdate={handleReviewsUpdate}
         />
       </Box>
-
       <ImageGallery
         images={roomDetails.images ?? []}
         title={roomDetails.name}
       />
-
       {roomDetails.propertyAddress && (
         <Box sx={{ my: 4 }}>
           <PropertyMap address={roomDetails.propertyAddress} />
         </Box>
       )}
-
       <Divider sx={{ my: 3, borderColor: "rgba(142, 68, 173, 0.2)" }} />
-
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, md: 8 }}>
           {roomDetails.detailedDescription && (
@@ -349,7 +340,6 @@ export const RoomDetailsPage = () => {
               />
             )}
         </Grid>
-
         <Grid size={{ xs: 12, md: 4 }}>
           <EntitySummaryCard
             entityType="room"
@@ -364,7 +354,6 @@ export const RoomDetailsPage = () => {
           />
         </Grid>
       </Grid>
-
       {roomDetails.owner && (
         <Box sx={{ mb: 4 }}>
           <Paper
@@ -391,7 +380,6 @@ export const RoomDetailsPage = () => {
             >
               Property Owner
             </Typography>
-
             <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
               <Avatar
                 sx={{
@@ -409,7 +397,6 @@ export const RoomDetailsPage = () => {
                   roomDetails.owner.lastName
                 )}
               </Avatar>
-
               <Box sx={{ flexGrow: 1 }}>
                 <Typography
                   variant="h6"
@@ -417,7 +404,6 @@ export const RoomDetailsPage = () => {
                 >
                   {roomDetails.owner.firstName} {roomDetails.owner.lastName}
                 </Typography>
-
                 {roomDetails.owner.reviews &&
                   roomDetails.owner.reviews.length > 0 && (
                     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
@@ -437,7 +423,6 @@ export const RoomDetailsPage = () => {
                       </Typography>
                     </Box>
                   )}
-
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <EmailIcon
                     sx={{ mr: 1, fontSize: "1.1rem", color: "#8E44AD" }}
@@ -456,7 +441,6 @@ export const RoomDetailsPage = () => {
                   </Typography>
                 </Box>
               </Box>
-
               <Button
                 variant="outlined"
                 startIcon={<EmailIcon />}
@@ -477,9 +461,7 @@ export const RoomDetailsPage = () => {
                 Contact Owner
               </Button>
             </Box>
-
             <Divider sx={{ mb: 2 }} />
-
             <ReviewSection
               reviews={roomDetails.owner.reviews || []}
               entityId={roomDetails.ownerId || ""}
@@ -489,8 +471,6 @@ export const RoomDetailsPage = () => {
           </Paper>
         </Box>
       )}
-
-      {/* Delete confirmation dialog */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -500,12 +480,10 @@ export const RoomDetailsPage = () => {
         variant="gradient"
         loading={deleting}
       />
-
-      {/* NEW: Rental request modal */}
       <RentalRequestModal
         open={rentalModalOpen}
         onClose={() => setRentalModalOpen(false)}
-        propertyId={roomDetails.propertyId} // we pass both propertyId and roomId
+        propertyId={roomDetails.propertyId}
         roomId={roomDetails.id}
         currentUserId={user?.userId ?? null}
       />

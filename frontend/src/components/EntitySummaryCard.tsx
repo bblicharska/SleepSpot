@@ -129,7 +129,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
         </Typography>
       </Box>
       <Divider sx={{ my: 2, borderColor: "rgba(142, 68, 173, 0.3)" }} />
-
       <Box
         sx={{
           display: "flex",
@@ -151,7 +150,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           }}
         />
       </Box>
-
       {isRoom && capacity && (
         <Box
           sx={{
@@ -177,7 +175,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           />
         </Box>
       )}
-
       {isProperty && isEntirePlaceRentable !== undefined && (
         <Box
           sx={{
@@ -202,7 +199,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           />
         </Box>
       )}
-
       {showAvailability && isAvailable !== undefined && (
         <Box
           sx={{
@@ -229,7 +225,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           />
         </Box>
       )}
-
       {showAvailableSince && availabilityInfo && (
         <Box
           sx={{
@@ -268,7 +263,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           />
         </Box>
       )}
-
       {showReviews && (
         <Box
           sx={{
@@ -296,7 +290,6 @@ export const EntitySummaryCard: React.FC<EntitySummaryCardProps> = ({
           </Box>
         </Box>
       )}
-
       {showCreatedDate && createdAt && (
         <Box
           sx={{

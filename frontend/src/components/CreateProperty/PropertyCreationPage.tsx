@@ -312,7 +312,7 @@ export const PropertyCreationPage: React.FC = () => {
       }
 
       setSubmitStatus("success");
-      console.log("✅ Property and all images created successfully");
+      console.log("Property and all images created successfully");
     } catch (err) {
       console.error("Error creating property:", err);
       setSubmitStatus("error");

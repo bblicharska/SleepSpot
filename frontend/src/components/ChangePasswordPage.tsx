@@ -77,13 +77,11 @@ export const ChangePasswordPage: React.FC = () => {
           <Typography variant="h5" fontWeight={600} gutterBottom>
             Change Password
           </Typography>
-
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
-
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
@@ -111,7 +109,6 @@ export const ChangePasswordPage: React.FC = () => {
                 ),
               }}
             />
-
             <TextField
               fullWidth
               label="New Password"
@@ -138,7 +135,6 @@ export const ChangePasswordPage: React.FC = () => {
                 ),
               }}
             />
-
             <TextField
               fullWidth
               label="Confirm New Password"
@@ -179,7 +175,6 @@ export const ChangePasswordPage: React.FC = () => {
                 ),
               }}
             />
-
             <Button
               type="submit"
               variant="contained"

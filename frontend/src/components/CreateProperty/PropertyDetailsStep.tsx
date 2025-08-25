@@ -59,7 +59,6 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
             }}
           />
         </Grid>
-
         <Grid size={{ xs: 12 }}>
           <TextField
             fullWidth
@@ -77,7 +76,6 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
             }}
           />
         </Grid>
-
         <Grid size={{ xs: 12 }}>
           <TextField
             fullWidth
@@ -90,7 +88,6 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
             helperText={errors.description}
           />
         </Grid>
-
         <Grid size={{ xs: 12 }}>
           <TextField
             fullWidth
@@ -104,7 +101,6 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
             helperText="Provide additional details about the property"
           />
         </Grid>
-
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
@@ -125,7 +121,6 @@ export const PropertyDetailsStep: React.FC<PropertyDetailsStepProps> = ({
             }}
           />
         </Grid>
-
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth

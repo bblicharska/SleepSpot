@@ -190,7 +190,7 @@ export const PropertyDetailsPage = () => {
           onClose={() => setRentalModalOpen(false)}
           propertyId={id!}
           currentUserId={user?.userId}
-          availableSince={property.availableSince} // <-- pass availableSince so modal can validate
+          availableSince={property.availableSince}
         />
       </Box>
       <Box sx={{ mb: 3 }}>

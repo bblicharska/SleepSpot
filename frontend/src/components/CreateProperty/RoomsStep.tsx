@@ -39,14 +39,12 @@ export const RoomsStep: React.FC<RoomsStepProps> = ({
           Add Room
         </Button>
       </Box>
-
       {isEntirePlaceRentable && (
         <Alert severity="info" sx={{ mb: 2 }}>
           Since this is an entire place rental, you don't need to add individual
           rooms.
         </Alert>
       )}
-
       <Grid container spacing={2}>
         {rooms.map((room, index) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={room.id}>

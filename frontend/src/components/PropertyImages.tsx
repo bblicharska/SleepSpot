@@ -144,14 +144,14 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
     imageUrl: string;
     originalFileName: string;
     isPrimary: boolean;
-    [key: string]: any; // For any additional fields
+    [key: string]: any;
   }
 
   interface FileInputChangeEvent extends React.ChangeEvent<HTMLInputElement> {}
 
   const handleFileInputChange = (event: FileInputChangeEvent) => {
     handleFileUpload(event.target.files);
-    event.target.value = ""; // Reset file input
+    event.target.value = "";
   };
 
   interface DragEventHandler {
@@ -229,7 +229,6 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
 
   return (
     <Box sx={{ mt: 2 }}>
-      {/* Upload Section */}
       <UploadArea
         elevation={0}
         isDragOver={dragOver}
@@ -251,15 +250,12 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
               sx={{ fontSize: 48, color: "text.secondary", mb: 2 }}
             />
           )}
-
           <Typography variant="h6" gutterBottom>
             {uploading ? "Uploading..." : "Upload Property Images"}
           </Typography>
-
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Drag and drop images here or click to browse
           </Typography>
-
           <label htmlFor="image-upload">
             <HiddenInput
               id="image-upload"
@@ -278,27 +274,21 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
               Select Images
             </Button>
           </label>
-
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
             PNG, JPG, GIF up to 5MB each
           </Typography>
         </Box>
       </UploadArea>
-
-      {/* Error Alert */}
       {error && (
         <Alert severity="error" onClose={() => setError("")} sx={{ mt: 2 }}>
           {error}
         </Alert>
       )}
-
-      {/* Images Section */}
       {images.length > 0 && (
         <Box sx={{ mt: 4 }}>
           <Typography variant="h6" gutterBottom>
             Images ({images.length})
           </Typography>
-
           <Grid container spacing={2}>
             {images.map((image) => (
               <Grid size={{ xs: 12, sm: 4, md: 4 }} key={image.id}>
@@ -311,8 +301,6 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
                       alt={image.originalFileName}
                       sx={{ objectFit: "cover" }}
                     />
-
-                    {/* Primary Badge */}
                     {image.isPrimary && (
                       <Chip
                         label="Primary"
@@ -326,8 +314,6 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
                         }}
                       />
                     )}
-
-                    {/* Overlay with Actions */}
                     <ImageOverlay className="image-overlay">
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <IconButton
@@ -351,7 +337,6 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
                         >
                           {image.isPrimary ? <Star /> : <StarBorder />}
                         </IconButton>
-
                         <IconButton
                           onClick={() => deleteImage(image.id)}
                           sx={{
@@ -374,8 +359,6 @@ export const PropertyImages = ({ propertyId }: { propertyId: string }) => {
           </Grid>
         </Box>
       )}
-
-      {/* Empty State */}
       {images.length === 0 && !uploading && (
         <Box
           sx={{

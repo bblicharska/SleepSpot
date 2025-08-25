@@ -22,7 +22,6 @@ export const OtherRoomsSection = ({
     navigate(`/room/${roomId}`);
   };
 
-  // Filter out current room if provided
   const filteredRooms = currentRoomId
     ? rooms.filter((room) => room.id !== currentRoomId)
     : rooms;
@@ -39,7 +38,6 @@ export const OtherRoomsSection = ({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Explore other rooms in {propertyName}
       </Typography>
-
       <Grid container spacing={3}>
         {filteredRooms.map((room) => (
           <Grid size={{ xs: 12, sm: 6, md: 6 }} key={room.id}>
@@ -71,7 +69,6 @@ export const OtherRoomsSection = ({
               }}
               onClick={() => room.isAvailable && handleRoomNavigation(room.id)}
             >
-              {/* Room Image */}
               {room.mainImage && (
                 <Box
                   sx={{
@@ -117,8 +114,6 @@ export const OtherRoomsSection = ({
                   )}
                 </Box>
               )}
-
-              {/* Room Name */}
               <Typography
                 variant="h6"
                 fontWeight={600}
@@ -129,8 +124,6 @@ export const OtherRoomsSection = ({
               >
                 {room.name}
               </Typography>
-
-              {/* Room Description */}
               <Typography
                 variant="body2"
                 color={room.isAvailable ? "text.secondary" : "text.disabled"}
@@ -144,8 +137,6 @@ export const OtherRoomsSection = ({
               >
                 {room.description}
               </Typography>
-
-              {/* Price and Availability */}
               <Box
                 sx={{
                   display: "flex",
@@ -168,8 +159,6 @@ export const OtherRoomsSection = ({
                   color={room.isAvailable ? "success" : "error"}
                 />
               </Box>
-
-              {/* Room Details Chips */}
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                 <Chip
                   label={`${room.areaInSquareMeters} m²`}

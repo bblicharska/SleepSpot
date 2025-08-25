@@ -70,10 +70,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
       })
     ) as RoomSearchFilterDto;
 
-    // Debug log to see what's being sent
-    console.log("RoomFilter - Sending filters:", cleanFilters);
-    console.log("Raw filters before cleaning:", filters);
-
     onFilter(cleanFilters);
   };
 
@@ -94,7 +90,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
   return (
     <Card sx={{ mb: 3, borderRadius: 2 }}>
       <CardContent>
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
@@ -108,7 +103,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
           >
             <Search /> Filter Rooms
           </Typography>
-
           <Button
             onClick={() => setExpanded(!expanded)}
             endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
@@ -117,8 +111,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
             {expanded ? "Hide Advanced Filters" : "Show Advanced Filters"}
           </Button>
         </Box>
-
-        {/* Location */}
         <Box sx={{ mt: 2 }}>
           <TextField
             fullWidth
@@ -135,12 +127,9 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
             }}
           />
         </Box>
-
-        {/* Advanced Filters */}
         <Collapse in={expanded}>
           <Box sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              {/* Capacity */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                   Capacity
@@ -160,8 +149,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
                   }}
                 />
               </Grid>
-
-              {/* Price Range */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                   Price Range (per month)
@@ -195,8 +182,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
                   />
                 </Box>
               </Grid>
-
-              {/* Area Range */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                   Area Range (m²)
@@ -236,8 +221,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
                   />
                 </Box>
               </Grid>
-
-              {/* Availability Date */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                   Available From
@@ -264,8 +247,6 @@ export const RoomFilter: React.FC<RoomFilterProps> = ({
             </Grid>
           </Box>
         </Collapse>
-
-        {/* Actions */}
         <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
           <Button
             variant="contained"

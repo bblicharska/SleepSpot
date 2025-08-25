@@ -31,10 +31,9 @@ export const changePassword = async (
     throw new Error(message);
   }
 
-  // Only parse JSON if content exists
   if (response.status !== 204) {
     return await response.json();
   }
 
-  return null; // or void
+  return null; 
 };

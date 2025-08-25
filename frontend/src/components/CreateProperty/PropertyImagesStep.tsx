@@ -36,7 +36,6 @@ export const PropertyImagesStep: React.FC<PropertyImagesStepProps> = ({
           Upload high-quality images of your property
         </Typography>
       </Box>
-
       <input
         ref={fileInputRef}
         type="file"
@@ -45,13 +44,11 @@ export const PropertyImagesStep: React.FC<PropertyImagesStepProps> = ({
         onChange={onImageUpload}
         style={{ display: "none" }}
       />
-
       {errors.images && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errors.images}
         </Alert>
       )}
-
       <ImageGallery
         images={images}
         onRemoveImage={onRemoveImage}

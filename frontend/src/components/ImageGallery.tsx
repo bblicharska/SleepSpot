@@ -53,7 +53,6 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
           </Grid>
         ))}
       </Grid>
-
       <Dialog
         open={selectedImageIndex !== null}
         onClose={() => setSelectedImageIndex(null)}
